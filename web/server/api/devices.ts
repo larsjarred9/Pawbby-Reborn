@@ -24,6 +24,8 @@ export default defineEventHandler(async (event) => {
         });
 
         let wasteBin = "Not Full*";
+        let litterLevel = "Sufficient*";
+        
         // Find the most recent raw data that contains DP 102 (clean cycle count/fault code)
         const latestDP102Event = await prisma.litterEvent.findFirst({
           where: {
@@ -51,9 +53,26 @@ export default defineEventHandler(async (event) => {
                     wasteBin = `${Math.round((cycleCount / 13) * 100)}% Full*`;
                   }
                 }
+                // If bytes 1 or 2 indicate a fault code, we can assume it's the insufficient litter error
+                if (buffer.length > 2 && (buffer[1] > 0 || buffer[2] > 0)) {
+                  litterLevel = "Insufficient*";
+                }
               }
             }
           } catch (e) {}
+        }
+        
+        // Also check DP 114 for motor/sensor errors
+        if (latestRaw && latestRaw.rawData) {
+          try {
+            const parsed = JSON.parse(latestRaw.rawData);
+            if (parsed && parsed.dps && parsed.dps["114"]) {
+              const dp114 = String(parsed.dps["114"]).toLowerCase();
+              if (dp114 !== "motor_ok") {
+                litterLevel = "Insufficient*";
+              }
+            }
+          } catch(e) {}
         }
 
         return {
@@ -61,6 +80,7 @@ export default defineEventHandler(async (event) => {
           todayToileted,
           lastHeartbeat: latestRaw ? latestRaw.timestamp : null,
           wasteBin,
+          litterLevel,
         };
       }),
     );
