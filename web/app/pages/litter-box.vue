@@ -89,6 +89,8 @@
             <input 
               type="date" 
               v-model="selectedDateFilter"
+              :min="minDate"
+              :max="maxDate"
               class="bg-white/10 border border-white/5 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-pawbby-primary cursor-pointer [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
             />
           </div>
@@ -137,13 +139,13 @@
                 </svg>
               </div>
 
-              <div v-else-if="log.type === 'flatten'" class="w-8 h-8 rounded-lg bg-[#2A6372]/20 flex items-center justify-center text-[#2A6372]">
+              <div v-else-if="log.type === 'flatten' || log.type === 'flatten-app'" class="w-8 h-8 rounded-lg bg-[#2A6372]/20 flex items-center justify-center text-[#2A6372]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" />
                 </svg>
               </div>
 
-              <div v-else-if="log.type === 'empty'" class="w-8 h-8 rounded-lg bg-[#D84C4C]/20 flex items-center justify-center text-[#D84C4C]">
+              <div v-else-if="log.type === 'empty' || log.type === 'empty-app'" class="w-8 h-8 rounded-lg bg-[#D84C4C]/20 flex items-center justify-center text-[#D84C4C]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -156,13 +158,13 @@
                 </svg>
               </div>
 
-              <div v-else-if="log.type === 'manual-clean'" class="w-8 h-8 rounded-lg bg-[#3D7A41] flex items-center justify-center text-white">
+              <div v-else-if="log.type === 'manual-clean' || log.type === 'manual-clean-app'" class="w-8 h-8 rounded-lg bg-[#3D7A41] flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
 
-              <div v-else-if="log.type === 'toileted' && getPetInfo(log.petId)?.imageBase64" class="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-white/5">
+              <div v-else-if="(log.type === 'toileted' || log.type === 'quick-visit') && getPetInfo(log.petId)?.imageBase64" class="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-white/5">
                 <img :src="getPetInfo(log.petId)?.imageBase64" class="w-full h-full object-cover" />
               </div>
 
@@ -464,8 +466,13 @@ const handleDeleteDevice = async () => {
 const deodorizerDaysLeft = computed(() => {
   if (!device.value || !device.value.deodorizerLastReset) return 0
   const resetDate = new Date(device.value.deodorizerLastReset)
+  resetDate.setHours(0, 0, 0, 0)
+  
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
   const duration = device.value.deodorizerDuration || 30
-  const daysPassed = Math.floor((Date.now() - resetDate.getTime()) / (1000 * 60 * 60 * 24))
+  const daysPassed = Math.floor((today.getTime() - resetDate.getTime()) / (1000 * 60 * 60 * 24))
   return Math.max(0, duration - daysPassed)
 })
 
@@ -473,8 +480,8 @@ const isOnline = computed(() => {
   if (!device.value?.lastHeartbeat) return false
   const hb = new Date(device.value.lastHeartbeat).getTime()
   const now = Date.now()
-  // Devices broadcast every ~10 mins at idle
-  return (now - hb) < 900000
+  // Devices actively ping every 5 mins, allow 7 mins before offline
+  return (now - hb) < 420000
 })
 
 const resetDeodorizer = async (duration: number) => {
@@ -503,12 +510,27 @@ const getPetInfo = (id?: string) => {
 }
 
 const getPetLogCount = (petId: string) => {
-  return logs.value.filter(l => l.petId === petId && l.type === 'toileted').length
+  return logs.value.filter(l => l.petId === petId && (l.type === 'toileted' || l.type === 'quick-visit')).length
 }
 
 // Filtering
 const selectedPetFilter = ref('all')
 const selectedDateFilter = ref(new Date().toISOString().split('T')[0])
+
+const maxDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
+
+const minDate = computed(() => {
+  if (logs.value && logs.value.length > 0) {
+    // The logs are ordered by timestamp descending, so the last log is the oldest
+    const oldestLog = logs.value[logs.value.length - 1]
+    if (oldestLog && oldestLog.rawTimestamp) {
+      return oldestLog.rawTimestamp.split('T')[0]
+    }
+  }
+  return maxDate.value
+})
 
 const filteredLogs = computed(() => {
   return logs.value.filter(log => {
@@ -517,9 +539,12 @@ const filteredLogs = computed(() => {
       if (log.petId !== selectedPetFilter.value) return false
     }
     
-    // In a real app we'd parse log.timestamp and compare against selectedDateFilter
-    // Since mock data only has a few entries from a hardcoded date, we just return true here 
-    // to ensure the UI works visually.
+    // Date filter logic
+    if (selectedDateFilter.value) {
+      if (!log.rawTimestamp || !log.rawTimestamp.startsWith(selectedDateFilter.value)) {
+        return false
+      }
+    }
     
     return true
   })
@@ -559,23 +584,23 @@ const proceedEmptyAction = () => {
 
 const doClean = async () => {
   await api.triggerClean(deviceId)
-  await api.createEvent({ deviceId, type: 'manual-clean' })
-  await loadData()
   activeTab.value = 'record'
+  setTimeout(loadData, 2000)
+  setTimeout(loadData, 5000)
 }
 
 const doFlatten = async () => {
   await api.triggerFlatten(deviceId)
-  await api.createEvent({ deviceId, type: 'flatten' })
-  await loadData()
   activeTab.value = 'record'
+  setTimeout(loadData, 2000)
+  setTimeout(loadData, 5000)
 }
 
 const doEmpty = async () => {
   await api.triggerEmpty(deviceId)
-  await api.createEvent({ deviceId, type: 'empty' })
-  await loadData()
   activeTab.value = 'record'
+  setTimeout(loadData, 2000)
+  setTimeout(loadData, 5000)
 }
 </script>
 
