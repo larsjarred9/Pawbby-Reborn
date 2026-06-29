@@ -30,6 +30,15 @@ export default defineEventHandler(async (event) => {
   })
 
   const pets = await prisma.pet.findMany()
+  const user = await prisma.user.findFirst()
+  const isLbs = user?.weightUnit === 'lb'
+
+  const formatWeight = (w: number) => {
+    if (isLbs) {
+      return (w * 2.20462).toFixed(1) + 'lbs'
+    }
+    return w.toFixed(1) + 'kg'
+  }
 
   const mappedLogs = dbEvents.map(e => {
     let description = e.type
@@ -37,11 +46,11 @@ export default defineEventHandler(async (event) => {
     if (e.type === 'toileted') {
       const pet = pets.find(p => p.id === e.petId)
       const name = pet ? pet.name : 'An unknown cat'
-      description = `${name} used the litter box (Weight: ${e.weight}kg, Duration: ${e.duration}s)`
+      description = `${name} used the litter box (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'quick-visit') {
       const pet = pets.find(p => p.id === e.petId)
       const name = pet ? pet.name : 'An unknown cat'
-      description = `${name} peeked inside but didn't use it (Weight: ${e.weight}kg, Duration: ${e.duration}s)`
+      description = `${name} peeked inside but didn't use it (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'reset-deodorizer' && e.rawData) {
       try {
         const parsed = JSON.parse(e.rawData)
@@ -72,9 +81,9 @@ export default defineEventHandler(async (event) => {
     } else if (e.type === 'bin-replaced') {
       description = 'The waste collection bin was installed.'
     } else if (e.type === 'litter-added') {
-      description = `${e.weight}kg of fresh litter was added to the box.`
+      description = `${formatWeight(e.weight || 0)} of fresh litter was added to the box.`
     } else if (e.type === 'litter-removed') {
-      description = `${e.weight}kg of litter was removed from the box.`
+      description = `${formatWeight(e.weight || 0)} of litter was removed from the box.`
     } else if (e.type === 'tuya-raw-data' && e.rawData) {
       // Try to parse the raw data to extract something readable if possible
       try {

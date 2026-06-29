@@ -53,6 +53,9 @@ export default defineEventHandler(async (event) => {
     aggregated['unknown'][l] = { count: 0, weight: 0, duration: 0 }
   })
 
+  const user = await prisma.user.findFirst()
+  const isLbs = user?.weightUnit === 'lb'
+
   events.forEach(e => {
     const dateStr = e.timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     const pid = e.petId || 'unknown'
@@ -60,7 +63,14 @@ export default defineEventHandler(async (event) => {
     // Ignore if dateStr is outside our labels (e.g. timezone edge cases)
     if (aggregated[pid] && aggregated[pid][dateStr]) {
       aggregated[pid][dateStr].count += 1
-      aggregated[pid][dateStr].weight += (e.weight || 0)
+      
+      // Convert weight to lbs if preferred
+      let w = e.weight || 0
+      if (isLbs) {
+        w = w * 2.20462
+      }
+      
+      aggregated[pid][dateStr].weight += w
       aggregated[pid][dateStr].duration += (e.duration || 0)
     }
   })

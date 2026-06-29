@@ -251,7 +251,7 @@
         <div class="relative w-full mb-6">
           <select v-model="selectedChart" class="w-full bg-pawbby-card border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pawbby-primary appearance-none font-medium">
             <option value="visits">Daily Visit Count</option>
-            <option value="weight">Average Weight (kg)</option>
+            <option value="weight">Average Weight ({{ user?.weightUnit === 'lb' ? 'lbs' : 'kg' }})</option>
             <option value="duration">Average Duration (seconds)</option>
             <option value="waste">Estimated Waste Output (g)</option>
           </select>
@@ -475,7 +475,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useApi, type Device, type Pet, type DeviceLog } from '~/composables/useApi'
+import { useApi, type Device, type Pet, type DeviceLog, type User } from '~/composables/useApi'
 import { Bar, Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js'
 
@@ -491,6 +491,7 @@ const router = useRouter()
 const activeTab = ref('record')
 const deviceId = String(route.query.id || 'dev_1')
 
+const user = ref<User | null>(null)
 const device = ref<Device | null>(null)
 const pets = ref<Pet[]>([])
 const logs = ref<DeviceLog[]>([])
@@ -519,6 +520,7 @@ const loadData = async () => {
   const devices = await api.getDevices()
   device.value = devices.find((d: any) => d.id === deviceId) || null
   pets.value = await api.getPets()
+  user.value = await api.getUser()
   logs.value = await api.getLogs(deviceId)
 }
 
