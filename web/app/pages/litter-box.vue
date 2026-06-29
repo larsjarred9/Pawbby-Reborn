@@ -29,11 +29,25 @@
         <img src="/litterbox.png" alt="Smart Litter Box" class="w-full h-full object-contain drop-shadow-2xl" />
         <!-- Overlay -->
         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-4">
-          <div class="flex items-baseline text-pawbby-secondary">
-            <span class="text-5xl font-bold tracking-tighter">{{ device?.todayToileted || 0 }}</span>
-            <span class="text-sm font-semibold ml-1">times</span>
+          <div v-if="device?.binRemoved" class="bg-[#D84C4C]/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Bin Removed</span>
           </div>
-          <p class="text-pawbby-mutedDark text-xs mt-1">Today Toileted</p>
+          <div v-else-if="device?.lidOpen" class="bg-orange-500/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Lid Removed</span>
+          </div>
+          <template v-else>
+            <div class="flex items-baseline text-pawbby-secondary">
+              <span class="text-5xl font-bold tracking-tighter">{{ device?.todayToileted || 0 }}</span>
+              <span class="text-sm font-semibold ml-1">times</span>
+            </div>
+            <p class="text-pawbby-mutedDark text-xs mt-1">Today Toileted</p>
+          </template>
         </div>
       </div>
     </div>
@@ -107,8 +121,8 @@
             :class="[selectedPetFilter === 'all' ? 'bg-pawbby-primary/20 border-pawbby-primary text-pawbby-secondary' : 'bg-white/5 border-white/10 text-pawbby-muted hover:text-white', 'relative flex items-center border rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors']"
           >
             <span>All</span>
-            <div v-if="device?.todayToileted" class="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-pawbby-secondary text-[10px] font-bold text-pawbby-bg shadow-sm">
-              {{ device.todayToileted }}
+            <div v-if="getAllLogCount > 0" class="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-pawbby-secondary text-[10px] font-bold text-pawbby-bg shadow-sm">
+              {{ getAllLogCount }}
             </div>
           </button>
           
@@ -139,7 +153,7 @@
                 </svg>
               </div>
 
-              <div v-else-if="log.type === 'flatten' || log.type === 'flatten-app'" class="w-8 h-8 rounded-lg bg-[#2A6372]/20 flex items-center justify-center text-[#2A6372]">
+              <div v-else-if="log.type === 'flatten' || log.type === 'flatten-app' || log.type === 'auto-flatten'" class="w-8 h-8 rounded-lg bg-[#2A6372]/20 flex items-center justify-center text-[#2A6372]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" />
                 </svg>
@@ -161,6 +175,42 @@
               <div v-else-if="log.type === 'manual-clean' || log.type === 'manual-clean-app'" class="w-8 h-8 rounded-lg bg-[#3D7A41] flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'lid-removed'" class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'lid-replaced'" class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'bin-removed'" class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'bin-replaced'" class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'litter-added'" class="w-8 h-8 rounded-lg bg-pawbby-primary/20 flex items-center justify-center text-pawbby-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'litter-removed'" class="w-8 h-8 rounded-lg bg-[#D84C4C]/20 flex items-center justify-center text-[#D84C4C]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
                 </svg>
               </div>
 
@@ -568,8 +618,21 @@ const getPetInfo = (id?: string) => {
 }
 
 const getPetLogCount = (petId: string) => {
-  return logs.value.filter(l => l.petId === petId && (l.type === 'toileted' || l.type === 'quick-visit')).length
+  return logs.value.filter(l => {
+    if (l.petId !== petId) return false
+    if (l.type !== 'toileted' && l.type !== 'quick-visit') return false
+    if (selectedDateFilter.value && (!l.rawTimestamp || !l.rawTimestamp.startsWith(selectedDateFilter.value))) return false
+    return true
+  }).length
 }
+
+const getAllLogCount = computed(() => {
+  return logs.value.filter(l => {
+    if (l.type !== 'toileted' && l.type !== 'quick-visit') return false
+    if (selectedDateFilter.value && (!l.rawTimestamp || !l.rawTimestamp.startsWith(selectedDateFilter.value))) return false
+    return true
+  }).length
+})
 
 // Filtering
 const selectedPetFilter = ref('all')
@@ -609,7 +672,7 @@ const filteredLogs = computed(() => {
 })
 
 const isBusy = computed(() => {
-  return device.value?.status && device.value.status !== 'Ready'
+  return (device.value?.status && device.value.status !== 'Ready') || device.value?.lidOpen || device.value?.binRemoved
 })
 
 const confirmClean = () => {

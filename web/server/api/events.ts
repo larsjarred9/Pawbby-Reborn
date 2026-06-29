@@ -57,10 +57,24 @@ export default defineEventHandler(async (event) => {
       description = 'Litter flattening cycle was physically triggered on the device.'
     } else if (e.type === 'flatten-app') {
       description = 'Litter flattening cycle started via Pawbby App.'
+    } else if (e.type === 'auto-flatten') {
+      description = 'Litter box automatically flattened the litter after use.'
     } else if (e.type === 'empty') {
       description = 'Waste bin emptying cycle was physically triggered on the device.'
     } else if (e.type === 'empty-app') {
       description = 'Waste bin emptying cycle started via Pawbby App.'
+    } else if (e.type === 'lid-removed') {
+      description = 'Safety trigger: The lid was removed from the litter box.'
+    } else if (e.type === 'lid-replaced') {
+      description = 'The lid was put back on the litter box.'
+    } else if (e.type === 'bin-removed') {
+      description = 'Safety trigger: The waste collection bin was removed.'
+    } else if (e.type === 'bin-replaced') {
+      description = 'The waste collection bin was installed.'
+    } else if (e.type === 'litter-added') {
+      description = `${e.weight}kg of fresh litter was added to the box.`
+    } else if (e.type === 'litter-removed') {
+      description = `${e.weight}kg of litter was removed from the box.`
     } else if (e.type === 'tuya-raw-data' && e.rawData) {
       // Try to parse the raw data to extract something readable if possible
       try {
