@@ -3,3 +3,5 @@
 .DS_Store
 mitmproxy-ca-cert.cer
 values.txt
+dev.db
+dev.db-journal

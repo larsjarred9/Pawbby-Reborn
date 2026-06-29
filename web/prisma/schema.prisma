@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  avatarUrl  String?
+  weightUnit String   @default("kg")
+}
+
+model Pet {
+  id          String   @id @default(cuid())
+  name        String
+  birthDate   String?
+  weight      Float
+  imageBase64 String?
+}
+
+model Device {
+  id               String   @id @default(cuid())
+  name             String
+  mode             String   @default("local") // "local" or "cloud"
+  deviceId         String
+  ipAddress        String?
+  localKey         String?
+  tuyaClientId     String?
+  tuyaClientSecret String?
+  tuyaRegion       String?
+  deodorizerLastReset DateTime?
+  deodorizerDuration  Int       @default(30)
+  events           LitterEvent[]
+}
+
+model LitterEvent {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  petId     String?  // nullable if couldn't identify pet
+  weight    Float?   // weight recorded during the event
+  duration  Int?     // duration in seconds
+  type      String   // "visit", "clean", "error"
+  rawData   String?  // To store raw Tuya JSON payloads for debugging
+  deviceId  String?  // Link back to the device that triggered it
+  device    Device?  @relation(fields: [deviceId], references: [id])
+}
