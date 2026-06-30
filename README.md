@@ -47,6 +47,7 @@ To run the Pawbby Reborn dashboard on your local network, you will need a machin
    ```bash
    npm install
    ```
+3. Copy the `.env.example` file as `.env` and provide the necessary values.
 4. Initialize the local SQLite database:
    ```bash
    npx prisma db push

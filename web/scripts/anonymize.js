@@ -2,23 +2,48 @@ import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
-const src = path.resolve('prisma/dev.db');
-const dest = path.resolve('prisma/share.db');
+const envPath = path.resolve('.env');
+let dbUrl = 'file:./dev.db';
+
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  const match = envContent.match(/^DATABASE_URL="(.*)"$/m) || envContent.match(/^DATABASE_URL=(.*)$/m);
+  if (match) {
+    dbUrl = match[1].replace(/['"]/g, '');
+  }
+}
+
+let dbPath;
+if (dbUrl.startsWith('file:')) {
+  const rawPath = dbUrl.substring(5);
+  // In Prisma, "file:./..." is relative to the prisma/ directory
+  if (rawPath.startsWith('./')) {
+    dbPath = path.resolve('prisma', rawPath);
+  } else {
+    dbPath = path.resolve(rawPath);
+  }
+} else {
+  console.error('❌ Error: DATABASE_URL must be a local file path.');
+  process.exit(1);
+}
+
+const src = dbPath;
+const dest = path.join(path.dirname(src), 'share.db');
 
 if (!fs.existsSync(src)) {
-  console.error('❌ Error: Database not found at prisma/dev.db');
+  console.error(`❌ Error: Database not found at ${src}`);
   process.exit(1);
 }
 
 // Create a copy of the database
 fs.copyFileSync(src, dest);
-console.log('✅ Created a copy of the database: prisma/share.db');
+console.log(`✅ Created a copy of the database: ${dest}`);
 
 // Connect Prisma to the copied database by overriding the datasource URL
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'file:./share.db' // Paths are relative to the prisma folder when overriding like this
+      url: `file:${path.join(path.dirname(src), 'share.db')}`
     }
   }
 });
@@ -46,7 +71,7 @@ async function run() {
   });
 
   console.log('🎉 Success! Your database is now anonymized and completely safe to share.');
-  console.log('👉 You can find the safe file here: web/prisma/share.db');
+  console.log(`👉 You can find the safe file here: ${dest}`);
 }
 
 run()
