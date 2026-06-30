@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+import prisma from '../../utils/prisma'
 export default defineEventHandler(async (event) => {
   const petId = getRouterParam(event, 'petId')
 
@@ -49,7 +46,10 @@ export default defineEventHandler(async (event) => {
   const headers = ['Date', 'Time', 'Duration (seconds)', 'Weight (kg)']
   const rows = events.map(e => {
     const d = new Date(e.timestamp)
-    const dateStr = d.toISOString().split('T')[0] // YYYY-MM-DD
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const dateStr = `${y}-${m}-${day}`
     const timeStr = d.toTimeString().split(' ')[0] // HH:MM:SS
     const duration = e.duration || 0
     const weight = e.weight?.toFixed(2) || '0.00'
@@ -60,7 +60,11 @@ export default defineEventHandler(async (event) => {
 
   // Sanitize pet name for filename
   const safePetName = pet.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dNow = new Date()
+  const yNow = dNow.getFullYear()
+  const mNow = String(dNow.getMonth() + 1).padStart(2, '0')
+  const dayNow = String(dNow.getDate()).padStart(2, '0')
+  const dateStr = `${yNow}-${mNow}-${dayNow}`
   const filename = `${safePetName}_vet_export_${dateStr}.csv`
 
   // Set headers to trigger a file download in the browser

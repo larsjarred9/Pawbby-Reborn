@@ -3,9 +3,10 @@ module.exports = {
     {
       name: 'pawbby',
       port: '3000',
-      exec_mode: 'cluster',
-      instances: 'max',
-      script: './web/.output/server/index.mjs',
+      cwd: './web',
+      script: './.output/server/index.mjs',
+      exec_mode: 'fork',
+      instances: 1,
       env: {
         NODE_ENV: 'production',
       }

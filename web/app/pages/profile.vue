@@ -378,6 +378,8 @@ const openExportModal = async () => {
 
   try {
     const res = await fetch(`/api/export/boundaries/${isEditingPetId.value}`)
+    if (!res.ok) throw new Error(`Server returned ${res.status}`)
+    
     const data = await res.json()
     if (data.hasData) {
       exportHasData.value = true
@@ -390,8 +392,9 @@ const openExportModal = async () => {
       alert('No data available to export.')
     }
   } catch (e) {
-    console.error(e)
+    console.error('Export boundaries error:', e)
     isExportModalOpen.value = false
+    alert('An error occurred while preparing the export data.')
   }
 }
 

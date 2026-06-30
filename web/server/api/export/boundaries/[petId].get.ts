@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+import prisma from '../../../utils/prisma'
 export default defineEventHandler(async (event) => {
   const petId = getRouterParam(event, 'petId')
 
@@ -28,9 +25,16 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Format as YYYY-MM-DD
-  const oldestDate = oldestEvent.timestamp.toISOString().split('T')[0]
-  const newestDate = newestEvent.timestamp.toISOString().split('T')[0]
+  // Format as local YYYY-MM-DD
+  const getLocalYMD = (d: Date) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
+
+  const oldestDate = getLocalYMD(oldestEvent.timestamp)
+  const newestDate = getLocalYMD(newestEvent.timestamp)
 
   return {
     hasData: true,

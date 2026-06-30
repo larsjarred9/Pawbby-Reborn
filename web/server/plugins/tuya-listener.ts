@@ -169,19 +169,36 @@ export default defineNitroPlugin((nitroApp) => {
             try {
               const user = await prisma.user.findFirst();
               if (user?.webhookUrl) {
-                const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
-                const min = Math.floor(durationSecs / 60);
-                const sec = durationSecs % 60;
-                const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
-                
-                const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
-                const payload = { content: msg, text: msg };
-                
-                fetch(user.webhookUrl, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload)
-                }).catch(e => console.error('[Webhook Error]', e.message));
+                try {
+                  const url = new URL(user.webhookUrl);
+                  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+                    throw new Error('Invalid webhook protocol. Must be http or https.');
+                  }
+                  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0') {
+                    throw new Error('Loopback webhook addresses are not allowed for security reasons.');
+                  }
+
+                  const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
+                  const min = Math.floor(durationSecs / 60);
+                  const sec = durationSecs % 60;
+                  const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+                  
+                  const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
+                  const payload = { content: msg, text: msg };
+                  
+                  const controller = new AbortController();
+                  const timeout = setTimeout(() => controller.abort(), 5000);
+                  
+                  fetch(user.webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                  }).catch(e => console.error('[Webhook Error]', e.message))
+                    .finally(() => clearTimeout(timeout));
+                } catch (err: any) {
+                  console.error('[Webhook Configuration Error]', err.message);
+                }
               }
             } catch (e) {
               console.error('[Webhook Error]', e);
