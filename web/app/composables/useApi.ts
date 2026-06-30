@@ -7,6 +7,7 @@ export interface User {
   email: string
   avatarUrl?: string
   weightUnit?: 'kg' | 'lb'
+  webhookUrl?: string
 }
 
 export interface Pet {

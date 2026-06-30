@@ -165,6 +165,28 @@ export default defineNitroPlugin((nitroApp) => {
               },
             });
 
+            // Trigger Webhook Notification
+            try {
+              const user = await prisma.user.findFirst();
+              if (user?.webhookUrl) {
+                const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
+                const min = Math.floor(durationSecs / 60);
+                const sec = durationSecs % 60;
+                const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+                
+                const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
+                const payload = { content: msg, text: msg };
+                
+                fetch(user.webhookUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                }).catch(e => console.error('[Webhook Error]', e.message));
+              }
+            } catch (e) {
+              console.error('[Webhook Error]', e);
+            }
+
             // Reset visit state
             state.catEnteredAt = null;
             state.peakWeight = 0;

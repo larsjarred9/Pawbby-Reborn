@@ -60,6 +60,26 @@
         </div>
       </button>
 
+      <!-- Push Notifications -->
+      <button @click="showNotificationsModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span class="font-medium text-lg">Push Notifications</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ webhookUrl ? 'Configured' : 'Setup' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Check for Updates -->
       <button @click="handleUpdateClick" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
@@ -86,9 +106,6 @@
       </button>
 
     </div>
-
-
-
     <!-- Clear Data -->
     <div class="mt-auto pt-8 pb-4 space-y-6">
       <button @click="doClearCache"
@@ -120,6 +137,31 @@
           </button>
           <button @click="triggerUpdate" class="w-full py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
             Confirm & Update
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Push Notifications Modal -->
+    <div v-if="showNotificationsModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
+        <h3 class="text-xl font-bold text-white mb-2">Push Notifications</h3>
+        <p class="text-xs text-pawbby-muted mb-6">Receive an instant alert via Discord or Slack when your cat uses the litter box.</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm text-pawbby-muted mb-1">Webhook URL</label>
+            <input v-model="webhookUrl" @change="saveWebhookUrl" type="url" placeholder="Paste Discord or Slack Webhook URL..."
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+          </div>
+          
+          <button @click="testWebhook" :disabled="testingWebhook || !webhookUrl"
+            class="w-full py-3 bg-pawbby-primary/10 text-[#3D7A41] font-semibold rounded-xl hover:bg-pawbby-primary/20 transition-colors disabled:opacity-50 text-sm">
+            {{ testingWebhook ? 'Testing...' : 'Test Notification' }}
+          </button>
+        </div>
+        <div class="mt-6">
+          <button @click="showNotificationsModal = false" class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            Close
           </button>
         </div>
       </div>
@@ -201,6 +243,36 @@ const checkForUpdates = async (silent = false) => {
 
 const loadData = async () => {
   user.value = await api.getUser()
+  if (user.value.webhookUrl) {
+    webhookUrl.value = user.value.webhookUrl
+  }
+}
+
+const webhookUrl = ref('')
+const testingWebhook = ref(false)
+const showNotificationsModal = ref(false)
+
+const saveWebhookUrl = async () => {
+  if (!user.value) return
+  await api.updateUser({ webhookUrl: webhookUrl.value })
+}
+
+const testWebhook = async () => {
+  if (!webhookUrl.value) return
+  testingWebhook.value = true
+  try {
+    const res = await fetch('/api/webhook/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ webhookUrl: webhookUrl.value })
+    })
+    if (!res.ok) throw new Error('Test failed')
+    alert('Test notification sent successfully!')
+  } catch (e) {
+    alert('Failed to send test notification. Check the URL.')
+  } finally {
+    testingWebhook.value = false
+  }
 }
 
 onMounted(() => {
