@@ -26,6 +26,17 @@ async function run() {
   });
 
   const envPath = path.resolve('.env');
+
+  if (fs.existsSync(envPath)) {
+    const overwrite = await confirm({
+      message: 'A .env file already exists. Overwrite it?',
+      default: false
+    });
+    if (!overwrite) {
+      console.log('\nℹ️  Setup cancelled (existing .env preserved).');
+      return;
+    }
+  }
   
   const envContent = `# ---------------------------------------------------------
 # PAWBBY REBORN - ENVIRONMENT CONFIGURATION
