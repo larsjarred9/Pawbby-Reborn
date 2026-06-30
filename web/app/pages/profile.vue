@@ -170,8 +170,13 @@
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-white">{{ isEditingPetId ? 'Edit Pet' : 'Add Pet' }}</h3>
-          <button v-if="isEditingPetId" @click="deletePet"
-            class="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">Delete</button>
+          <div v-if="isEditingPetId" class="flex items-center space-x-3">
+            <button @click="openExportModal"
+              class="text-[#3D7A41] hover:text-[#3D7A41]/80 transition-colors text-sm font-medium">Export CSV</button>
+            <span class="text-white/20">|</span>
+            <button @click="deletePet"
+              class="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">Delete</button>
+          </div>
         </div>
 
         <div class="space-y-4">
@@ -219,6 +224,39 @@
             class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
           <button @click="savePet"
             class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Data Modal -->
+    <div v-if="isExportModalOpen"
+      class="absolute inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
+        <h3 class="text-xl font-bold text-white mb-4">Export History (CSV)</h3>
+        
+        <div v-if="!exportHasData" class="text-pawbby-muted text-sm mb-6 text-center">
+          Fetching available dates...
+        </div>
+        <div v-else class="space-y-4">
+          <div class="flex space-x-3">
+            <div class="flex-1">
+              <label class="block text-sm text-pawbby-muted mb-1">Start Date</label>
+              <input v-model="exportStartDate" type="date" :min="exportMinDate" :max="exportEndDate"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary appearance-none [&::-webkit-calendar-picker-indicator]:invert-[0.6]" />
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm text-pawbby-muted mb-1">End Date</label>
+              <input v-model="exportEndDate" type="date" :min="exportStartDate" :max="exportMaxDate"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary appearance-none [&::-webkit-calendar-picker-indicator]:invert-[0.6]" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex space-x-3 mt-6">
+          <button @click="isExportModalOpen = false"
+            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
+          <a v-if="exportHasData" :href="getExportUrl()" download @click="isExportModalOpen = false"
+            class="flex-1 px-4 py-2 rounded-xl bg-[#3D7A41] text-white font-semibold hover:bg-[#3D7A41]/80 transition-colors text-center block">Download</a>
         </div>
       </div>
     </div>
@@ -321,6 +359,48 @@ const deletePet = async () => {
     await loadData()
     isEditPetOpen.value = false
   }
+}
+
+// Export Modal
+const isExportModalOpen = ref(false)
+const exportStartDate = ref('')
+const exportEndDate = ref('')
+const exportMinDate = ref('')
+const exportMaxDate = ref('')
+const exportHasData = ref(false)
+
+const openExportModal = async () => {
+  if (!isEditingPetId.value) return
+  isExportModalOpen.value = true
+  exportHasData.value = false
+  exportStartDate.value = ''
+  exportEndDate.value = ''
+
+  try {
+    const res = await fetch(`/api/export/boundaries/${isEditingPetId.value}`)
+    const data = await res.json()
+    if (data.hasData) {
+      exportHasData.value = true
+      exportMinDate.value = data.oldest
+      exportMaxDate.value = data.newest
+      exportStartDate.value = data.oldest
+      exportEndDate.value = data.newest
+    } else {
+      isExportModalOpen.value = false
+      alert('No data available to export.')
+    }
+  } catch (e) {
+    console.error(e)
+    isExportModalOpen.value = false
+  }
+}
+
+const getExportUrl = () => {
+  if (!isEditingPetId.value) return '#'
+  const params = new URLSearchParams()
+  if (exportStartDate.value) params.append('start', exportStartDate.value)
+  if (exportEndDate.value) params.append('end', exportEndDate.value)
+  return `/api/export/${isEditingPetId.value}?${params.toString()}`
 }
 </script>
 
