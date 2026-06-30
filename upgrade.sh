@@ -26,6 +26,12 @@ npm run build
 echo ""
 echo "==========================================="
 echo "✅ Upgrade complete! Your dashboard is fully up to date."
-echo "⚠️ IMPORTANT: Please manually restart your node process to apply changes."
-echo "   (e.g., run 'pm2 restart pawbby' or restart your 'npm run dev' terminal window)"
+echo "🚀 Attempting to restart PM2 service..."
+if command -v pm2 &> /dev/null
+then
+    pm2 restart pawbby || echo "PM2 service 'pawbby' not found or failed to restart. If not using PM2, restart your Node process manually."
+else
+    echo "PM2 not found. Please manually restart your node process to apply changes."
+    echo "   (e.g., restart your 'npm run dev' terminal window)"
+fi
 echo "==========================================="

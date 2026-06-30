@@ -27,48 +27,13 @@ We have built a beautiful, lightweight, self-hosted web app. This local interfac
 
 ---
 
-## 🛠️ Setup & Installation
+## ⚠️ Experimental & Unfinished Features
 
-To run the Pawbby Reborn dashboard on your local network, you will need a machine capable of running Node.js.
+While the dashboard successfully tracks weight, durations, litter levels, and waste bin capacity, some hardware triggers are still highly experimental:
 
-### Prerequisites
-
-- Node.js (v18+)
-- npm (Node Package Manager)
-
-### Installation Steps
-
-1. Clone this repository to your local machine.
-2. Navigate to the `web` directory:
-   ```bash
-   cd web
-   ```
-3. Install the required dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy the `.env.example` file as `.env` and provide the necessary values.
-4. Initialize the local SQLite database:
-   ```bash
-   npx prisma db push
-   ```
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
-6. Open a web browser and navigate to `http://localhost:3000` to access the dashboard. 
-
-_(For production deployment, run `npm run build` and follow standard Nuxt 3 deployment guidelines.)_
-
-### 🔄 Updating to the Latest Version
-
-We are actively discovering new payloads and improving the dashboard. To automatically update your instance to the latest version, navigate to the root folder of this project in your terminal and run:
-
-```bash
-./upgrade.sh
-```
-
-This script will safely pull the newest code from GitHub, install any new dependencies, sync the database schema, and prepare the app for a restart. Once it finishes, simply restart your Node process or PM2 service!
+- **Remote Cleaning Cycle:** We have successfully reverse-engineered the `Flatten` (litter leveling) and `Empty` (dump all litter) commands via DP 106. However, the exact data packet to trigger a standard "Auto Clean" or "Manual Clean" drum rotation remotely is **still unknown**. If you click "Clean" in the app, it is currently disabled.
+- **Litter Sensor:** The hardware does not explicitly broadcast an "Insufficient Litter" status (as far as we know, more research is needed). Instead, the dashboard makes an experimental guess by reading the raw weight sensor (DP 112). If the raw weight of the litter inside the drum drops below ~1500g, we flag it as "Insufficient". However, the scale drifts over time and can sometimes read artificially low.
+- **Waste Bin Status:** The machine's internal laser sensor cannot distinguish between the bin being physically removed and the bin being installed but completely empty. Pulling the bin out will sometimes clear the "Bin Full" error in the dashboard.
 
 ---
 
@@ -98,21 +63,82 @@ Once you have your `Device ID` and `Local Key`, you can input them directly into
 
 ---
 
-## ⚠️ Experimental & Unfinished Features
+## 🛠️ Setup & Installation
 
-While the dashboard successfully tracks weight, durations, litter levels, and waste bin capacity, some hardware triggers are still highly experimental:
+To run the Pawbby Reborn dashboard on your local network, you will need a machine capable of running Node.js.
 
-- **Remote Cleaning Cycle:** We have successfully reverse-engineered the `Flatten` (litter leveling) and `Empty` (dump all litter) commands via DP 106. However, the exact data packet to trigger a standard "Auto Clean" or "Manual Clean" drum rotation remotely is **still unknown**. If you click "Clean" in the app, it is currently disabled.
-- **Litter Sensor:** The hardware does not explicitly broadcast an "Insufficient Litter" status (as far as we know, more research is needed). Instead, the dashboard makes an experimental guess by reading the raw weight sensor (DP 112). If the raw weight of the litter inside the drum drops below ~1500g, we flag it as "Insufficient". However, the scale drifts over time and can sometimes read artificially low.
-- **Waste Bin Status:** The machine's internal laser sensor cannot distinguish between the bin being physically removed and the bin being installed but completely empty. Pulling the bin out will sometimes clear the "Bin Full" error in the dashboard.
+There are two primary ways to run the dashboard:
+
+- **Development Deployment**: Perfect for testing, tinkering, or quickly viewing the dashboard. This runs directly in your terminal, meaning it shuts down as soon as you close your window.
+- **Production Deployment (PM2)**: Required if you want the dashboard to act as a persistent, 24/7 smart home service (like on a Raspberry Pi). PM2 automatically runs the app in the background, auto-restarts it if it crashes, and boots it up automatically when your device turns on.
+
+### Prerequisites
+
+- Node.js (v18+)
+- npm (Node Package Manager)
+
+### Development Deployment
+
+1. Clone this repository to your local machine.
+2. Navigate to the `web` directory:
+   ```bash
+   cd web
+   ```
+3. Install the required dependencies:
+   ```bash
+   npm install
+   ```
+4. Run the interactive setup wizard (this will automatically configure your database and environment settings):
+   ```bash
+   npm run setup
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+6. Open a web browser and navigate to `http://localhost:3000` to access the dashboard.
+
+_(For production deployment, run `npm run build` and follow standard Nuxt 4 deployment guidelines.)_
+
+### 🚀 Background Deployment (PM2)
+
+If you only use `npm run dev`, the dashboard will immediately shut down the second you close your terminal or disconnect your SSH session. Because Pawbby Reborn needs to constantly listen to your local network to intercept litter box events (like tracking when your cat visits), **it must run 24/7 in the background**.
+
+The easiest way to turn Pawbby Reborn into a persistent background "daemon" (especially on a Raspberry Pi) is by using **PM2**, a lightweight process manager for Node.js.
+
+1. Install PM2 globally:
+   ```bash
+   npm install -g pm2
+   ```
+2. Build the production application:
+   ```bash
+   cd web
+   npm run build
+   cd ..
+   ```
+3. Start the application in the background. This will instantly detach it from your terminal, allowing you to close the window safely:
+   ```bash
+   pm2 start ecosystem.config.cjs
+   ```
+4. Tell PM2 to automatically start Pawbby Reborn whenever your device reboots:
+   ```bash
+   pm2 startup
+   pm2 save
+   ```
+
+_Note: You never need to touch PM2 again to update! When you hit "Confirm & Update" in the dashboard UI, the auto-updater will seamlessly restart the background service for you._
 
 ---
 
-## ⚖️ Why We Chose the AGPL-3.0 License
+## 🔄 Updating to the Latest Version
 
-We chose the **GNU Affero General Public License v3.0** with a very specific goal in mind: **to ensure this hardware never falls victim to corporate abandonment and remains community-controlled forever.**
+We are actively discovering new payloads and improving the dashboard. As of **version 0.2.0**, you can update Pawbby Reborn directly from within the dashboard!
 
-By using this license, we guarantee that the code we build together stays in the hands of the community forever. Anyone is free to use and modify this project for their home, but any network service, fork, or smart-home integration built using our engine must also make its source code completely public under the same terms. This permanently blocks corporate entities from hijacking our hard work, wrapping it in a private layer, or turning it into a closed-source subscription service.
+1. Open your **Settings** tab in the dashboard.
+2. Click **Check for Updates**.
+3. If an update is available, click **Confirm & Update**. The app will automatically pull the newest code, install dependencies, sync the database, and restart your PM2 service without you ever touching a terminal!
+
+_(Alternatively, you can still update manually by running `./upgrade.sh` from the root folder in your terminal)._
 
 ---
 
@@ -121,13 +147,14 @@ By using this license, we guarantee that the code we build together stays in the
 This is a collaborative community rescue mission. Whether you are an experienced packet-sniffer, a frontend developer ready to tackle the UI, or just a frustrated Pawbby owner who wants to help test commands, we need your help.
 
 - 💬 **Communication & Development:** [Join our Discord Server](https://discord.gg/Tw43AKZkge) to talk strategy, share logs, and coordinate the software build in real-time.
-- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local network commands and authentication extraction strategies.
+- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local local network commands and authentication extraction strategies.
 
 ### 📤 Sharing Your Database for Development
 
-Because the dashboard saves the raw Tuya JSON payloads from your litter box directly into the database, sharing your database with the developers is incredibly helpful for finding missing commands (like the remote auto-clean trigger). 
+Because the dashboard saves the raw Tuya JSON payloads from your litter box directly into the database, sharing your database with the developers is incredibly helpful for finding missing commands (like the remote auto-clean trigger).
 
 To share your logs safely without exposing your Wi-Fi device keys:
+
 1. Navigate to the `web` directory in your terminal.
 2. Run the anonymization script:
    ```bash
@@ -135,5 +162,13 @@ To share your logs safely without exposing your Wi-Fi device keys:
    ```
 3. This will create a completely safe, redacted copy of your database at `web/prisma/share.db`.
 4. You can now safely drag and drop `share.db` into the Discord server!
+
+---
+
+## ⚖️ Why We Chose the AGPL-3.0 License
+
+We chose the **GNU Affero General Public License v3.0** with a very specific goal in mind: **to ensure this hardware never falls victim to corporate abandonment and remains community-controlled forever.**
+
+By using this license, we guarantee that the code we build together stays in the hands of the community forever. Anyone is free to use and modify this project for their home, but any network service, fork, or smart-home integration built using our engine must also make its source code completely public under the same terms. This permanently blocks corporate entities from hijacking our hard work, wrapping it in a private layer, or turning it into a closed-source subscription service.
 
 Let's unbrick some hardware. 🐈‍⬛⚡
