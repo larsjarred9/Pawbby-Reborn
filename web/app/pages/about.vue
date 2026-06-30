@@ -75,7 +75,7 @@
         </svg>
       </a>
 
-      <a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/website/CONTRIBUTING.md" target="_blank"
+      <a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/main/CONTRIBUTING.md#developer-certificate-of-origin-dco" target="_blank"
         class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <span class="font-medium text-lg">DCO License</span>
         <svg xmlns="http://www.w3.org/2000/svg"
