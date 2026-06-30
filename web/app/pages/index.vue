@@ -15,6 +15,27 @@
     <!-- Main Content -->
     <div class="px-4 py-2 space-y-4 pb-20">
 
+      <!-- Update Banner -->
+      <div v-if="showUpdateBanner" class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-4 flex items-center justify-between mb-2">
+        <div class="flex items-center space-x-3">
+          <div class="bg-[#3D7A41]/20 p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-[#3D7A41] font-semibold text-sm">Update Available</h3>
+            <p class="text-xs text-[#3D7A41]/80 mt-0.5">A new version is ready to install.</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button @click="dismissUpdateBanner" class="text-xs text-[#3D7A41]/60 hover:text-[#3D7A41]">Dismiss</button>
+          <NuxtLink to="/settings" class="text-xs font-bold bg-[#3D7A41]/80 text-white px-3 py-1.5 rounded-lg hover:bg-[#3D7A41] transition-colors">
+            View
+          </NuxtLink>
+        </div>
+      </div>
+
       <!-- Empty State -->
       <div v-if="devices.length === 0" class="text-center py-10 bg-pawbby-card/30 rounded-2xl border border-white/5">
         <p class="text-pawbby-muted">No devices found. Tap the + to add your smart litter box.</p>
@@ -177,7 +198,35 @@ const isDeviceOnline = (device: any) => {
   return (now - hb) < 420000
 }
 
+const showUpdateBanner = ref(false)
+
+const checkForUpdates = async () => {
+  try {
+    const res = await fetch('/api/update')
+    const data = await res.json()
+    if (data.updateAvailable) {
+      const dismissedAt = localStorage.getItem('updateBannerDismissedAt')
+      if (dismissedAt) {
+        const dismissedTime = parseInt(dismissedAt, 10)
+        const now = Date.now()
+        if (now - dismissedTime < 86400000) { // 24 hours
+          return
+        }
+      }
+      showUpdateBanner.value = true
+    }
+  } catch (e) {
+    // Ignore error
+  }
+}
+
+const dismissUpdateBanner = () => {
+  showUpdateBanner.value = false
+  localStorage.setItem('updateBannerDismissedAt', Date.now().toString())
+}
+
 onMounted(() => {
   loadDevices()
+  checkForUpdates()
 })
 </script>
