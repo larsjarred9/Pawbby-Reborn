@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 403, statusMessage: 'Cross-origin request blocked' })
       }
     } catch (e) {
-      // Invalid URL
+      // Fail closed if the Origin/Referer is present but invalid (e.g. Origin: null)
+      throw createError({ statusCode: 403, statusMessage: 'Invalid Origin/Referer header' })
     }
   }
 

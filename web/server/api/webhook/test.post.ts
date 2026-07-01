@@ -22,8 +22,9 @@ export default defineEventHandler(async (event) => {
     if (url.protocol !== 'https:' && url.protocol !== 'http:') {
       throw createError({ statusCode: 400, statusMessage: 'Webhook URL protocol must be http or https' })
     }
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0') {
-      throw createError({ statusCode: 400, statusMessage: 'Loopback webhook addresses are not allowed for security reasons' })
+    const blockedHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254']);
+    if (blockedHosts.has(url.hostname)) {
+      throw createError({ statusCode: 400, statusMessage: 'Loopback and metadata webhook addresses are not allowed for security reasons' })
     }
   }
 
