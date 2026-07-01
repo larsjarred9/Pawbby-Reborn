@@ -29,7 +29,10 @@ echo "✅ Upgrade complete! Your dashboard is fully up to date."
 echo "🚀 Attempting to restart PM2 service..."
 if command -v pm2 &> /dev/null
 then
-    pm2 restart pawbby || echo "PM2 service 'pawbby' not found or failed to restart. If not using PM2, restart your Node process manually."
+    # Use 'start <config> --update-env' instead of 'restart' to ensure any changes
+    # to the ecosystem.config.cjs (like the new Alpha 0.2.0 fork mode) are actually applied.
+    pm2 start ../ecosystem.config.cjs --env production --update-env || echo "PM2 service 'pawbby' failed to start/restart."
+    pm2 save
 else
     echo "PM2 not found. Please manually restart your node process to apply changes."
     echo "   (e.g., restart your 'npm run dev' terminal window)"
