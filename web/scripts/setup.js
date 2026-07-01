@@ -6,12 +6,12 @@ import { execSync } from 'child_process';
 async function run() {
   console.log('\n🐾 Welcome to the PAWBBY REBORN setup wizard!\n');
 
-  const checkUpdates = await confirm({
-    message: 'Would you like the dashboard to notify you when new updates are available?',
+  const enableOneClick = await confirm({
+    message: 'Would you like to enable the 1-Click Update system? (Choose NO if running in Docker or restricted environments)',
     default: true
   });
 
-  const disableUpdates = checkUpdates ? 'false' : 'true';
+  const disableUpdates = enableOneClick ? 'false' : 'true';
 
   const defaultDbUrl = 'file:./dev.db';
   const customDbUrl = await input({
@@ -50,8 +50,8 @@ async function run() {
 # PAWBBY REBORN - ENVIRONMENT CONFIGURATION
 # ---------------------------------------------------------
 
-# Set to "true" if you are developing or if you do not want
-# the built-in update checker to notify you of updates.
+# Set to "true" if you are running in Docker or restricted environments
+# to disable the 1-Click Update system. (Update notifications will still show).
 DISABLE_UPDATES="${disableUpdates}"
 
 # Strict Webhook Security
