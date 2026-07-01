@@ -288,16 +288,16 @@
                 </div>
               </div>
               <div class="relative w-full h-48 sm:h-56 bg-black/50 flex items-center justify-center">
-                <img v-if="guideSlide === 0" src="/step_1.png" @click="expandedImage = '/step_1.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 1" src="/step_2.png" @click="expandedImage = '/step_2.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 2" src="/step_3.png" @click="expandedImage = '/step_3.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 3" src="/step_4.png" @click="expandedImage = '/step_4.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 4" src="/step_5.png" @click="expandedImage = '/step_5.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 5" src="/step_6.png" @click="expandedImage = '/step_6.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 7" src="/step_8.png" @click="expandedImage = '/step_8.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 8" src="/step_9.png" @click="expandedImage = '/step_9.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 9" src="/step_10.png" @click="expandedImage = '/step_10.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
-                <img v-if="guideSlide === 10" src="/step_11.png" @click="expandedImage = '/step_11.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 0" src="/step_1.png" alt="Step 1 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_1.png'" @click="expandedImage = '/step_1.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 1" src="/step_2.png" alt="Step 2 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_2.png'" @click="expandedImage = '/step_2.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 2" src="/step_3.png" alt="Step 3 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_3.png'" @click="expandedImage = '/step_3.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 3" src="/step_4.png" alt="Step 4 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_4.png'" @click="expandedImage = '/step_4.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 4" src="/step_5.png" alt="Step 5 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_5.png'" @click="expandedImage = '/step_5.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 5" src="/step_6.png" alt="Step 6 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_6.png'" @click="expandedImage = '/step_6.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 7" src="/step_8.png" alt="Step 8 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_8.png'" @click="expandedImage = '/step_8.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 8" src="/step_9.png" alt="Step 9 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_9.png'" @click="expandedImage = '/step_9.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 9" src="/step_10.png" alt="Step 10 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_10.png'" @click="expandedImage = '/step_10.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                <img v-if="guideSlide === 10" src="/step_11.png" alt="Step 11 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_11.png'" @click="expandedImage = '/step_11.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
                 <div v-if="guideSlide === 6" class="text-white/20">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                 </div>
@@ -385,8 +385,8 @@
       </div>
     </div>
     <!-- Image Expansion Modal -->
-    <div v-if="expandedImage" @click="expandedImage = null" class="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4 cursor-zoom-out animate-fade-in-up">
-      <img :src="expandedImage" class="max-w-full max-h-full object-contain shadow-2xl rounded-lg" />
+    <div v-if="expandedImage" @click="expandedImage = null" @keydown.esc="expandedImage = null" tabindex="0" role="dialog" aria-modal="true" class="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4 cursor-zoom-out animate-fade-in-up">
+      <img :src="expandedImage" alt="Expanded setup screenshot" class="max-w-full max-h-full object-contain shadow-2xl rounded-lg" />
     </div>
   </div>
 </template>
