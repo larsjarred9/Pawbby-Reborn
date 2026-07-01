@@ -67,10 +67,11 @@ Once you have your `Device ID` and `Local Key`, you can input them directly into
 
 To run the Pawbby Reborn dashboard on your local network, you will need a machine capable of running Node.js.
 
-There are two primary ways to run the dashboard:
+There are three primary ways to run the dashboard:
 
 - **Development Deployment**: Perfect for testing, tinkering, or quickly viewing the dashboard. This runs directly in your terminal, meaning it shuts down as soon as you close your window.
-- **Production Deployment (PM2)**: Required if you want the dashboard to act as a persistent, 24/7 smart home service (like on a Raspberry Pi). PM2 automatically runs the app in the background, auto-restarts it if it crashes, and boots it up automatically when your device turns on.
+- **Production Deployment (Docker)**: The cleanest, most modern way to run Pawbby Reborn. It keeps all dependencies containerized and isolated. Recommended for Synology NAS, Unraid, or modern Linux servers.
+- **Production Deployment (PM2)**: A lightweight alternative if you want to run the app directly on your host OS (like a Raspberry Pi) without installing Docker.
 
 ### Prerequisites
 
@@ -96,9 +97,23 @@ There are two primary ways to run the dashboard:
    ```bash
    npm run dev
    ```
-6. Open a web browser and navigate to `http://localhost:3000` to access the dashboard.
+6. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
 _(For production deployment, run `npm run build` and follow standard Nuxt 4 deployment guidelines.)_
+
+### 🐳 Background Deployment (Docker)
+
+Docker is the cleanest way to run Pawbby Reborn. It packages everything into an isolated container and handles database persistence automatically.
+
+1. Clone this repository to your machine.
+2. Ensure you have Docker and Docker Compose installed.
+3. Simply run the following command in the root folder:
+   ```bash
+   docker-compose up -d --build
+   ```
+4. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
+
+_To change environment settings like webhooks or update the port, just edit the `docker-compose.yml` file and run the command again._
 
 ### 🚀 Background Deployment (PM2)
 
@@ -138,7 +153,16 @@ We are actively discovering new payloads and improving the dashboard. As of **ve
 2. Click **Check for Updates**.
 3. If an update is available, click **Confirm & Update**. The app will automatically pull the newest code, install dependencies, sync the database, and restart your PM2 service without you ever touching a terminal!
 
-_(Alternatively, you can still update manually by running `./upgrade.sh` from the root folder in your terminal)._
+_(Alternatively, you can still update PM2 manually by running `./upgrade.sh` from the root folder in your terminal)._
+
+### 🐳 Updating in Docker
+
+Because Docker containers are isolated, the 1-Click Update button cannot restart your container. To update, pull the latest code and rebuild your container:
+
+```bash
+git pull origin main
+docker-compose up -d --build
+```
 
 ---
 
