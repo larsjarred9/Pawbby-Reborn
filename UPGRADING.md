@@ -1,8 +1,15 @@
 # 🚀 Upgrading Pawbby Reborn
 
-Pawbby Reborn version `0.3.0` introduces several **massive** architectural and security improvements. Because of these fundamental changes, there are a few things you need to know depending on which version you are upgrading from.
+Pawbby Reborn version `0.4.0` introduces **Authentication and Local Admin Accounts** to secure your dashboard. Because of these fundamental changes, there are a few things you need to know depending on which version you are upgrading from.
 
-## 1. Upgrading from v0.2.x to v0.3.0 (1-Click Update)
+## 1. Upgrading from v0.3.0 to v0.4.0
+
+Version `0.4.0` can be upgraded seamlessly via the 1-Click Update button on your dashboard. 
+
+**Important Post-Update Action:**
+Because `0.4.0` introduces strict local security, existing users who upgrade from `0.3.0` will automatically be redirected to a **Set Password** wizard the first time they visit the dashboard after upgrading. You must create a local admin password to secure your instance before you can continue accessing your Pawbby data.
+
+## 2. Upgrading from v0.2.x to v0.3.0 (1-Click Update)
 
 Starting in version `0.2.x`, Pawbby Reborn features a built-in 1-Click Upgrade system! 
 
