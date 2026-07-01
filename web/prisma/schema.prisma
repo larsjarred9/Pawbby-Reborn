@@ -15,6 +15,20 @@ model User {
   avatarUrl    String?
   weightUnit   String   @default("kg")
   webhookUrl   String?
+  
+  notifyPushVisit       Boolean @default(true)
+  notifyPushAutoClean   Boolean @default(false)
+  notifyPushManualClean Boolean @default(false)
+  notifyPushEmpty       Boolean @default(false)
+  notifyPushFlatten     Boolean @default(false)
+  notifyPushError       Boolean @default(false)
+  
+  notifyDashVisit       Boolean @default(true)
+  notifyDashAutoClean   Boolean @default(true)
+  notifyDashManualClean Boolean @default(true)
+  notifyDashEmpty       Boolean @default(true)
+  notifyDashFlatten     Boolean @default(true)
+  notifyDashError       Boolean @default(true)
 }
 
 model Pet {

@@ -20,6 +20,50 @@ export default defineNitroPlugin((nitroApp) => {
   const deviceStates = new Map<string, DeviceState>();
   const appTriggeredActions = new Map<string, number>();
 
+  const dispatchWebhook = async (user: any, message: string, eventType: string) => {
+    if (!user?.webhookUrl) return;
+    
+    // Check user preferences
+    if (eventType === 'visit' && !user.notifyPushVisit) return;
+    if (eventType === 'auto-clean' && !user.notifyPushAutoClean) return;
+    if (eventType === 'manual-clean' && !user.notifyPushManualClean) return;
+    if (eventType === 'empty' && !user.notifyPushEmpty) return;
+    if (eventType === 'flatten' && !user.notifyPushFlatten) return;
+    if (eventType === 'error' && !user.notifyPushError) return;
+
+    try {
+      const url = new URL(user.webhookUrl);
+      if (process.env.WEBHOOK_STRICT_MODE === 'true') {
+        const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com', 'api.telegram.org', 'api.pushover.net'];
+        if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
+          throw new Error('Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.');
+        }
+      } else {
+        if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+          throw new Error('Invalid webhook protocol. Must be http or https.');
+        }
+        const blockedHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254']);
+        if (blockedHosts.has(url.hostname)) {
+          throw new Error('Loopback and metadata webhook addresses are not allowed for security reasons.');
+        }
+      }
+
+      const payload = { content: message, text: message };
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      
+      fetch(user.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      }).catch(e => console.error('[Webhook Error]', e.message))
+        .finally(() => clearTimeout(timeout));
+    } catch (err: any) {
+      console.error('[Webhook Configuration Error]', err.message);
+    }
+  };
+
   const startTuyaListener = async () => {
     try {
       const devices = await prisma.device.findMany({
@@ -168,45 +212,14 @@ export default defineNitroPlugin((nitroApp) => {
             // Trigger Webhook Notification
             try {
               const user = await prisma.user.findFirst();
-              if (user?.webhookUrl) {
-                try {
-                  const url = new URL(user.webhookUrl);
-                  if (process.env.WEBHOOK_STRICT_MODE === 'true') {
-                    const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com', 'api.telegram.org', 'api.pushover.net']
-                    if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
-                      throw new Error('Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.')
-                    }
-                  } else {
-                    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-                      throw new Error('Invalid webhook protocol. Must be http or https.');
-                    }
-                    const blockedHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254']);
-                    if (blockedHosts.has(url.hostname)) {
-                      throw new Error('Loopback and metadata webhook addresses are not allowed for security reasons.');
-                    }
-                  }
-
-                  const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
-                  const min = Math.floor(durationSecs / 60);
-                  const sec = durationSecs % 60;
-                  const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
-                  
-                  const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
-                  const payload = { content: msg, text: msg };
-                  
-                  const controller = new AbortController();
-                  const timeout = setTimeout(() => controller.abort(), 5000);
-                  
-                  fetch(user.webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                  }).catch(e => console.error('[Webhook Error]', e.message))
-                    .finally(() => clearTimeout(timeout));
-                } catch (err: any) {
-                  console.error('[Webhook Configuration Error]', err.message);
-                }
+              if (user) {
+                const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
+                const min = Math.floor(durationSecs / 60);
+                const sec = durationSecs % 60;
+                const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+                
+                const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
+                await dispatchWebhook(user, msg, 'visit');
               }
             } catch (e) {
               console.error('[Webhook Error]', e);
@@ -237,6 +250,8 @@ export default defineNitroPlugin((nitroApp) => {
                   data: { type: "auto-clean", deviceId: config.id },
                 });
                 state.lastCleanTime = now;
+                const user = await prisma.user.findFirst();
+                if (user) await dispatchWebhook(user, "🧹 Auto-cleaning cycle started.", "auto-clean");
               }
             }
             if (
@@ -244,13 +259,13 @@ export default defineNitroPlugin((nitroApp) => {
               state.currentStatus !== "work_mclean"
             ) {
               if (now - state.lastCleanTime > 60000) {
+                const type = isApp ? "manual-clean-app" : "manual-clean";
                 await prisma.litterEvent.create({
-                  data: {
-                    type: isApp ? "manual-clean-app" : "manual-clean",
-                    deviceId: config.id,
-                  },
+                  data: { type, deviceId: config.id },
                 });
                 state.lastCleanTime = now;
+                const user = await prisma.user.findFirst();
+                if (user) await dispatchWebhook(user, "🧹 Manual cleaning cycle started.", "manual-clean");
               }
             }
             if (newStatus === "cat_leave") {
@@ -273,6 +288,8 @@ export default defineNitroPlugin((nitroApp) => {
                   },
                 });
                 state.lastFlattenTime = now;
+                const user = await prisma.user.findFirst();
+                if (user) await dispatchWebhook(user, "🔄 Smoothing/Flattening litter.", "flatten");
               }
             }
             if (
@@ -280,13 +297,13 @@ export default defineNitroPlugin((nitroApp) => {
               state.currentStatus !== "work_empty"
             ) {
               if (now - state.lastEmptyTime > 60000) {
+                const type = isApp ? "empty-app" : "empty";
                 await prisma.litterEvent.create({
-                  data: {
-                    type: isApp ? "empty-app" : "empty",
-                    deviceId: config.id,
-                  },
+                  data: { type, deviceId: config.id },
                 });
                 state.lastEmptyTime = now;
+                const user = await prisma.user.findFirst();
+                if (user) await dispatchWebhook(user, "🗑️ Emptying litter box.", "empty");
               }
             }
             if (
@@ -296,6 +313,8 @@ export default defineNitroPlugin((nitroApp) => {
               await prisma.litterEvent.create({
                 data: { type: "lid-removed", deviceId: config.id },
               });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "⚠️ Top cover/lid removed from the litter box!", "error");
             }
             if (
               state.currentStatus === "lid_open" &&
@@ -314,6 +333,8 @@ export default defineNitroPlugin((nitroApp) => {
               await prisma.litterEvent.create({
                 data: { type: "bin-removed", deviceId: config.id },
               });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "⚠️ Waste bin removed from the litter box!", "error");
             }
             if (
               state.currentStatus === "collect_install" &&

@@ -784,6 +784,16 @@ const filteredLogs = computed(() => {
       }
     }
 
+    // User Preferences (Dashboard Visibility)
+    if (user.value) {
+      if ((log.type === 'toileted' || log.type === 'quick-visit') && !user.value.notifyDashVisit) return false;
+      if (log.type === 'auto-clean' && !user.value.notifyDashAutoClean) return false;
+      if ((log.type === 'manual-clean' || log.type === 'manual-clean-app') && !user.value.notifyDashManualClean) return false;
+      if ((log.type === 'empty' || log.type === 'empty-app') && !user.value.notifyDashEmpty) return false;
+      if ((log.type === 'flatten' || log.type === 'flatten-app' || log.type === 'auto-flatten') && !user.value.notifyDashFlatten) return false;
+      if ((log.type === 'lid-removed' || log.type === 'lid-replaced' || log.type === 'bin-removed' || log.type === 'bin-replaced') && !user.value.notifyDashError) return false;
+    }
+
     return true
   })
 })

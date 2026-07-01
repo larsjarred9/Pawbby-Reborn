@@ -60,6 +60,26 @@
         </div>
       </button>
 
+      <!-- Notification Controls -->
+      <button @click="showNotificationControlsModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="font-medium text-lg">Notification Controls</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Push Notifications -->
       <button @click="showNotificationsModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
@@ -214,6 +234,86 @@
       </div>
     </div>
 
+    <!-- Notification Controls Modal -->
+    <div v-if="showNotificationControlsModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up max-h-[90vh] overflow-y-auto no-scrollbar">
+        <h3 class="text-xl font-bold text-white mb-2">Notification Controls</h3>
+        <p class="text-xs text-pawbby-muted mb-6">Configure which events trigger webhooks and what shows on your timeline.</p>
+        
+        <div class="space-y-6">
+          <!-- Webhook Settings -->
+          <div v-if="webhookUrl">
+            <h4 class="text-sm font-semibold text-white/90 mb-3 border-b border-white/10 pb-2">Push Notifications (Webhook)</h4>
+            <div class="space-y-4">
+              <div v-if="user" class="space-y-2">
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Cat Usage</span>
+                  <input type="checkbox" v-model="user.notifyPushVisit" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Auto Clean</span>
+                  <input type="checkbox" v-model="user.notifyPushAutoClean" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Manual Clean</span>
+                  <input type="checkbox" v-model="user.notifyPushManualClean" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Empty Bin</span>
+                  <input type="checkbox" v-model="user.notifyPushEmpty" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Flatten Litter</span>
+                  <input type="checkbox" v-model="user.notifyPushFlatten" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+                <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                  <span>Hardware Alerts</span>
+                  <input type="checkbox" v-model="user.notifyPushError" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard History Settings -->
+          <div>
+            <h4 class="text-sm font-semibold text-white/90 mb-3 border-b border-white/10 pb-2">Dashboard Timeline</h4>
+            <div v-if="user" class="space-y-2">
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Cat Usage</span>
+                <input type="checkbox" v-model="user.notifyDashVisit" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Auto Clean</span>
+                <input type="checkbox" v-model="user.notifyDashAutoClean" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Manual Clean</span>
+                <input type="checkbox" v-model="user.notifyDashManualClean" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Empty Bin</span>
+                <input type="checkbox" v-model="user.notifyDashEmpty" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Flatten Litter</span>
+                <input type="checkbox" v-model="user.notifyDashFlatten" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+              <label class="flex items-center justify-between text-sm text-white/80 cursor-pointer">
+                <span>Hardware Alerts</span>
+                <input type="checkbox" v-model="user.notifyDashError" @change="saveNotificationSettings" class="accent-pawbby-primary w-4 h-4 rounded" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button @click="showNotificationControlsModal = false" class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -314,10 +414,29 @@ const loadData = async () => {
 const webhookUrl = ref('')
 const testingWebhook = ref(false)
 const showNotificationsModal = ref(false)
+const showNotificationControlsModal = ref(false)
 
 const saveWebhookUrl = async () => {
   if (!user.value) return
   await api.updateUser({ webhookUrl: webhookUrl.value })
+}
+
+const saveNotificationSettings = async () => {
+  if (!user.value) return
+  await api.updateUser({
+    notifyPushVisit: user.value.notifyPushVisit,
+    notifyPushAutoClean: user.value.notifyPushAutoClean,
+    notifyPushManualClean: user.value.notifyPushManualClean,
+    notifyPushEmpty: user.value.notifyPushEmpty,
+    notifyPushFlatten: user.value.notifyPushFlatten,
+    notifyPushError: user.value.notifyPushError,
+    notifyDashVisit: user.value.notifyDashVisit,
+    notifyDashAutoClean: user.value.notifyDashAutoClean,
+    notifyDashManualClean: user.value.notifyDashManualClean,
+    notifyDashEmpty: user.value.notifyDashEmpty,
+    notifyDashFlatten: user.value.notifyDashFlatten,
+    notifyDashError: user.value.notifyDashError
+  })
 }
 
 const testWebhook = async () => {

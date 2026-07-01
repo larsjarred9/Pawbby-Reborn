@@ -16,8 +16,17 @@ export default defineEventHandler(async (event) => {
     
     if (body.user) {
       // Destructure to prevent mass assignment vulnerabilities
-      const { name, email, weightUnit, webhookUrl } = body.user
-      const safeData = { name, email, weightUnit, webhookUrl }
+      const { 
+        name, email, weightUnit, webhookUrl,
+        notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
+        notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError
+      } = body.user
+      
+      const safeData = { 
+        name, email, weightUnit, webhookUrl,
+        notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
+        notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError
+      }
       
       const user = await prisma.user.findFirst()
       if (user) {
