@@ -54,6 +54,13 @@ const errorMsg = ref('')
 onMounted(async () => {
   try {
     const data = await $fetch('/api/auth/status')
+    
+    // Protect this page if they already have a password set
+    if (data.hasUser && data.hasPassword) {
+      window.location.href = '/login'
+      return
+    }
+    
     if (data.legacyName) form.value.name = data.legacyName
     if (data.legacyEmail) form.value.email = data.legacyEmail
   } catch (e) {}

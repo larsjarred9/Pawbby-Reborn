@@ -68,4 +68,15 @@ async function handleRegister() {
     isLoading.value = false
   }
 }
+
+onMounted(async () => {
+  try {
+    const { hasUser, hasPassword } = await $fetch('/api/auth/status')
+    if (hasUser && hasPassword) {
+      window.location.href = '/login'
+    } else if (hasUser && !hasPassword) {
+      window.location.href = '/set-password'
+    }
+  } catch (e) {}
+})
 </script>
