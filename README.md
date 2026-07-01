@@ -157,7 +157,7 @@ _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` fro
 
 ### 🐳 Updating in Docker
 
-Because Docker containers are isolated, the 1-Click Update button cannot restart your container. When you see the green "Update Available" notification on your dashboard, simply rebuild your container:
+Because Docker containers are isolated, the 1-Click Update button cannot restart your container. To update, pull the latest code and rebuild your container:
 
 ```bash
 git pull origin main
