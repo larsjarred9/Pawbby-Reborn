@@ -282,29 +282,45 @@
             
             <div class="bg-black/30 border border-white/10 rounded-2xl overflow-hidden relative">
               <div class="flex justify-between items-center p-3 border-b border-white/10 bg-white/5">
-                <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">How to get the key</span>
-                <div class="flex gap-1">
-                  <div class="w-2 h-2 rounded-full transition-colors" :class="guideSlide === 0 ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
-                  <div class="w-2 h-2 rounded-full transition-colors" :class="guideSlide === 1 ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
-                  <div class="w-2 h-2 rounded-full transition-colors" :class="guideSlide === 2 ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
+                <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">How to link your app</span>
+                <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
+                  <div v-for="i in 11" :key="i-1" class="w-2 h-2 rounded-full transition-colors shrink-0" :class="guideSlide === (i-1) ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
                 </div>
               </div>
-              <div class="relative w-full h-48 sm:h-56 bg-black/50">
-                <img v-if="guideSlide === 0" src="/tuya-step1.png" class="absolute inset-0 w-full h-full object-cover opacity-80" />
-                <img v-if="guideSlide === 1" src="/tuya-step2.png" class="absolute inset-0 w-full h-full object-cover opacity-80" />
-                <img v-if="guideSlide === 2" src="/tuya-step3.png" class="absolute inset-0 w-full h-full object-cover opacity-80" />
+              <div class="relative w-full h-48 sm:h-56 bg-black/50 flex items-center justify-center">
+                <img v-if="guideSlide === 0" src="/step_1.png" @click="expandedImage = '/step_1.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 1" src="/step_2.png" @click="expandedImage = '/step_2.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 2" src="/step_3.png" @click="expandedImage = '/step_3.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 3" src="/step_4.png" @click="expandedImage = '/step_4.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 4" src="/step_5.png" @click="expandedImage = '/step_5.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 5" src="/step_6.png" @click="expandedImage = '/step_6.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 7" src="/step_8.png" @click="expandedImage = '/step_8.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 8" src="/step_9.png" @click="expandedImage = '/step_9.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 9" src="/step_10.png" @click="expandedImage = '/step_10.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <img v-if="guideSlide === 10" src="/step_11.png" @click="expandedImage = '/step_11.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                <div v-if="guideSlide === 6" class="text-white/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                </div>
                 
-                <button @click="guideSlide = (guideSlide - 1 + 3) % 3" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
+                <button v-if="guideSlide > 0" @click="guideSlide--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <button @click="guideSlide = (guideSlide + 1) % 3" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
+                <button v-if="guideSlide < 10" @click="guideSlide++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
               <div class="p-4 text-xs text-white/80 leading-relaxed min-h-[5rem]">
-                <p v-if="guideSlide === 0"><strong>1.</strong> Go to <a href="https://iot.tuya.com/" target="_blank" class="text-[#3D7A41] underline">iot.tuya.com</a> and sign up for a free developer account. Go to <strong>Cloud &gt; Projects</strong> and create a new project.</p>
-                <p v-if="guideSlide === 1"><strong>2.</strong> Go to the <strong>Devices &gt; Link Tuya App Account</strong> tab. Scan the QR code using the scanner inside your Smart Life app to link your devices.</p>
-                <p v-if="guideSlide === 2"><strong>3.</strong> Finally, go to <strong>Cloud &gt; API Explorer</strong>. Select <em>Get Device Details</em>, enter your Device ID ({{ newDevice.deviceId || 'bf123...' }}), and click Submit to reveal your Local Key.</p>
+                <p v-if="guideSlide === 0"><strong>Step 1.</strong> Go to <a href="https://iot.tuya.com/" target="_blank" class="text-[#3D7A41] underline">iot.tuya.com</a> and sign up for a free developer account.</p>
+                <p v-if="guideSlide === 1"><strong>Step 2.</strong> After you create an account, click on <strong>Cloud</strong> on the left menu, then <strong>Project Management</strong>.</p>
+                <p v-if="guideSlide === 2"><strong>Step 3.</strong> Click on the blue <strong>Create Cloud Project</strong> button.</p>
+                <p v-if="guideSlide === 3"><strong>Step 4.</strong> Fill in the form: Industry &rarr; <em>Smart Home</em>, Development Method &rarr; <em>Custom</em>. <br><span class="text-[#3D7A41] font-bold">Important:</span> Select the Data Center that geographically matches where your Smart Life app is registered!</p>
+                <p v-if="guideSlide === 4"><strong>Step 5.</strong> In the API Services section, make sure to add <strong>Smart Home Basic Service</strong>, then click Authorize.</p>
+                <p v-if="guideSlide === 5"><strong>Step 6.</strong> Click on the <strong>Devices</strong> tab at the top, then <strong>Link Tuya App Account</strong>, and click <strong>Add App Account</strong> to show a QR code.</p>
+                <p v-if="guideSlide === 6"><strong>Step 7.</strong> Open the Smart Life app on your phone, tap the `+` or scanner icon, and scan the QR code on your computer screen. Tap <strong>Confirm Login</strong> on your phone.</p>
+                <p v-if="guideSlide === 7"><strong>Step 8.</strong> Back on your computer screen, an authorization box will pop up. Leave it on <em>Automatic Link</em> and click <strong>OK</strong>.</p>
+                <p v-if="guideSlide === 8"><strong>Step 9.</strong> Tuya might show you an overview of your linked devices. You can just click away/close that overview panel to get back to the project page.</p>
+                <p v-if="guideSlide === 9"><strong>Step 10.</strong> Click on <strong>Cloud</strong> on the left menu, then click on <strong>API Explorer</strong>.</p>
+                <p v-if="guideSlide === 10"><strong>Step 11.</strong> Search for <em>Query Device Details</em>. Enter the <strong>Device ID</strong> located directly below this text into the input field, click Submit, and copy the <strong>local_key</strong> from the right panel!</p>
               </div>
             </div>
 
@@ -368,6 +384,10 @@
         </div>
       </div>
     </div>
+    <!-- Image Expansion Modal -->
+    <div v-if="expandedImage" @click="expandedImage = null" class="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4 cursor-zoom-out animate-fade-in-up">
+      <img :src="expandedImage" class="max-w-full max-h-full object-contain shadow-2xl rounded-lg" />
+    </div>
   </div>
 </template>
 
@@ -397,6 +417,7 @@ const isScanning = ref(false)
 const discoveredDevices = ref<any[]>([])
 const manualMode = ref(false)
 const guideSlide = ref(0)
+const expandedImage = ref<string | null>(null)
 
 const scanNetwork = async () => {
   isScanning.value = true
