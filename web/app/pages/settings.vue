@@ -106,12 +106,54 @@
       </button>
 
     </div>
+
+    <!-- Export Anonymized DB -->
+    <button @click="showExportModal = true" class="mt-8 block w-full text-left border border-[#3D7A41]/20 bg-[#3D7A41]/5 rounded-2xl p-4 hover:bg-[#3D7A41]/10 transition-colors group cursor-pointer">
+      <div class="flex items-center justify-between text-white/90 group-hover:text-white mb-2">
+        <div class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <span class="font-medium text-lg">Export Anonymized DB</span>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#3D7A41]/50 group-hover:text-[#3D7A41] transition-colors" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <p class="text-xs text-pawbby-mutedDark ml-9">
+        Downloads a safe, redacted copy of your database to share with developers.
+      </p>
+    </button>
     <!-- Clear Data -->
     <div class="mt-auto pt-8 pb-4 space-y-6">
       <button @click="doClearCache"
         class="w-full text-center py-4 text-[#D84C4C] font-semibold text-lg hover:bg-white/5 rounded-2xl transition-colors">
         Remove stored information
       </button>
+    </div>
+
+    <!-- Export DB Modal -->
+    <div v-if="showExportModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden">
+        <div class="w-16 h-16 bg-[#3D7A41]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D7A41]/50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2 text-center">Export Database</h2>
+        <p class="text-pawbby-muted text-sm mb-6 text-center leading-relaxed">
+          This will securely download an anonymized copy of your database. All Wi-Fi passwords, Tuya keys, IPs, and names have been permanently erased.<br><br>
+          Once downloaded, join our <a href="https://discord.gg/Tw43AKZkge" target="_blank" class="text-[#5865F2] font-bold hover:underline">Discord Server</a> and drag-and-drop the file into the <strong>#database-dump</strong> channel to help us find new features!
+        </p>
+        <div class="flex gap-3">
+          <button @click="showExportModal = false" class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+            Cancel
+          </button>
+          <a href="/api/export-anonymized-db" download="pawbby-share.db" @click="showExportModal = false" class="w-full flex items-center justify-center py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
+            Download
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- Upgrade Instructions Modal -->
@@ -190,6 +232,7 @@ const updateAvailable = ref(false)
 const updatesDisabled = ref(false)
 const showUpgradeModal = ref(false)
 const isUpdating = ref(false)
+const showExportModal = ref(false)
 
 const handleUpdateClick = () => {
   if (updateAvailable.value) {

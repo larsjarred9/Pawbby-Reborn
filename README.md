@@ -98,13 +98,10 @@ Because the dashboard saves the raw Tuya JSON payloads from your litter box dire
 
 To share your logs safely without exposing your Wi-Fi device keys:
 
-1. Navigate to the `web` directory in your terminal.
-2. Run the anonymization script:
-   ```bash
-   npm run anonymize
-   ```
-3. This will create a completely safe, redacted copy of your database at `web/prisma/share.db`.
-4. You can now safely drag and drop `share.db` into the Discord server!
+1. Open the **Settings** tab in your Pawbby Reborn dashboard.
+2. Click **Export Anonymized DB**.
+3. A safe, heavily redacted file named `pawbby-share.db` will immediately download to your computer.
+4. You can safely drag and drop this file into the Discord server! (All IP addresses, Wi-Fi keys, Tuya tokens, and personal names have been permanently erased).
 
 ---
 
