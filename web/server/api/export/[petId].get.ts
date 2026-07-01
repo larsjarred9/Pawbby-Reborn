@@ -16,8 +16,15 @@ export default defineEventHandler(async (event) => {
   }
 
   const query = getQuery(event)
-  const startDate = query.start ? new Date(query.start as string) : undefined
-  const endDate = query.end ? new Date(query.end as string) : undefined
+  const startRaw = query.start as string | undefined
+  const endRaw = query.end as string | undefined
+  
+  const startDate = startRaw ? new Date(startRaw) : undefined
+  const endDate = endRaw ? new Date(endRaw) : undefined
+
+  if ((startDate && Number.isNaN(startDate.getTime())) || (endDate && Number.isNaN(endDate.getTime()))) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid start/end date format' })
+  }
 
   if (endDate) {
     endDate.setHours(23, 59, 59, 999)
