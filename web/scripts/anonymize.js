@@ -70,6 +70,15 @@ async function run() {
     }
   });
 
+  // Redact Pet Names
+  const pets = await prisma.pet.findMany();
+  for (let i = 0; i < pets.length; i++) {
+    await prisma.pet.update({
+      where: { id: pets[i].id },
+      data: { name: `Pet ${i + 1}` }
+    });
+  }
+
   console.log('🎉 Success! Your database is now anonymized and completely safe to share.');
   console.log(`👉 You can find the safe file here: ${dest}`);
 }
