@@ -115,7 +115,7 @@
 
     <!-- GitHub Link Card -->
     <div class="pt-4">
-      <a href="https://github.com/larsjarred9/Pawby-Reborn/" target="_blank"
+      <a href="https://github.com/larsjarred9/Pawbby-Reborn/" target="_blank"
         class="bg-gradient-to-r from-[#24292e] to-pawbby-card/80 rounded-2xl h-20 flex items-center justify-between px-6 cursor-pointer border border-white/5 hover:border-white/20 transition-colors">
         <div class="flex items-center space-x-4">
           <div class="text-white">
@@ -126,7 +126,7 @@
           </div>
           <div>
             <h3 class="text-lg font-semibold text-white/90">View on GitHub</h3>
-            <p class="text-xs text-pawbby-muted mt-0.5">Pawby-Reborn Repository</p>
+            <p class="text-xs text-pawbby-muted mt-0.5">Pawbby-Reborn Repository</p>
           </div>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"

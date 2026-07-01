@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
     // 2. Get the latest remote commit hash from GitHub API
     // We use the GitHub API to avoid doing a full 'git fetch' on the user's machine, which can be slow and write to disk
-    const response = await fetch('https://api.github.com/repos/larsjarred9/Pawby-Reborn/commits/main', {
+    const response = await fetch('https://api.github.com/repos/larsjarred9/Pawbby-Reborn/commits/main', {
       headers: {
         'User-Agent': 'Pawbby-Reborn-Local-Server',
         'Accept': 'application/vnd.github.v3+json'
