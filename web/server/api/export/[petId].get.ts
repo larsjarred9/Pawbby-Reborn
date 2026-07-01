@@ -19,8 +19,15 @@ export default defineEventHandler(async (event) => {
   const startRaw = query.start as string | undefined
   const endRaw = query.end as string | undefined
   
-  const startDate = startRaw ? new Date(startRaw) : undefined
-  const endDate = endRaw ? new Date(endRaw) : undefined
+  const parseLocalYMD = (ymd: string) => {
+    const parts = ymd.split('-')
+    if (parts.length !== 3) return new Date('Invalid')
+    const [y, m, d] = parts.map(Number)
+    return new Date(y, m - 1, d)
+  }
+
+  const startDate = startRaw ? parseLocalYMD(startRaw) : undefined
+  const endDate = endRaw ? parseLocalYMD(endRaw) : undefined
 
   if ((startDate && Number.isNaN(startDate.getTime())) || (endDate && Number.isNaN(endDate.getTime()))) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid start/end date format' })
