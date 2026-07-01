@@ -211,7 +211,9 @@ const pollForServer = () => {
   setTimeout(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch('/api/update')
+        // Poll the root route with a lightweight HEAD request instead of the update API
+        // to prevent hammering the GitHub API and triggering rate limits while the server restarts.
+        const res = await fetch('/', { method: 'HEAD' })
         if (res.ok) {
           clearInterval(interval)
           window.location.reload()
