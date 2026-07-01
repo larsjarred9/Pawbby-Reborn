@@ -6,6 +6,18 @@ import path from 'path'
 const execPromise = promisify(exec)
 
 export default defineEventHandler(async (event) => {
+  // Basic CSRF Protection: Ensure the request came from our own dashboard
+  const referer = getHeader(event, 'referer') || ''
+  const host = getHeader(event, 'host') || ''
+  
+  // If there's no referer or it doesn't match our host, reject it to prevent cross-site execution
+  if (!referer || !referer.includes(host)) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden: Invalid Referer'
+    })
+  }
+
   try {
     // 1. Run the anonymization script
     await execPromise('node scripts/anonymize.js', {
