@@ -1,0 +1,56 @@
+# 🚀 Upgrading Pawbby Reborn
+
+Pawbby Reborn version `0.3.0` introduces several **massive** architectural and security improvements. Because of these fundamental changes, there are a few things you need to know depending on which version you are upgrading from.
+
+## 1. Upgrading from v0.2.x to v0.3.0 (1-Click Update)
+
+Starting in version `0.2.x`, Pawbby Reborn features a built-in 1-Click Upgrade system! 
+
+When a new update is pushed to GitHub, you will see a green **Update Available** banner on your dashboard. Simply click it, and the dashboard will automatically download, build, and restart the new version for you.
+
+*Note: If you run Pawbby Reborn in a highly restrictive environment (like Docker or an unprivileged user), you can completely disable the 1-Click upgrade by adding `DISABLE_UPDATES="true"` to your `web/.env` file. You will still see the update notification banner on the dashboard, but the UI will prompt you to run `./upgrade.sh` manually instead of executing the upgrade itself.*
+
+## 2. Upgrading from v0.1.x to v0.3.0 (Manual)
+
+In version `0.1.x`, clicking the "Update" button merely told you to manually run the `./upgrade.sh` script in your terminal. Because `0.3.0` fundamentally restructures the PM2 architecture and the `upgrade.sh` script itself, running the old script might cause unpredictable behavior.
+
+To ensure a perfectly clean upgrade to the new `0.3.0` architecture, please bypass the script this one time and run the following commands manually in the root of your repository:
+
+```bash
+# 1. Pull the latest code
+git pull origin main
+
+# 2. Re-install dependencies (we restructured the package.json)
+cd web
+npm install
+
+# 3. Rebuild the production Nuxt server
+npm run build
+
+# 4. Restart PM2 and FORCE it to read the new ecosystem.config.cjs
+cd ..
+pm2 start ecosystem.config.cjs --env production --update-env
+pm2 save
+```
+
+## 3. New `.env` Security Features
+
+Version `0.3.0` introduces a brand new **Strict Webhook Security Mode** to prevent Server-Side Request Forgery (SSRF) attacks.
+
+By default, the update will run in **Relaxed Mode**, which allows local LAN IP addresses so that your local Home Assistant and ntfy.sh webhooks continue to function flawlessly. 
+
+However, if you want to lock your server down entirely, you can manually add the following line to your `web/.env` file:
+
+```env
+# Strict Webhook Security
+# If "true", the server will ONLY allow webhooks to known, secure domains
+# (Discord, Slack, Telegram). If "false" or missing, it allows local network IP addresses
+# (e.g. for Home Assistant or a local ntfy.sh instance).
+WEBHOOK_STRICT_MODE="true"
+```
+
+After modifying your `web/.env` file, simply restart your PM2 process: `pm2 restart pawbby`
+
+---
+
+*Thank you for testing Pawbby Reborn! If you encounter any bugs after upgrading, please open an issue on GitHub.*
