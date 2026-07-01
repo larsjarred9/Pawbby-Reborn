@@ -337,14 +337,9 @@ export default defineNitroPlugin((nitroApp) => {
 
               const pets = await prisma.pet.findMany();
               let matchedPetId = null;
-              let minDiff = 0.3;
-              for (const pet of pets) {
-                const diff = Math.abs(pet.weight - weightInKg);
-                if (diff <= minDiff) {
-                  minDiff = diff;
-                  matchedPetId = pet.id;
-                }
-              }
+              
+              // We do NOT attempt to identify the pet for quick-visits, 
+              // because half a heavy cat leaning in looks identical to a small cat fully inside.
 
               console.log(
                 `[PawID] Quick peek detected! Weight: ${weightInKg}kg, Duration: ${durationSecs}s.`,
