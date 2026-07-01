@@ -71,7 +71,9 @@ async function run() {
   });
 
   // Redact Pet Names
-  const pets = await prisma.pet.findMany();
+  const pets = await prisma.pet.findMany({
+    orderBy: { id: 'asc' }
+  });
   for (let i = 0; i < pets.length; i++) {
     await prisma.pet.update({
       where: { id: pets[i].id },
