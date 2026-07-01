@@ -66,7 +66,8 @@ async function run() {
     data: {
       name: 'Anonymous User',
       email: 'anon@example.com',
-      avatarUrl: ''
+      avatarUrl: '',
+      passwordHash: null
     }
   });
 

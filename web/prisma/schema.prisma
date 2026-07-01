@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  name       String
-  email      String
-  avatarUrl  String?
-  weightUnit String   @default("kg")
-  webhookUrl String?
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  passwordHash String?
+  avatarUrl    String?
+  weightUnit   String   @default("kg")
+  webhookUrl   String?
 }
 
 model Pet {

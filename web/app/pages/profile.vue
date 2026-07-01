@@ -143,7 +143,7 @@
       class="absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
         <h3 class="text-xl font-bold text-white mb-4">Edit Profile</h3>
-        <div class="space-y-4">
+        <div class="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pb-2">
           <div>
             <label class="block text-sm text-pawbby-muted mb-1">Name</label>
             <input v-model="profileForm.name" type="text"
@@ -154,12 +154,37 @@
             <input v-model="profileForm.email" type="email"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
+          
+          <div class="border-t border-white/10 pt-4 mt-2">
+            <button @click="showPasswordFields = !showPasswordFields" class="flex items-center justify-between w-full text-left group">
+              <h4 class="text-sm font-bold text-white group-hover:text-pawbby-primary transition-colors">Change Password</h4>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted transition-transform duration-300" :class="{ 'rotate-180': showPasswordFields }" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div v-show="showPasswordFields" class="space-y-3 mt-3 animate-fade-in-up">
+              <input v-model="profileForm.currentPassword" type="password" placeholder="Current Password"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+              <input v-model="profileForm.newPassword" type="password" placeholder="New Password"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+              <input v-model="profileForm.confirmPassword" type="password" placeholder="Confirm New Password"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+              <p v-if="passwordError" class="text-[#D84C4C] text-xs">{{ passwordError }}</p>
+              <p v-if="passwordSuccess" class="text-[#3D7A41] text-xs">Password updated successfully!</p>
+            </div>
+          </div>
         </div>
-        <div class="flex space-x-3 mt-6">
-          <button @click="isEditProfileOpen = false"
+        <div class="flex space-x-3 mt-4">
+          <button @click="closeEditProfile"
             class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
-          <button @click="saveProfile"
-            class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors">Save</button>
+          <button @click="saveProfile" :disabled="isSavingProfile"
+            class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors disabled:opacity-50 flex justify-center items-center">
+            <svg v-if="isSavingProfile" class="animate-spin -ml-1 mr-2 h-4 w-4 text-pawbby-bg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -285,21 +310,75 @@ onMounted(() => {
 
 // Profile Edit Modal
 const isEditProfileOpen = ref(false)
-const profileForm = ref({ name: '', email: '' })
+const showPasswordFields = ref(false)
+const profileForm = ref({ name: '', email: '', currentPassword: '', newPassword: '', confirmPassword: '' })
+const isSavingProfile = ref(false)
+const passwordError = ref('')
+const passwordSuccess = ref(false)
 
 const openEditProfile = () => {
   if (user.value) {
     profileForm.value.name = user.value.name
     profileForm.value.email = user.value.email
   }
+  profileForm.value.currentPassword = ''
+  profileForm.value.newPassword = ''
+  profileForm.value.confirmPassword = ''
+  passwordError.value = ''
+  passwordSuccess.value = false
+  showPasswordFields.value = false
   isEditProfileOpen.value = true
+}
+
+const closeEditProfile = () => {
+  isEditProfileOpen.value = false
 }
 
 const saveProfile = async () => {
   if (!user.value) return
-  await api.updateUser({ name: profileForm.value.name, email: profileForm.value.email })
-  await loadData()
-  isEditProfileOpen.value = false
+  isSavingProfile.value = true
+  passwordError.value = ''
+  passwordSuccess.value = false
+
+  try {
+    // 1. Update Password if requested
+    if (profileForm.value.currentPassword || profileForm.value.newPassword || profileForm.value.confirmPassword) {
+      if (profileForm.value.newPassword !== profileForm.value.confirmPassword) {
+        passwordError.value = 'New passwords do not match'
+        isSavingProfile.value = false
+        return
+      }
+      
+      try {
+        await $fetch('/api/auth/password', {
+          method: 'POST',
+          body: {
+            currentPassword: profileForm.value.currentPassword,
+            newPassword: profileForm.value.newPassword
+          }
+        })
+        passwordSuccess.value = true
+        profileForm.value.currentPassword = ''
+        profileForm.value.newPassword = ''
+        profileForm.value.confirmPassword = ''
+      } catch (err: any) {
+        passwordError.value = err.data?.statusMessage || 'Failed to update password'
+        isSavingProfile.value = false
+        return
+      }
+    }
+
+    // 2. Update regular profile settings
+    await api.updateUser({ name: profileForm.value.name, email: profileForm.value.email })
+    await loadData()
+    
+    // Only close if we didn't just update the password (so they can see the success message)
+    if (!passwordSuccess.value) {
+      isEditProfileOpen.value = false
+    }
+  } finally {
+    isSavingProfile.value = false
+  }
 }
 
 // Pet Edit Modal

@@ -124,8 +124,12 @@
         Downloads a safe, redacted copy of your database to share with developers.
       </p>
     </button>
-    <!-- Clear Data -->
-    <div class="mt-auto pt-8 pb-4 space-y-6">
+    <!-- Account Actions -->
+    <div class="mt-auto pt-8 pb-4 space-y-4">
+      <button @click="doLogout"
+        class="w-full text-center py-4 bg-white/5 text-white font-semibold text-lg hover:bg-white/10 rounded-2xl transition-colors">
+        Log Out
+      </button>
       <button @click="doClearCache"
         class="w-full text-center py-4 text-[#D84C4C] font-semibold text-lg hover:bg-white/5 rounded-2xl transition-colors">
         Remove stored information
@@ -239,6 +243,15 @@ const handleUpdateClick = () => {
     showUpgradeModal.value = true
   } else {
     checkForUpdates()
+  }
+}
+
+const doLogout = async () => {
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    window.location.href = '/login'
+  } catch (e) {
+    console.error(e)
   }
 }
 

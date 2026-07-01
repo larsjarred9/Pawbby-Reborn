@@ -163,6 +163,7 @@ export default defineEventHandler(async (event) => {
 
         return {
           ...d,
+          tuyaClientSecret: d.tuyaClientSecret ? '********' : null,
           status,
           lidOpen,
           binRemoved,
@@ -202,12 +203,18 @@ export default defineEventHandler(async (event) => {
 
   if (method === "PUT") {
     const body = await readBody(event);
-    const { id, ...data } = body;
+    const { id, name, mode, deviceId, ipAddress, localKey, tuyaClientId, tuyaClientSecret, tuyaRegion, deodorizerDuration } = body;
     if (!id) throw new Error("Device ID required for update");
+
+    const safeData: any = { name, mode, deviceId, ipAddress, localKey, tuyaClientId, tuyaRegion, deodorizerDuration };
+    
+    if (tuyaClientSecret && tuyaClientSecret !== '********') {
+      safeData.tuyaClientSecret = tuyaClientSecret;
+    }
 
     const device = await prisma.device.update({
       where: { id: String(id) },
-      data,
+      data: safeData,
     });
 
     // Restart daemon
