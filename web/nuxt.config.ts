@@ -8,5 +8,10 @@ export default defineNuxtConfig({
   },
   devServer: {
     port: 3333
+  },
+  nitro: {
+    externals: {
+      external: ['@prisma/client']
+    }
   }
 })
