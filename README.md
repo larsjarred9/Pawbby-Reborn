@@ -97,7 +97,7 @@ There are three primary ways to run the dashboard:
    ```bash
    npm run dev
    ```
-6. Open a web browser and navigate to `http://localhost:3000` to access the dashboard.
+6. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
 _(For production deployment, run `npm run build` and follow standard Nuxt 4 deployment guidelines.)_
 
@@ -113,7 +113,7 @@ Docker is the cleanest way to run Pawbby Reborn. It packages everything into an 
    ```
 4. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
-*To change environment settings like webhooks or update the port, just edit the `docker-compose.yml` file and run the command again.*
+_To change environment settings like webhooks or update the port, just edit the `docker-compose.yml` file and run the command again._
 
 ### 🚀 Background Deployment (PM2)
 
