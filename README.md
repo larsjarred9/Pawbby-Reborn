@@ -3,101 +3,63 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-7289DA.svg)](https://discord.gg/Tw43AKZkge)
 
-> **"Bringing the Pawbby Smart Litter Box back from the dead after the cloud went dark."**
+> **"A beautiful, fully local, cloud-free dashboard for your Pawbby Smart Litter Box."**
 
-`Pawbby Reborn` is a community-led effort to rescue the **Pawbby Smart Cat Litter Box** from becoming completely useless e-waste. In early 2026, Pawbby's cloud infrastructure went dark permanently, leaving owners worldwide with bricked, unresponsive hardware.
+`Pawbby Reborn` rescues your Pawbby Smart Cat Litter Box from the dead cloud servers, giving it a second life through 100% local, lightning-fast network control. 
 
-This project exists to bypass the dead servers entirely, giving these machines a second nine lives through local network control.
-
----
-
-## 🎯 Our Two-Step Roadmap
-
-We are tackling this rescue mission in two distinct phases:
-
-### Phase 1: Deep Reverse Engineering & Public Documentation
-
-Our immediate focus was exposing the local Tuya LAN protocol (v3.4), mapping out data points (DPs), sniffing background payloads, and sharing all technical findings transparently.
-
-- 👉 _To view our complete technical findings, byte structures, and DP schemas, check out [values.md](values.md)._
-
-### Phase 2: The Local Web Interface (Alpha)
-
-We have built a beautiful, lightweight, self-hosted web app. This local interface mimics the features and feel of the original mobile app layout, allowing you to monitor your cat's usage data, track weight variations, and trigger cleaning cycles entirely within your own home network—no external cloud required.
+Say goodbye to slow app loading times, server outages, and data privacy concerns. Pawbby Reborn runs entirely inside your own home network!
 
 ---
 
-## ⚠️ Experimental & Unfinished Features
+## ✨ Features
 
-While the dashboard successfully tracks weight, durations, litter levels, and waste bin capacity, some hardware triggers are still highly experimental:
-
-- **Remote Cleaning Cycle:** We have successfully reverse-engineered the `Flatten` (litter leveling) and `Empty` (dump all litter) commands via DP 106. However, the exact data packet to trigger a standard "Auto Clean" or "Manual Clean" drum rotation remotely is **still unknown**. If you click "Clean" in the app, it is currently disabled.
-- **Litter Sensor:** The hardware does not explicitly broadcast an "Insufficient Litter" status (as far as we know, more research is needed). Instead, the dashboard makes an experimental guess by reading the raw weight sensor (DP 112). If the raw weight of the litter inside the drum drops below ~1500g, we flag it as "Insufficient". However, the scale drifts over time and can sometimes read artificially low.
-- **Waste Bin Status:** The machine's internal laser sensor cannot distinguish between the bin being physically removed and the bin being installed but completely empty. Pulling the bin out will sometimes clear the "Bin Full" error in the dashboard.
-
----
-
-## 🖥️ Recommended Hardware (Microcomputers)
-
-Because the Pawbby Smart Litter Box requires a persistent local connection to intercept events (like your cat visiting), **you must run this software on a device that stays powered on 24/7 on your home network.**
-
-We highly recommend using a low-power microcomputer, such as:
-
-- **Raspberry Pi** (Pi 3, 4, or 5)
-- **Mini PCs** (Intel N100 machines, Beelink, Minisforum)
-- An always-on home NAS (Synology, Unraid) via Docker
-
-### Remote Access (Outside Your Home)
-
-Because this app relies entirely on your local Wi-Fi to talk to the litter box (bypassing the dead Pawbby cloud servers), you will not be able to access the dashboard when you leave your house unless you set up a VPN. We recommend installing **Tailscale** or **WireGuard** on your microcomputer to securely tunnel into your home network from your phone.
-
----
-
-## 🔑 Tuya Local Credentials
-
-To allow the dashboard to communicate with your Pawbby box, you must extract its local **Tuya Device ID** and **Local Key**. Because the official Pawbby cloud is dead, you cannot pull these from the official app.
-
-If your device was previously connected to your Wi-Fi before the servers died, you will need to use a packet sniffing tool (like Wireshark) or a rooted Android emulator with a Tuya extraction script to intercept the `localkey` broadcast on your local network. Please refer to our Discord community for the latest scripts and methods for extracting these keys from orphaned Tuya devices.
-
-Once you have your `Device ID` and `Local Key`, you can input them directly into the "Settings" page of the Pawbby Reborn dashboard.
+- **100% Local & Private:** Your cat's data never leaves your house. The dashboard talks directly to the litter box over your local Wi-Fi, completely bypassing the Tuya/Pawbby cloud.
+- **Beautiful Dashboard:** Monitor your litter box's status, waste bin capacity, and litter levels in real-time through a stunning, mobile-friendly web app.
+- **Multi-Cat Tracking:** Automatically identifies which cat used the box based on their weight and tracks their bathroom habits and weight trends over time.
+- **Push Notifications:** Easily integrate with Home Assistant, Discord, Slack, or Ntfy to receive instant alerts when a cat uses the box or when the waste bin is full.
+- **Built-In Setup Wizard:** No more scary packet sniffing! Pawbby Reborn features a beautifully illustrated, step-by-step setup wizard that guides you through connecting your device securely in under 5 minutes.
+- **1-Click Updates:** When new features drop, simply click the "Update Available" banner in the UI to seamlessly download and apply updates without ever touching a terminal.
 
 ---
 
 ## 🛠️ Setup & Installation
 
-To run the Pawbby Reborn dashboard on your local network, you will need a machine capable of running Node.js.
+To run Pawbby Reborn, you will need a device that stays powered on 24/7 on your home network. A **Raspberry Pi**, an old laptop, or a home server (like a Synology NAS or Unraid) is perfect!
 
 There are three primary ways to run the dashboard:
 
 - **Development Deployment**: Perfect for testing, tinkering, or quickly viewing the dashboard. This runs directly in your terminal, meaning it shuts down as soon as you close your window.
 - **Production Deployment (Docker)**: The cleanest, most modern way to run Pawbby Reborn. It keeps all dependencies containerized and isolated. Recommended for Synology NAS, Unraid, or modern Linux servers.
-- **Production Deployment (PM2)**: A lightweight alternative if you want to run the app directly on your host OS (like a Raspberry Pi) without installing Docker.
+- **Production Deployment (PM2)**: A lightweight alternative if you want to run the app directly on your host OS (like a Raspberry Pi) without installing Docker. 
 
 ### Prerequisites
-
 - Node.js (v18+)
 - npm (Node Package Manager)
 
-### Development Deployment
+### ⚡ Quick Start Installation (Development)
 
-1. Clone this repository to your local machine.
-2. Navigate to the `web` directory:
+1. Clone this repository to your local machine:
    ```bash
-   cd web
+   git clone https://github.com/larsjarred9/Pawbby-Reborn.git
+   cd Pawbby-Reborn/web
    ```
-3. Install the required dependencies:
+
+2. Install the required dependencies:
    ```bash
    npm install
    ```
-4. Run the interactive setup wizard (this will automatically configure your database and environment settings):
+
+3. Run the interactive setup wizard:
    ```bash
    npm run setup
    ```
-5. Start the development server:
+
+4. Start the development server:
    ```bash
    npm run dev
    ```
-6. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
+
+5. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
 _(For production deployment, run `npm run build` and follow standard Nuxt 4 deployment guidelines.)_
 
@@ -123,35 +85,39 @@ The easiest way to turn Pawbby Reborn into a persistent background "daemon" (esp
 
 1. Install PM2 globally:
    ```bash
-   npm install -g pm2
-   ```
-2. Build the production application:
-   ```bash
-   cd web
-   npm run build
-   cd ..
-   ```
-3. Start the application in the background. This will instantly detach it from your terminal, allowing you to close the window safely:
-   ```bash
-   pm2 start ecosystem.config.cjs
-   ```
-4. Tell PM2 to automatically start Pawbby Reborn whenever your device reboots:
-   ```bash
-   pm2 startup
-   pm2 save
+   sudo npm install -g pm2
    ```
 
-_Note: You never need to touch PM2 again to update! When you hit "Confirm & Update" in the dashboard UI, the auto-updater will seamlessly restart the background service for you._
+2. Build the production application:
+   ```bash
+   npm run build
+   ```
+
+3. Start the application in the background using PM2:
+   ```bash
+   cd ..
+   pm2 start ecosystem.config.cjs --env production
+   ```
+
+4. Tell PM2 to automatically start Pawbby Reborn whenever your device reboots:
+   ```bash
+   pm2 save
+   pm2 startup
+   ```
+
+_Note: You never need to touch PM2 again to update! When you hit "Update" in the dashboard UI, the auto-updater will seamlessly pull code, rebuild, and restart the background service for you._
 
 ---
 
 ## 🔄 Updating to the Latest Version
 
-We are actively discovering new payloads and improving the dashboard. As of **version 0.2.0**, you can update Pawbby Reborn directly from within the dashboard!
+We are actively discovering new payloads and improving the dashboard. As of **version 0.3.0**, you can update Pawbby Reborn directly from within the dashboard!
 
-1. Open your **Settings** tab in the dashboard.
-2. Click **Check for Updates**.
-3. If an update is available, click **Confirm & Update**. The app will automatically pull the newest code, install dependencies, sync the database, and restart your PM2 service without you ever touching a terminal!
+1. If an update is available, a green banner will appear on your dashboard.
+2. Click **Review & Update**.
+3. Click **Confirm & Update**. The app will automatically pull the newest code, install dependencies, sync the database, and restart your PM2 service without you ever touching a terminal!
+
+_⚠️ **Note for Early Adopters:** If you are currently running version `0.1.x`, you cannot use the auto-updater. Please read the [UPGRADING.md](UPGRADING.md) guide for manual instructions to transition your installation to the new `0.3.0` architecture._
 
 _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` from the root folder in your terminal)._
 
@@ -179,13 +145,10 @@ Because the dashboard saves the raw Tuya JSON payloads from your litter box dire
 
 To share your logs safely without exposing your Wi-Fi device keys:
 
-1. Navigate to the `web` directory in your terminal.
-2. Run the anonymization script:
-   ```bash
-   npm run anonymize
-   ```
-3. This will create a completely safe, redacted copy of your database at `web/prisma/share.db`.
-4. You can now safely drag and drop `share.db` into the Discord server!
+1. Open the **Settings** tab in your Pawbby Reborn dashboard.
+2. Click **Export Anonymized DB**.
+3. A safe, heavily redacted file named `pawbby-share.db` will immediately download to your computer.
+4. You can safely drag and drop this file into the Discord server! (All IP addresses, Wi-Fi keys, Tuya tokens, and personal names have been permanently erased).
 
 ---
 

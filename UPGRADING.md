@@ -4,7 +4,21 @@ Pawbby Reborn is constantly evolving. Below you will find the important architec
 
 ---
 
-## Upgrading to Alpha 0.2.1 from 0.2.0
+## Upgrading to v0.3.0
+
+Pawbby Reborn version `0.3.0` introduces several **massive** architectural and security improvements. Because of these fundamental changes, there are a few things you need to know depending on which version you are upgrading from.
+
+### 1. Upgrading from v0.2.x to v0.3.0 (1-Click Update)
+
+Starting in version `0.2.x`, Pawbby Reborn features a built-in 1-Click Upgrade system! 
+
+When a new update is pushed to GitHub, you will see a green **Update Available** banner on your dashboard. Simply click it, and the dashboard will automatically download, build, and restart the new version for you.
+
+*Note: If you run Pawbby Reborn in a highly restrictive environment (like Docker or an unprivileged user), you can completely disable the 1-Click upgrade by adding `DISABLE_UPDATES="true"` to your `web/.env` file or `docker-compose.yml`. You will still see the update notification banner on the dashboard, but the UI will prompt you to rebuild your container or run `./upgrade.sh` manually instead of executing the upgrade itself.*
+
+---
+
+## Upgrading to v0.2.1
 
 Version `0.2.1` introduces full Docker support and officially changes the default networking port of the application.
 
@@ -31,21 +45,17 @@ To migrate from PM2 to Docker and keep your data:
 2. Ensure your server has Docker and Docker Compose installed.
 3. Navigate to your Pawbby Reborn folder.
 4. Create a data directory: `mkdir data`
-5. Copy your existing database into it: `cp web/prisma/dev.db data/pawbby.db` (If you set a custom `DATABASE_URL`, copy that SQLite file instead).
+5. Copy your existing database into it: `cp web/dev.db data/pawbby.db` (If you set a custom `DATABASE_URL`, copy that SQLite file instead).
 6. Run `docker-compose up -d --build`.
 7. Your old data is now safely running inside Docker!
 
 ---
 
-## Upgrading from Alpha 0.1.x to Alpha 0.2.0
+## Upgrading from Alpha 0.1.x to 0.3.0 (Manual)
 
-Alpha 0.2.0 introduces several **massive** architectural and security improvements to Pawbby Reborn. Because of these fundamental changes, there are a few things you need to know when upgrading from an older `0.1.x` version.
+In version `0.1.x`, clicking the "Update" button merely told you to manually run the `./upgrade.sh` script in your terminal. Because `0.3.0` fundamentally restructures the PM2 architecture and the `upgrade.sh` script itself, running the old script might cause unpredictable behavior when `git pull` overwrites the file mid-execution.
 
-### 1. Upgrading from the Terminal
-
-In version `0.1.x`, clicking the "Update" button merely told you to manually run the `./upgrade.sh` script in your terminal. However, because `0.2.0` fundamentally restructures the PM2 architecture and the `upgrade.sh` script itself, running the old script might cause unpredictable behavior when `git pull` overwrites the file mid-execution.
-
-To ensure a perfectly clean upgrade to the new `0.2.0` architecture, please bypass the script this one time and run the following commands manually in the root of your repository:
+To ensure a perfectly clean upgrade to the new `0.3.0` architecture, please bypass the script this one time and run the following commands manually in the root of your repository:
 
 ```bash
 # 1. Pull the latest code
@@ -64,9 +74,9 @@ pm2 start ecosystem.config.cjs --env production --update-env
 pm2 save
 ```
 
-### 2. New `.env` Features
+### New `.env` Security Features
 
-Alpha 0.2.0 introduces a brand new **Strict Webhook Security Mode** to prevent Server-Side Request Forgery (SSRF) attacks.
+Version `0.2.0` (and `0.3.0`) introduces a brand new **Strict Webhook Security Mode** to prevent Server-Side Request Forgery (SSRF) attacks.
 
 By default, the update will run in **Relaxed Mode**, which allows local LAN IP addresses so that your local Home Assistant and ntfy.sh webhooks continue to function flawlessly.
 

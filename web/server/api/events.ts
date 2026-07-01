@@ -48,9 +48,7 @@ export default defineEventHandler(async (event) => {
       const name = pet ? pet.name : 'An unknown cat'
       description = `${name} used the litter box (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'quick-visit') {
-      const pet = pets.find(p => p.id === e.petId)
-      const name = pet ? pet.name : 'An unknown cat'
-      description = `${name} peeked inside but didn't use it (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
+      description = `A cat visited but didn't use it (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'reset-deodorizer' && e.rawData) {
       try {
         const parsed = JSON.parse(e.rawData)
