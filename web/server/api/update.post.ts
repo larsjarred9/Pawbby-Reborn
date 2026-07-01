@@ -8,10 +8,24 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Updates are disabled on this instance' })
   }
 
+  // CSRF Protection: Basic Origin/Referer check to prevent malicious cross-site POSTs
+  const reqOrigin = getHeader(event, 'origin') || getHeader(event, 'referer')
+  const host = getHeader(event, 'host')
+  
+  if (reqOrigin && host) {
+    try {
+      const originUrl = new URL(reqOrigin)
+      if (originUrl.host !== host) {
+        throw createError({ statusCode: 403, statusMessage: 'Cross-origin request blocked' })
+      }
+    } catch (e) {
+      // Invalid URL
+    }
+  }
+
   // We don't want to await the script completely because if it restarts PM2,
   // the server will close the connection before returning the response.
   // We'll spawn it detached.
-  const isDev = process.env.NODE_ENV === 'development'
   
   // process.cwd() is usually the `web` folder.
   // We want to run the script from the repository root.
