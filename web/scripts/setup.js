@@ -21,6 +21,9 @@ async function run() {
       if (!value.startsWith('file:')) {
         return 'The database path must start with "file:" (e.g. file:./dev.db)';
       }
+      if (/["\r\n]/.test(value)) {
+        return 'The database path must not contain quotes or newlines';
+      }
       return true;
     }
   });
