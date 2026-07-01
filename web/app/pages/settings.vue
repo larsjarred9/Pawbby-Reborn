@@ -129,13 +129,14 @@
         <h2 class="text-xl font-bold text-white mb-2 text-center">{{ isUpdating ? 'Updating...' : 'Update Available!' }}</h2>
         <p class="text-pawbby-muted text-sm mb-6 text-center">
           <span v-if="isUpdating">Pawbby Reborn is currently updating. This usually takes 1-2 minutes. The page will automatically refresh when complete.</span>
+          <span v-else-if="updatesDisabled">A new version of the dashboard is available! However, automatic updates are disabled in your environment. Please run the upgrade commands manually.</span>
           <span v-else>A new version of the dashboard is available! Would you like to automatically download and install it now?</span>
         </p>
         <div v-if="!isUpdating" class="flex gap-3">
           <button @click="showUpgradeModal = false" class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-            Cancel
+            {{ updatesDisabled ? 'Close' : 'Cancel' }}
           </button>
-          <button @click="triggerUpdate" class="w-full py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
+          <button v-if="!updatesDisabled" @click="triggerUpdate" class="w-full py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
             Confirm & Update
           </button>
         </div>
@@ -186,6 +187,7 @@ const user = ref<User | null>(null)
 const checking = ref(false)
 const hasChecked = ref(false)
 const updateAvailable = ref(false)
+const updatesDisabled = ref(false)
 const showUpgradeModal = ref(false)
 const isUpdating = ref(false)
 
@@ -231,6 +233,9 @@ const checkForUpdates = async (silent = false) => {
   try {
     const res = await fetch('/api/update')
     const data = await res.json()
+    if (data.disabled) {
+      updatesDisabled.value = true
+    }
     if (data.updateAvailable) {
       updateAvailable.value = true
     } else {

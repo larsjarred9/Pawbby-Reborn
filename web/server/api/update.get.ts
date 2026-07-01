@@ -1,10 +1,7 @@
 import { execSync } from 'child_process'
 
 export default defineEventHandler(async (event) => {
-  // If the developer disabled updates in .env, just return false immediately
-  if (process.env.DISABLE_UPDATES === 'true') {
-    return { updateAvailable: false, disabled: true }
-  }
+  const updatesDisabled = process.env.DISABLE_UPDATES === 'true'
 
   try {
     // 1. Get the local commit hash
@@ -35,7 +32,8 @@ export default defineEventHandler(async (event) => {
     return {
       updateAvailable,
       localHash,
-      remoteHash
+      remoteHash,
+      disabled: updatesDisabled
     }
   } catch (error) {
     console.error('[Update Checker] Error checking for updates:', error)
