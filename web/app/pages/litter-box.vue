@@ -744,12 +744,19 @@ const getAllLogCount = computed(() => {
   }).length
 })
 
+const getLocalYMD = (d: Date) => {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 // Filtering
 const selectedPetFilter = ref('all')
-const selectedDateFilter = ref(new Date().toISOString().split('T')[0])
+const selectedDateFilter = ref(getLocalYMD(new Date()))
 
 const maxDate = computed(() => {
-  return new Date().toISOString().split('T')[0]
+  return getLocalYMD(new Date())
 })
 
 const minDate = computed(() => {

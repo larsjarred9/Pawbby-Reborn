@@ -34,7 +34,7 @@
           </svg>
         </a>
         <!-- GitHub -->
-        <a href="https://github.com/larsjarred9/Pawby-Reborn/" target="_blank"
+        <a href="https://github.com/larsjarred9/Pawbby-Reborn/" target="_blank"
           class="w-16 h-16 bg-pawbby-card rounded-full flex items-center justify-center hover:bg-white/10 transition-colors border border-white/5">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
             class="text-pawbby-secondary" viewBox="0 0 16 16">
@@ -63,9 +63,21 @@
         </svg>
       </a>
 
-      <a href="https://github.com/larsjarred9/Pawby-Reborn/blob/main/LICENSE" target="_blank"
+      <a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/main/LICENSE" target="_blank"
         class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <span class="font-medium text-lg">Open Source License</span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </a>
+
+      <a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/main/CONTRIBUTING.md#developer-certificate-of-origin-dco" target="_blank"
+        class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <span class="font-medium text-lg">DCO License</span>
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
           fill="currentColor">

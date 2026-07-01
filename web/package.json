@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -9,9 +9,11 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "anonymize": "node scripts/anonymize.js"
+    "anonymize": "node scripts/anonymize.js",
+    "setup": "node scripts/setup.js"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.10.1",
     "@prisma/client": "^6.19.3",
     "chart.js": "^4.5.1",
     "nuxt": "^4.4.8",
