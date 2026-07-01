@@ -31,7 +31,7 @@ To migrate from PM2 to Docker and keep your data:
 2. Ensure your server has Docker and Docker Compose installed.
 3. Navigate to your Pawbby Reborn folder.
 4. Create a data directory: `mkdir data`
-5. Copy your existing database into it: `cp web/dev.db data/pawbby.db` (If you didn't use a custom path, it might be at `cp web/prisma/dev.db data/pawbby.db`).
+5. Copy your existing database into it: `cp web/prisma/dev.db data/pawbby.db` (If you set a custom `DATABASE_URL`, copy that SQLite file instead).
 6. Run `docker-compose up -d --build`.
 7. Your old data is now safely running inside Docker!
 
