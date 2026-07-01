@@ -28,6 +28,11 @@ async function run() {
     }
   });
 
+  const strictWebhooks = await confirm({
+    message: 'Do you want to enforce STRICT webhook security? (Choose NO if you use a local Home Assistant/ntfy server. Choose YES to restrict to Discord/Slack/Telegram only)',
+    default: false
+  });
+
   const envPath = path.resolve('.env');
 
   if (fs.existsSync(envPath)) {
@@ -48,6 +53,12 @@ async function run() {
 # Set to "true" if you are developing or if you do not want
 # the built-in update checker to notify you of updates.
 DISABLE_UPDATES="${disableUpdates}"
+
+# Strict Webhook Security
+# If "true", the server will ONLY allow webhooks to known, secure domains
+# (Discord, Slack, Telegram). If "false", it allows local network IP addresses
+# (e.g. for Home Assistant or a local ntfy.sh instance).
+WEBHOOK_STRICT_MODE="${strictWebhooks}"
 
 # SQLite Database Location
 # By default, Prisma creates this file in the \`prisma\` folder (i.e. prisma/dev.db).

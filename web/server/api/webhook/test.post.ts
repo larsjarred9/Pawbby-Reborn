@@ -13,9 +13,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Webhook URL is invalid' })
   }
 
-  const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com']
-  if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
-    throw createError({ statusCode: 400, statusMessage: 'Webhook URL must be a valid Discord or Slack webhook' })
+  if (process.env.WEBHOOK_STRICT_MODE === 'true') {
+    const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com', 'api.telegram.org', 'api.pushover.net']
+    if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
+      throw createError({ statusCode: 400, statusMessage: 'Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.' })
+    }
+  } else {
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      throw createError({ statusCode: 400, statusMessage: 'Webhook URL protocol must be http or https' })
+    }
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0') {
+      throw createError({ statusCode: 400, statusMessage: 'Loopback webhook addresses are not allowed for security reasons' })
+    }
   }
 
   const payload = {

@@ -171,11 +171,18 @@ export default defineNitroPlugin((nitroApp) => {
               if (user?.webhookUrl) {
                 try {
                   const url = new URL(user.webhookUrl);
-                  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-                    throw new Error('Invalid webhook protocol. Must be http or https.');
-                  }
-                  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0') {
-                    throw new Error('Loopback webhook addresses are not allowed for security reasons.');
+                  if (process.env.WEBHOOK_STRICT_MODE === 'true') {
+                    const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com', 'api.telegram.org', 'api.pushover.net']
+                    if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
+                      throw new Error('Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.')
+                    }
+                  } else {
+                    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+                      throw new Error('Invalid webhook protocol. Must be http or https.');
+                    }
+                    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0') {
+                      throw new Error('Loopback webhook addresses are not allowed for security reasons.');
+                    }
                   }
 
                   const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
