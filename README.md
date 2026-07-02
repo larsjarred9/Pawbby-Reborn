@@ -65,17 +65,29 @@ _(For production deployment, run `npm run build` and follow standard Nuxt 4 depl
 
 ### 🐳 Background Deployment (Docker)
 
-Docker is the cleanest way to run Pawbby Reborn. It packages everything into an isolated container and handles database persistence automatically.
+Docker is the cleanest and most reliable way to run Pawbby Reborn. It packages all dependencies into an isolated container and automatically handles keeping the service alive in the background.
 
-1. Clone this repository to your machine.
-2. Ensure you have Docker and Docker Compose installed.
-3. Simply run the following command in the root folder:
+1. Clone this repository to your machine:
    ```bash
-   docker-compose up -d --build
+   git clone https://github.com/larsjarred9/Pawbby-Reborn.git
+   cd Pawbby-Reborn
    ```
+
+2. Ensure you have Docker installed.
+
+3. Start the application in the background and force it to build the image:
+   ```bash
+   docker compose up --build -d
+   ```
+
 4. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
-_To change environment settings like webhooks or update the port, just edit the `docker-compose.yml` file and run the command again._
+**Helpful Docker Tips:**
+- **Logs:** You can view real-time logs to monitor your litter box activity by running `docker compose logs -f`.
+- **Database Persistence:** The `docker-compose.yml` file automatically maps a local `data/` folder on your host machine to `/app/data` inside the container. This ensures your `pawbby.db` database is permanently saved, even if you delete or rebuild the container!
+- **Port Conflicts:** If port `3333` is already taken on your server, simply open `docker-compose.yml` and change `ports: - "3333:3333"` to something like `ports: - "8080:3333"` (where `8080` is your desired port). Then, rerun `docker compose up -d` to apply the change.
+- **Starting / Shutting Down:** To stop the background service, run `docker compose down`. To start it back up again later, simply run `docker compose up -d`.
+- **Updating:** Because Docker containers use pre-built, isolated images, the in-app "1-Click Update" system is not supported in Docker environments. To safely update to the newest version, you must pull the latest code and rebuild the image by running `git pull origin main` followed by `docker compose up --build -d`.
 
 ### 🚀 Background Deployment (PM2)
 
@@ -121,14 +133,7 @@ _⚠️ **Note for Early Adopters:** If you are currently running version `0.1.x
 
 _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` from the root folder in your terminal)._
 
-### 🐳 Updating in Docker
 
-Because Docker containers are isolated, the 1-Click Update button cannot restart your container. To update, pull the latest code and rebuild your container:
-
-```bash
-git pull origin main
-docker-compose up -d --build
-```
 
 ---
 
