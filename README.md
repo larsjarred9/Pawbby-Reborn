@@ -5,7 +5,7 @@
 
 > **"A beautiful, fully local, cloud-free dashboard for your Pawbby Smart Litter Box."**
 
-`Pawbby Reborn` rescues your Pawbby Smart Cat Litter Box from the dead cloud servers, giving it a second life through 100% local, lightning-fast network control. 
+`Pawbby Reborn` rescues your Pawbby Smart Cat Litter Box from the dead cloud servers, giving it a second life through 100% local, lightning-fast network control.
 
 Say goodbye to slow app loading times, server outages, and data privacy concerns. Pawbby Reborn runs entirely inside your own home network!
 
@@ -26,86 +26,13 @@ Say goodbye to slow app loading times, server outages, and data privacy concerns
 
 To run Pawbby Reborn, you will need a device that stays powered on 24/7 on your home network. A **Raspberry Pi**, an old laptop, or a home server (like a Synology NAS or Unraid) is perfect!
 
-There are three primary ways to run the dashboard:
+There are three primary ways to run the dashboard. Choose the one that best fits your environment:
 
-- **Development Deployment**: Perfect for testing, tinkering, or quickly viewing the dashboard. This runs directly in your terminal, meaning it shuts down as soon as you close your window.
-- **Production Deployment (Docker)**: The cleanest, most modern way to run Pawbby Reborn. It keeps all dependencies containerized and isolated. Recommended for Synology NAS, Unraid, or modern Linux servers.
-- **Production Deployment (PM2)**: A lightweight alternative if you want to run the app directly on your host OS (like a Raspberry Pi) without installing Docker. 
-
-### Prerequisites
-- Node.js (v18+)
-- npm (Node Package Manager)
-
-### ⚡ Quick Start Installation (Development)
-
-1. Clone this repository to your local machine:
-   ```bash
-   git clone https://github.com/larsjarred9/Pawbby-Reborn.git
-   cd Pawbby-Reborn/web
-   ```
-
-2. Install the required dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the interactive setup wizard:
-   ```bash
-   npm run setup
-   ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
-
-_(For production deployment, run `npm run build` and follow standard Nuxt 4 deployment guidelines.)_
-
-### 🐳 Background Deployment (Docker)
-
-Docker is the cleanest way to run Pawbby Reborn. It packages everything into an isolated container and handles database persistence automatically.
-
-1. Clone this repository to your machine.
-2. Ensure you have Docker and Docker Compose installed.
-3. Simply run the following command in the root folder:
-   ```bash
-   docker-compose up -d --build
-   ```
-4. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
-
-_To change environment settings like webhooks or update the port, just edit the `docker-compose.yml` file and run the command again._
-
-### 🚀 Background Deployment (PM2)
-
-If you only use `npm run dev`, the dashboard will immediately shut down the second you close your terminal or disconnect your SSH session. Because Pawbby Reborn needs to constantly listen to your local network to intercept litter box events (like tracking when your cat visits), **it must run 24/7 in the background**.
-
-The easiest way to turn Pawbby Reborn into a persistent background "daemon" (especially on a Raspberry Pi) is by using **PM2**, a lightweight process manager for Node.js.
-
-1. Install PM2 globally:
-   ```bash
-   sudo npm install -g pm2
-   ```
-
-2. Build the production application:
-   ```bash
-   npm run build
-   ```
-
-3. Start the application in the background using PM2:
-   ```bash
-   cd ..
-   pm2 start ecosystem.config.cjs --env production
-   ```
-
-4. Tell PM2 to automatically start Pawbby Reborn whenever your device reboots:
-   ```bash
-   pm2 save
-   pm2 startup
-   ```
-
-_Note: You never need to touch PM2 again to update! When you hit "Update" in the dashboard UI, the auto-updater will seamlessly pull code, rebuild, and restart the background service for you._
+| Method                | Guide                                                                                             | Use Case                                                    | Pros                                                                                              | Cons                                                                                     |
+| :-------------------- | :------------------------------------------------------------------------------------------------ | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **PM2** (Recommended) | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/PM2-Deployment-(Recommended)>) | Best for most users, Raspberry Pi, or direct Linux installs | ⚡ Very lightweight<br>✨ Full support for 1-Click Updates<br>🔄 Restarts automatically on reboot | ℹ️ Requires installing PM2 globally                                                      |
+| **Docker**            | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/Docker-Deployment-(Advanced)>) | Best for advanced users with Synology or Unraid servers     | 🐳 Cleanest installation<br>📦 Keeps dependencies isolated<br>🔄 Restarts automatically on reboot | ❌ 1-Click Update feature disabled (requires manual `docker compose up --build` instead) |
+| **NPM (Dev)**         | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/NPM-Setup-(Development)>)      | Best for testing and development                            | 🛠️ Hot Module Replacement (HMR)<br>🚀 Instant feedback when coding                                | 🛑 Shuts down when terminal closes<br>🛑 Not suitable for 24/7 background usage          |
 
 ---
 
@@ -121,25 +48,9 @@ _⚠️ **Note for Early Adopters:** If you are currently running version `0.1.x
 
 _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` from the root folder in your terminal)._
 
-### 🐳 Updating in Docker
-
-Because Docker containers are isolated, the 1-Click Update button cannot restart your container. To update, pull the latest code and rebuild your container:
-
-```bash
-git pull origin main
-docker-compose up -d --build
-```
-
 ---
 
-## 🤝 Join the Effort & Collaborate
-
-This is a collaborative community rescue mission. Whether you are an experienced packet-sniffer, a frontend developer ready to tackle the UI, or just a frustrated Pawbby owner who wants to help test commands, we need your help.
-
-- 💬 **Communication & Development:** [Join our Discord Server](https://discord.gg/Tw43AKZkge) to talk strategy, share logs, and coordinate the software build in real-time.
-- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local network commands and authentication extraction strategies.
-
-### 📤 Sharing Your Database for Development
+## 📤 Sharing Your Database for Development
 
 Because the dashboard saves the raw Tuya JSON payloads from your litter box directly into the database, sharing your database with the developers is incredibly helpful for finding missing commands (like the remote auto-clean trigger).
 
@@ -149,6 +60,15 @@ To share your logs safely without exposing your Wi-Fi device keys:
 2. Click **Export Anonymized DB**.
 3. A safe, heavily redacted file named `pawbby-share.db` will immediately download to your computer.
 4. You can safely drag and drop this file into the Discord server! (All IP addresses, Wi-Fi keys, Tuya tokens, and personal names have been permanently erased).
+
+---
+
+## 🤝 Join the Effort & Collaborate
+
+This is a collaborative community rescue mission. Whether you are an experienced packet-sniffer, a frontend developer ready to tackle the UI, or just a frustrated Pawbby owner who wants to help test commands, we need your help.
+
+- 💬 **Communication & Development:** [Join our Discord Server](https://discord.gg/Tw43AKZkge) to talk strategy, share logs, and coordinate the software build in real-time.
+- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local network commands and authentication extraction strategies.
 
 ---
 

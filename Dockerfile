@@ -12,6 +12,7 @@ WORKDIR /app/web
 
 # Install dependencies and build the Nuxt app
 RUN npm install
+RUN npx prisma generate
 RUN npm run build
 
 # Default environment variables
