@@ -3,14 +3,18 @@ import fs from 'fs';
 import path from 'path';
 
 const envPath = path.resolve('.env');
-let dbUrl = 'file:./dev.db';
+let dbUrl = process.env.DATABASE_URL;
 
-if (fs.existsSync(envPath)) {
+if (!dbUrl && fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf8');
   const match = envContent.match(/^DATABASE_URL="(.*)"$/m) || envContent.match(/^DATABASE_URL=(.*)$/m);
   if (match) {
     dbUrl = match[1].replace(/['"]/g, '');
   }
+}
+
+if (!dbUrl) {
+  dbUrl = 'file:./dev.db';
 }
 
 let dbPath;
