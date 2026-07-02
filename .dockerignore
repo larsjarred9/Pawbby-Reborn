@@ -1,0 +1,11 @@
+node_modules/
+web/node_modules/
+.nuxt/
+.output/
+web/.nuxt/
+web/.output/
+.env
+data/
+*.db
+*.db-journal
+.DS_Store

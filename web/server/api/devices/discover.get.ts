@@ -1,6 +1,8 @@
 import TuyAPI from 'tuyapi'
 
 export default defineEventHandler(async (event) => {
+  // We must instantiate TuyAPI with dummy credentials just to access its UDP discovery methods.
+  // The 'tuyapi' library throws an error if id/key are missing from the constructor.
   const device = new TuyAPI({
     id: '00000000000000000000',
     key: '0000000000000000'

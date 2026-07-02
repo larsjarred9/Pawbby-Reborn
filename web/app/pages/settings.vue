@@ -81,15 +81,19 @@
       </button>
 
       <!-- Push Notifications -->
-      <button @click="showNotificationsModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+      <button @click="showNotificationsModal = true"
+        class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
           <span class="font-medium text-lg">Push Notifications</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ webhookUrl ? 'Configured' : 'Setup' }}</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ webhookUrl ?
+            'Configured' : 'Setup' }}</span>
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
             fill="currentColor">
@@ -101,7 +105,8 @@
       </button>
 
       <!-- Check for Updates -->
-      <button @click="handleUpdateClick" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+      <button @click="handleUpdateClick"
+        class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" stroke-width="1.5">
@@ -114,7 +119,7 @@
           <span v-if="checking" class="text-sm text-pawbby-mutedDark">Checking...</span>
           <span v-else-if="updateAvailable" class="text-sm text-[#3D7A41]">Update Available!</span>
           <span v-else-if="!updateAvailable && hasChecked" class="text-sm text-pawbby-mutedDark">Up to date</span>
-          
+
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
             fill="currentColor">
@@ -128,16 +133,23 @@
     </div>
 
     <!-- Export Anonymized DB -->
-    <button @click="showExportModal = true" class="mt-8 block w-full text-left border border-[#3D7A41]/20 bg-[#3D7A41]/5 rounded-2xl p-4 hover:bg-[#3D7A41]/10 transition-colors group cursor-pointer">
+    <button @click="showExportModal = true"
+      class="mt-8 block w-full text-left border border-[#3D7A41]/20 bg-[#3D7A41]/5 rounded-2xl p-4 hover:bg-[#3D7A41]/10 transition-colors group cursor-pointer">
       <div class="flex items-center justify-between text-white/90 group-hover:text-white mb-2">
         <div class="flex items-center space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#3D7A41]" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
           <span class="font-medium text-lg">Export Anonymized DB</span>
         </div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#3D7A41]/50 group-hover:text-[#3D7A41] transition-colors" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-[#3D7A41]/50 group-hover:text-[#3D7A41] transition-colors" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clip-rule="evenodd" />
         </svg>
       </div>
       <p class="text-xs text-pawbby-mutedDark ml-9">
@@ -159,21 +171,29 @@
     <!-- Export DB Modal -->
     <div v-if="showExportModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden">
-        <div class="w-16 h-16 bg-[#3D7A41]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D7A41]/50">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        <div
+          class="w-16 h-16 bg-[#3D7A41]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D7A41]/50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#3D7A41]" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
         </div>
         <h2 class="text-xl font-bold text-white mb-2 text-center">Export Database</h2>
         <p class="text-pawbby-muted text-sm mb-6 text-center leading-relaxed">
-          This will securely download an anonymized copy of your database. All Wi-Fi passwords, Tuya keys, IPs, and names have been permanently erased.<br><br>
-          Once downloaded, join our <a href="https://discord.gg/Tw43AKZkge" target="_blank" class="text-[#5865F2] font-bold hover:underline">Discord Server</a> and drag-and-drop the file into the <strong>#database-dump</strong> channel to help us find new features!
+          This will securely download an anonymized copy of your database. All Wi-Fi passwords, Tuya keys, IPs, and
+          names have been permanently erased.<br><br>
+          Once downloaded, join our <a href="https://discord.gg/Tw43AKZkge" target="_blank"
+            class="text-[#5865F2] font-bold hover:underline">Discord Server</a> and drag-and-drop the file into the
+          <strong>#database-dump</strong> channel to help us find new features!
         </p>
         <div class="flex gap-3">
-          <button @click="showExportModal = false" class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+          <button @click="showExportModal = false"
+            class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
             Cancel
           </button>
-          <a href="/api/export-anonymized-db" download="pawbby-share.db" @click="showExportModal = false" class="w-full flex items-center justify-center py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
+          <a href="/api/export-anonymized-db" download="pawbby-share.db" @click="showExportModal = false"
+            class="w-full flex items-center justify-center py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
             Download
           </a>
         </div>
@@ -183,26 +203,41 @@
     <!-- Upgrade Instructions Modal -->
     <div v-if="showUpgradeModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden">
-        <div class="w-16 h-16 bg-[#3D7A41]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D7A41]/50">
-          <svg v-if="isUpdating" class="animate-spin h-8 w-8 text-[#3D7A41]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div
+          class="w-16 h-16 bg-[#3D7A41]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D7A41]/50">
+          <svg v-if="isUpdating" class="animate-spin h-8 w-8 text-[#3D7A41]" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#3D7A41]" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
         </div>
-        <h2 class="text-xl font-bold text-white mb-2 text-center">{{ isUpdating ? 'Updating...' : 'Update Available!' }}</h2>
+        <h2 class="text-xl font-bold text-white mb-2 text-center">{{ isUpdating ? 'Updating...' : 'Update Available!' }}
+        </h2>
         <p class="text-pawbby-muted text-sm mb-6 text-center">
-          <span v-if="isUpdating">Pawbby Reborn is currently updating. This usually takes 1-2 minutes. The page will automatically refresh when complete.</span>
-          <span v-else-if="updatesDisabled">A new version of the dashboard is available! However, automatic updates are disabled in your environment. Please run the upgrade commands manually.</span>
-          <span v-else>A new version of the dashboard is available! Would you like to automatically download and install it now?</span>
+          <span v-if="isUpdating">Pawbby Reborn is currently updating. This usually takes 1-2 minutes. The page will
+            automatically refresh when complete.</span>
+          <span v-else-if="updatesDisabled">A new version of the dashboard is available! However, automatic updates are
+            disabled in your environment. Please run the upgrade commands manually. <br><br><a
+              href="https://github.com/larsjarred9/Pawbby-Reborn/#-updating-to-the-latest-version" target="_blank"
+              class="text-white hover:text-white/80 underline font-bold transition-colors">View Upgrade
+              Instructions</a></span>
+          <span v-else>A new version of the dashboard is available! Would you like to automatically download and install
+            it now?</span>
         </p>
         <div v-if="!isUpdating" class="flex gap-3">
-          <button @click="showUpgradeModal = false" class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+          <button @click="showUpgradeModal = false"
+            class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
             {{ updatesDisabled ? 'Close' : 'Cancel' }}
           </button>
-          <button v-if="!updatesDisabled" @click="triggerUpdate" class="w-full py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
+          <button v-if="!updatesDisabled" @click="triggerUpdate"
+            class="w-full py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
             Confirm & Update
           </button>
         </div>
@@ -211,23 +246,27 @@
 
     <!-- Push Notifications Modal -->
     <div v-if="showNotificationsModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
         <h3 class="text-xl font-bold text-white mb-2">Push Notifications</h3>
-        <p class="text-xs text-pawbby-muted mb-6">Receive an instant alert via Discord or Slack when your cat uses the litter box.</p>
+        <p class="text-xs text-pawbby-muted mb-6">Receive an instant alert via Discord or Slack when your cat uses the
+          litter box.</p>
         <div class="space-y-4">
           <div>
             <label class="block text-sm text-pawbby-muted mb-1">Webhook URL</label>
-            <input v-model="webhookUrl" @change="saveWebhookUrl" type="url" placeholder="Paste Discord or Slack Webhook URL..."
+            <input v-model="webhookUrl" @change="saveWebhookUrl" type="url"
+              placeholder="Paste Discord or Slack Webhook URL..."
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
-          
+
           <button @click="testWebhook" :disabled="testingWebhook || !webhookUrl"
             class="w-full py-3 bg-pawbby-primary/10 text-[#3D7A41] font-semibold rounded-xl hover:bg-pawbby-primary/20 transition-colors disabled:opacity-50 text-sm">
             {{ testingWebhook ? 'Testing...' : 'Test Notification' }}
           </button>
         </div>
         <div class="mt-6">
-          <button @click="showNotificationsModal = false" class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+          <button @click="showNotificationsModal = false"
+            class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
             Close
           </button>
         </div>

@@ -356,8 +356,7 @@ export default defineNitroPlugin((nitroApp) => {
               );
               const weightInKg = state.peakWeight / 1000;
 
-              const pets = await prisma.pet.findMany();
-              let matchedPetId = null;
+              const matchedPetId = null;
               
               // We do NOT attempt to identify the pet for quick-visits, 
               // because half a heavy cat leaning in looks identical to a small cat fully inside.
