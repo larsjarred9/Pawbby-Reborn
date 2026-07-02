@@ -5,7 +5,7 @@
 
 > **"A beautiful, fully local, cloud-free dashboard for your Pawbby Smart Litter Box."**
 
-`Pawbby Reborn` rescues your Pawbby Smart Cat Litter Box from the dead cloud servers, giving it a second life through 100% local, lightning-fast network control. 
+`Pawbby Reborn` rescues your Pawbby Smart Cat Litter Box from the dead cloud servers, giving it a second life through 100% local, lightning-fast network control.
 
 Say goodbye to slow app loading times, server outages, and data privacy concerns. Pawbby Reborn runs entirely inside your own home network!
 
@@ -26,35 +26,42 @@ Say goodbye to slow app loading times, server outages, and data privacy concerns
 
 To run Pawbby Reborn, you will need a device that stays powered on 24/7 on your home network. A **Raspberry Pi**, an old laptop, or a home server (like a Synology NAS or Unraid) is perfect!
 
-There are three primary ways to run the dashboard:
+There are three primary ways to run the dashboard. Choose the one that best fits your environment:
 
-- **Development Deployment**: Perfect for testing, tinkering, or quickly viewing the dashboard. This runs directly in your terminal, meaning it shuts down as soon as you close your window.
-- **Production Deployment (Docker)**: The cleanest, most modern way to run Pawbby Reborn. It keeps all dependencies containerized and isolated. Recommended for Synology NAS, Unraid, or modern Linux servers.
-- **Production Deployment (PM2)**: A lightweight alternative if you want to run the app directly on your host OS (like a Raspberry Pi) without installing Docker. 
+| Method                | Use Case                                                    | Pros                                                                                              | Cons                                                                                     |
+| :-------------------- | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **PM2** (Recommended) | Best for most users, Raspberry Pi, or direct Linux installs | ⚡ Very lightweight<br>✨ Full support for 1-Click Updates<br>🔄 Restarts automatically on reboot | ℹ️ Requires installing PM2 globally                                                      |
+| **Docker**            | Best for advanced users with Synology or Unraid servers     | 🐳 Cleanest installation<br>📦 Keeps dependencies isolated<br>🔄 Restarts automatically on reboot | ❌ 1-Click Update feature disabled (requires manual `docker compose up --build` instead) |
+| **NPM (Dev)**         | Best for testing and development                            | 🛠️ Hot Module Replacement (HMR)<br>🚀 Instant feedback when coding                                | 🛑 Shuts down when terminal closes<br>🛑 Not suitable for 24/7 background usage          |
 
 ### Prerequisites
+
 - Node.js (v18+)
 - npm (Node Package Manager)
 
 ### ⚡ Quick Start Installation (Development)
 
 1. Clone this repository to your local machine:
+
    ```bash
    git clone https://github.com/larsjarred9/Pawbby-Reborn.git
    cd Pawbby-Reborn/web
    ```
 
 2. Install the required dependencies:
+
    ```bash
    npm install
    ```
 
 3. Run the interactive setup wizard:
+
    ```bash
    npm run setup
    ```
 
 4. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -68,6 +75,7 @@ _(For production deployment, run `npm run build` and follow standard Nuxt 4 depl
 Docker is the cleanest and most reliable way to run Pawbby Reborn. It packages all dependencies into an isolated container and automatically handles keeping the service alive in the background.
 
 1. Clone this repository to your machine:
+
    ```bash
    git clone https://github.com/larsjarred9/Pawbby-Reborn.git
    cd Pawbby-Reborn
@@ -76,6 +84,7 @@ Docker is the cleanest and most reliable way to run Pawbby Reborn. It packages a
 2. Ensure you have Docker installed.
 
 3. Start the application in the background and force it to build the image:
+
    ```bash
    docker compose up --build -d
    ```
@@ -83,6 +92,7 @@ Docker is the cleanest and most reliable way to run Pawbby Reborn. It packages a
 4. Open a web browser and navigate to `http://localhost:3333` to access the dashboard.
 
 **Helpful Docker Tips:**
+
 - **Logs:** You can view real-time logs to monitor your litter box activity by running `docker compose logs -f`.
 - **Database Persistence:** The `docker-compose.yml` file automatically maps a local `data/` folder on your host machine to `/app/data` inside the container. This ensures your `pawbby.db` database is permanently saved, even if you delete or rebuild the container!
 - **Port Conflicts:** If port `3333` is already taken on your server, simply open `docker-compose.yml` and change `ports: - "3333:3333"` to something like `ports: - "8080:3333"` (where `8080` is your desired port). Then, rerun `docker compose up -d` to apply the change.
@@ -96,16 +106,19 @@ If you only use `npm run dev`, the dashboard will immediately shut down the seco
 The easiest way to turn Pawbby Reborn into a persistent background "daemon" (especially on a Raspberry Pi) is by using **PM2**, a lightweight process manager for Node.js.
 
 1. Install PM2 globally:
+
    ```bash
    sudo npm install -g pm2
    ```
 
 2. Build the production application:
+
    ```bash
    npm run build
    ```
 
 3. Start the application in the background using PM2:
+
    ```bash
    cd ..
    pm2 start ecosystem.config.cjs --env production
@@ -132,8 +145,6 @@ We are actively discovering new payloads and improving the dashboard. As of **ve
 _⚠️ **Note for Early Adopters:** If you are currently running version `0.1.x`, you cannot use the auto-updater. Please read the [UPGRADING.md](UPGRADING.md) guide for manual instructions to transition your installation to the new `0.3.0` architecture._
 
 _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` from the root folder in your terminal)._
-
-
 
 ---
 
