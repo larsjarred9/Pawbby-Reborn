@@ -32,7 +32,7 @@ if (dbUrl.startsWith('file:')) {
 }
 
 const src = dbPath;
-const dest = path.resolve('prisma', 'share.db');
+const dest = path.join(path.dirname(src), 'share.db');
 
 if (!fs.existsSync(src)) {
   console.error(`❌ Error: Database not found at ${src}`);
@@ -47,7 +47,7 @@ console.log(`✅ Created a copy of the database: ${dest}`);
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: `file:./share.db`
+      url: `file:${dest}`
     }
   }
 });
