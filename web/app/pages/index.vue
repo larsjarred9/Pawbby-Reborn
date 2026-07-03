@@ -462,8 +462,7 @@ const handleAddDevice = async () => {
   try {
     await api.createDevice(newDevice.value)
     // Refresh devices
-    const res = await $fetch('/api/devices')
-    devices.value = res as any[]
+    await loadDevices()
     
     // Move to step 7 for success message
     currentStep.value = 7
