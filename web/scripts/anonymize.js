@@ -47,7 +47,7 @@ console.log(`✅ Created a copy of the database: ${dest}`);
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: `file:${path.join(path.dirname(src), 'share.db')}`
+      url: `file:${dest}`
     }
   }
 });

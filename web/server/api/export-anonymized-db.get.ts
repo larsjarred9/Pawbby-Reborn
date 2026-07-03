@@ -32,12 +32,16 @@ export default defineEventHandler(async (event) => {
     isExporting = true
     
     // 1. Run the anonymization script
-    await execPromise('node scripts/anonymize.js', {
+    const { stdout } = await execPromise('node scripts/anonymize.js', {
       cwd: process.cwd()
     })
 
     // 2. Locate the generated share.db
-    const shareDbPath = path.resolve(process.cwd(), 'prisma/share.db')
+    let shareDbPath = path.resolve(process.cwd(), 'prisma/share.db')
+    const match = stdout.match(/👉 You can find the safe file here: (.*)/)
+    if (match && match[1]) {
+      shareDbPath = match[1].trim()
+    }
     
     if (!fs.existsSync(shareDbPath)) {
       throw createError({
