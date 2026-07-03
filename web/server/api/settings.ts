@@ -15,11 +15,24 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     
     if (body.user) {
+      // Destructure to prevent mass assignment vulnerabilities
+      const { 
+        name, email, weightUnit, webhookUrl,
+        notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
+        notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError
+      } = body.user
+      
+      const safeData = { 
+        name, email, weightUnit, webhookUrl,
+        notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
+        notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError
+      }
+      
       const user = await prisma.user.findFirst()
       if (user) {
-        await prisma.user.update({ where: { id: user.id }, data: body.user })
+        await prisma.user.update({ where: { id: user.id }, data: safeData })
       } else {
-        await prisma.user.create({ data: body.user })
+        await prisma.user.create({ data: safeData })
       }
     }
     return { success: true }

@@ -9,10 +9,13 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'POST') {
     const body = await readBody(event)
+    const { name, birthDate, weight, imageBase64 } = body
+    const safeData = { name, birthDate, weight, imageBase64 }
+
     if (body.id) {
-       return await prisma.pet.update({ where: { id: body.id }, data: body })
+       return await prisma.pet.update({ where: { id: body.id }, data: safeData })
     }
-    return await prisma.pet.create({ data: body })
+    return await prisma.pet.create({ data: safeData })
   }
   
   if (method === 'DELETE') {
