@@ -15,6 +15,7 @@ model User {
   avatarUrl    String?
   weightUnit   String   @default("kg")
   webhookUrl   String?
+  timezone     String?  @default("UTC")
   
   notifyPushVisit       Boolean @default(true)
   notifyPushAutoClean   Boolean @default(false)

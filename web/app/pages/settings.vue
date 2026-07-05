@@ -60,6 +60,28 @@
         </div>
       </button>
 
+      <!-- Timezone -->
+      <button @click="showTimezoneModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="font-medium text-lg">Timezone</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors max-w-[120px] truncate text-right">{{ user?.timezone || 'UTC' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Notification Controls -->
       <button @click="showNotificationControlsModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
@@ -273,6 +295,29 @@
       </div>
     </div>
 
+    <!-- Timezone Modal -->
+    <div v-if="showTimezoneModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
+        <h3 class="text-xl font-bold text-white mb-2">Timezone</h3>
+        <p class="text-xs text-pawbby-muted mb-6">Select your local timezone.</p>
+        <div class="space-y-4">
+          <div>
+            <select v-model="selectedTimezone" @change="saveTimezone"
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary">
+              <option v-for="tz in availableTimezones" :key="tz" :value="tz">{{ tz }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6">
+          <button @click="showTimezoneModal = false"
+            class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Notification Controls Modal -->
     <div v-if="showNotificationControlsModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up max-h-[90vh] overflow-y-auto no-scrollbar">
@@ -443,17 +488,32 @@ const checkForUpdates = async (silent = false) => {
   }
 }
 
+const webhookUrl = ref('')
+const testingWebhook = ref(false)
+const showNotificationsModal = ref(false)
+const showNotificationControlsModal = ref(false)
+const showTimezoneModal = ref(false)
+const selectedTimezone = ref('UTC')
+const availableTimezones = ref(Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : ['UTC'])
+
 const loadData = async () => {
   user.value = await api.getUser()
   if (user.value.webhookUrl) {
     webhookUrl.value = user.value.webhookUrl
   }
+  if (user.value.timezone) {
+    selectedTimezone.value = user.value.timezone
+  } else if (Intl.DateTimeFormat) {
+    selectedTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+    saveTimezone()
+  }
 }
 
-const webhookUrl = ref('')
-const testingWebhook = ref(false)
-const showNotificationsModal = ref(false)
-const showNotificationControlsModal = ref(false)
+const saveTimezone = async () => {
+  if (!user.value) return
+  await api.updateUser({ timezone: selectedTimezone.value })
+  await loadData()
+}
 
 const saveWebhookUrl = async () => {
   if (!user.value) return

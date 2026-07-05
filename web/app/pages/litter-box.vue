@@ -164,7 +164,10 @@
         <!-- Timeline List -->
         <div class="space-y-6 pt-4">
 
-          <div v-for="log in filteredLogs" :key="log.id" class="flex space-x-4">
+          <div v-for="log in filteredLogs" :key="log.id" 
+               class="flex space-x-4"
+               :class="{ 'cursor-pointer hover:bg-white/5 rounded-xl p-2 -mx-2 transition-colors': log.type === 'toileted' || log.type === 'quick-visit' }"
+               @click="(log.type === 'toileted' || log.type === 'quick-visit') ? openAssignPetModal(log) : null">
             <div class="flex-shrink-0 mt-1">
 
               <!-- Icon Logic Based on Log Type -->
@@ -280,9 +283,18 @@
               </div>
 
             </div>
-            <div>
+            <div class="flex-1">
               <p class="text-white/90 text-base leading-snug">{{ log.description }}</p>
-              <p class="text-pawbby-mutedDark text-xs mt-1">{{ log.timestamp }}</p>
+              <div class="flex items-center justify-between mt-1">
+                <p class="text-pawbby-mutedDark text-xs">{{ log.timestamp }}</p>
+                <div v-if="(log.type === 'toileted' || log.type === 'quick-visit') && !log.petId" 
+                     class="text-pawbby-primary text-xs font-semibold flex items-center space-x-1">
+                  <span>Assign</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -572,9 +584,41 @@
       </div>
     </div>
 
+      <!-- Assign Pet Modal -->
+    <div v-if="showAssignPetModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden text-center">
+        <h2 class="text-xl font-bold text-white mb-4">Assign to Pet</h2>
+        <p class="text-pawbby-muted text-sm mb-6 leading-relaxed">
+          Which cat used the litter box?
+        </p>
+        
+        <div class="space-y-3">
+          <div class="space-y-3 max-h-60 overflow-y-auto scrollbar-hide">
+            <button v-for="pet in pets" :key="pet.id" @click="assignPet(pet.id!)"
+              class="w-full py-3 bg-white/5 text-white font-medium rounded-xl hover:bg-white/10 border border-white/5 transition-colors flex items-center px-4 space-x-3">
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-pawbby-primary/20 flex-shrink-0">
+                <img v-if="pet.imageBase64" :src="pet.imageBase64" class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full flex items-center justify-center text-pawbby-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+              <span>{{ pet.name }}</span>
+            </button>
+          </div>
+
+          <button @click="showAssignPetModal = false"
+            class="w-full py-2 text-pawbby-muted text-sm hover:text-white transition-colors mt-2">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useApi, type Device, type Pet, type DeviceLog, type User } from '~/composables/useApi'
@@ -607,6 +651,8 @@ const showSettingsModal = ref(false)
 const showDeodorizerModal = ref(false)
 const showLiabilityModal = ref(false)
 const showEmptyModal = ref(false)
+const showAssignPetModal = ref(false)
+const eventToAssign = ref<DeviceLog | null>(null)
 const pendingAction = ref<'clean' | 'flatten'>('flatten')
 
 const isSaving = ref(false)
@@ -678,6 +724,25 @@ const handleDeleteDevice = async () => {
   if (confirm("Are you sure you want to delete this device?")) {
     await api.deleteDevice(deviceId)
     router.push('/')
+  }
+}
+
+const openAssignPetModal = (log: DeviceLog) => {
+  eventToAssign.value = log
+  showAssignPetModal.value = true
+}
+
+const assignPet = async (petId: string) => {
+  if (!eventToAssign.value) return
+  
+  try {
+    await api.assignPetToEvent(eventToAssign.value.id, petId)
+    await loadData() // reload logs to show the new assignment
+  } catch (e) {
+    alert("Failed to assign pet")
+  } finally {
+    showAssignPetModal.value = false
+    eventToAssign.value = null
   }
 }
 
