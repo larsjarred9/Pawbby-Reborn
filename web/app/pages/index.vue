@@ -223,21 +223,21 @@
             </div>
 
             <div v-else-if="!manualMode">
-              <div v-if="discoveredDevices.length > 0" class="space-y-3">
+              <div v-if="availableDiscoveredDevices.length > 0" class="space-y-3">
                 <div class="bg-white/5 p-3 rounded-xl border border-white/10 mb-4 flex gap-3 items-start">
                   <div class="text-xl">💡</div>
                   <p class="text-xs text-white/70">Not sure which one is Pawbby? Open your Smart Life app &gt; Device Settings &gt; Device Information and match the <strong>Virtual ID</strong>.</p>
                 </div>
                 <p class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider mb-2">Select Your Device</p>
-                <button v-for="d in discoveredDevices" :key="d.id" @click="selectDevice(d)"
+                <button v-for="device in availableDiscoveredDevices" :key="device.id" @click="selectDevice(device)"
                   class="w-full text-left bg-black/30 border border-white/10 rounded-2xl p-4 hover:border-[#3D7A41] hover:bg-[#3D7A41]/10 transition-colors group">
                   <div class="flex justify-between items-center">
                     <div>
                       <p class="text-white font-bold text-sm">Smart Device</p>
-                      <p class="text-xs text-white/50 font-mono mt-1">{{ d.id }}</p>
+                      <p class="text-xs text-white/50 font-mono mt-1">{{ device.id }}</p>
                     </div>
                     <div class="text-right">
-                      <p class="text-xs text-[#3D7A41] font-mono bg-[#3D7A41]/20 px-2 py-1 rounded-md">{{ d.ip }}</p>
+                      <p class="text-xs text-[#3D7A41] font-mono bg-[#3D7A41]/20 px-2 py-1 rounded-md">{{ device.ip }}</p>
                     </div>
                   </div>
                 </button>
@@ -246,11 +246,40 @@
                   <button @click="manualMode = true" class="text-xs text-white/40 hover:text-white underline">I don't see it / Enter manually</button>
                 </div>
               </div>
-              <div v-else class="text-center py-6">
-                <p class="text-white/60 text-sm mb-4">We couldn't find any Tuya devices on your local network automatically.</p>
-                <button @click="scanNetwork" class="px-4 py-2 bg-[#3D7A41]/20 text-[#3D7A41] rounded-lg text-sm font-bold hover:bg-[#3D7A41]/30 transition-colors mb-2">Scan Again</button>
-                <button @click="manualMode = true" class="block w-full mt-2 px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors">Enter Details Manually</button>
-              </div>
+                <div v-else-if="discoveredDevices.length > 0" class="text-center py-6">
+                  <p class="text-white/60 text-sm mb-4">
+                    All discovered Tuya devices have already been added to Pawbby Reborn.
+                  </p>
+                  <button
+                    @click="scanNetwork"
+                    class="px-4 py-2 bg-[#3D7A41]/20 text-[#3D7A41] rounded-lg text-sm font-bold hover:bg-[#3D7A41]/30 transition-colors mb-2"
+                  >
+                    Scan Again
+                  </button>
+                  <button
+                    @click="manualMode = true"
+                    class="block w-full mt-2 px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors"
+                  >
+                    Enter Details Manually
+                  </button>
+                </div>
+                <div v-else class="text-center py-6">
+                  <p class="text-white/60 text-sm mb-4">
+                    We couldn't find any Tuya devices on your local network automatically.
+                  </p>
+                  <button
+                    @click="scanNetwork"
+                    class="px-4 py-2 bg-[#3D7A41]/20 text-[#3D7A41] rounded-lg text-sm font-bold hover:bg-[#3D7A41]/30 transition-colors mb-2"
+                  >
+                    Scan Again
+                  </button>
+                  <button
+                    @click="manualMode = true"
+                    class="block w-full mt-2 px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors"
+                  >
+                    Enter Details Manually
+                  </button>
+                </div>
             </div>
 
             <div v-if="manualMode">
@@ -392,7 +421,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const api = useApi()
 const devices = ref<any[]>([])
@@ -462,8 +491,7 @@ const handleAddDevice = async () => {
   try {
     await api.createDevice(newDevice.value)
     // Refresh devices
-    const res = await $fetch('/api/devices')
-    devices.value = res as any[]
+    await loadDevices()
     
     // Move to step 7 for success message
     currentStep.value = 7
@@ -511,6 +539,11 @@ const checkForUpdates = async () => {
     // Ignore error
   }
 }
+
+const availableDiscoveredDevices = computed(() => {
+  const addedDeviceIds = new Set(devices.value.map(device => device.deviceId))
+  return discoveredDevices.value.filter(device => !addedDeviceIds.has(device.id))
+})
 
 const dismissUpdateBanner = () => {
   showUpdateBanner.value = false
