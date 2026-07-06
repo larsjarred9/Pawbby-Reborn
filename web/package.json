@@ -10,7 +10,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && prisma generate",
     "anonymize": "node scripts/anonymize.js",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
