@@ -126,6 +126,22 @@
         </div>
       </button>
 
+      <!-- External API -->
+      <button @click="showApiModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="font-medium text-lg">External API</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.apiKey ? 'Configured' : 'Setup' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Check for Updates -->
       <button @click="handleUpdateClick"
         class="w-full flex items-center justify-between text-white/90 hover:text-white group">
@@ -398,6 +414,41 @@
       </div>
     </div>
 
+    <!-- External API Modal -->
+    <div v-if="showApiModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up max-h-[90vh] overflow-y-auto no-scrollbar">
+        <h3 class="text-xl font-bold text-white mb-2">External API</h3>
+        <p class="text-xs text-pawbby-muted mb-6">Generate an API key to control Pawbby from external apps.</p>
+        <div class="space-y-4">
+          <div v-if="user?.apiKey">
+            <label class="block text-sm text-pawbby-muted mb-1">Your API Key</label>
+            <div class="flex gap-2">
+              <input :type="showApiKey ? 'text' : 'password'" readonly :value="user.apiKey" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+              <button @click="showApiKey = !showApiKey" class="px-3 bg-white/5 rounded-xl hover:bg-white/10 text-white transition-colors">
+                <svg v-if="!showApiKey" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>
+              </button>
+              <button @click="copyApiKey" class="px-3 bg-white/5 rounded-xl hover:bg-white/10 text-white transition-colors" title="Copy API Key">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              </button>
+            </div>
+          </div>
+          <button @click="doGenerateApiKey" :disabled="generatingKey" class="w-full py-3 bg-pawbby-primary/10 text-[#3D7A41] font-semibold rounded-xl hover:bg-pawbby-primary/20 transition-colors disabled:opacity-50 text-sm">
+            {{ generatingKey ? 'Generating...' : (user?.apiKey ? 'Regenerate API Key' : 'Generate API Key') }}
+          </button>
+          
+          <NuxtLink to="/api-docs" class="block text-center text-[#5865F2] hover:underline text-sm font-bold pt-2">
+            View API Documentation
+          </NuxtLink>
+        </div>
+        <div class="mt-6">
+          <button @click="showApiModal = false" class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -421,6 +472,39 @@ const updatesDisabled = ref(false)
 const showUpgradeModal = ref(false)
 const isUpdating = ref(false)
 const showExportModal = ref(false)
+
+const showApiModal = ref(false)
+const showApiKey = ref(false)
+const generatingKey = ref(false)
+
+const doGenerateApiKey = async () => {
+  if (user.value?.apiKey && !confirm('Are you sure you want to regenerate your API key? Any existing apps using the old key will stop working.')) {
+    return
+  }
+  generatingKey.value = true
+  try {
+    const newKey = await api.generateApiKey()
+    if (user.value) {
+      user.value.apiKey = newKey
+      showApiKey.value = true
+    }
+  } catch (e) {
+    alert('Failed to generate API key.')
+  } finally {
+    generatingKey.value = false
+  }
+}
+
+const copyApiKey = async () => {
+  if (user.value?.apiKey) {
+    try {
+      await navigator.clipboard.writeText(user.value.apiKey)
+      alert('API Key copied to clipboard!')
+    } catch (e) {
+      alert('Failed to copy to clipboard.')
+    }
+  }
+}
 
 const handleUpdateClick = () => {
   if (updateAvailable.value) {

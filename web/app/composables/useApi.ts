@@ -9,6 +9,7 @@ export interface User {
   weightUnit?: 'kg' | 'lb'
   webhookUrl?: string
   timezone?: string
+  apiKey?: string
 }
 
 export interface Pet {
@@ -60,6 +61,11 @@ export const useApi = () => {
   const getUser = async (): Promise<User> => {
     const { user } = await $fetch('/api/settings') as any
     return user
+  }
+
+  const generateApiKey = async (): Promise<string> => {
+    const { apiKey } = await $fetch('/api/auth/api-key', { method: 'POST' }) as any
+    return apiKey
   }
 
   const updateUser = async (updates: Partial<User>) => {
@@ -168,6 +174,7 @@ export const useApi = () => {
 
   return {
     getUser,
+    generateApiKey,
     updateUser,
     getDevices,
     createDevice,

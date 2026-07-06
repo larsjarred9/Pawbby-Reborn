@@ -30,6 +30,8 @@ model User {
   notifyDashEmpty       Boolean @default(true)
   notifyDashFlatten     Boolean @default(true)
   notifyDashError       Boolean @default(true)
+  
+  apiKey                String? @unique
 }
 
 model Pet {
