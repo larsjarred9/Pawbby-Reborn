@@ -15,6 +15,7 @@ model User {
   avatarUrl    String?
   weightUnit   String   @default("kg")
   webhookUrl   String?
+  timezone     String?  @default("UTC")
   
   notifyPushVisit       Boolean @default(true)
   notifyPushAutoClean   Boolean @default(false)
@@ -29,6 +30,8 @@ model User {
   notifyDashEmpty       Boolean @default(true)
   notifyDashFlatten     Boolean @default(true)
   notifyDashError       Boolean @default(true)
+  
+  apiKey                String? @unique
 }
 
 model Pet {

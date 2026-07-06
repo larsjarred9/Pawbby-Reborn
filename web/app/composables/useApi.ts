@@ -8,6 +8,8 @@ export interface User {
   avatarUrl?: string
   weightUnit?: 'kg' | 'lb'
   webhookUrl?: string
+  timezone?: string
+  apiKey?: string
 }
 
 export interface Pet {
@@ -59,6 +61,11 @@ export const useApi = () => {
   const getUser = async (): Promise<User> => {
     const { user } = await $fetch('/api/settings') as any
     return user
+  }
+
+  const generateApiKey = async (): Promise<string> => {
+    const { apiKey } = await $fetch('/api/auth/api-key', { method: 'POST' }) as any
+    return apiKey
   }
 
   const updateUser = async (updates: Partial<User>) => {
@@ -117,6 +124,10 @@ export const useApi = () => {
     const { event } = await $fetch('/api/events', { method: 'POST', body: data }) as any
     return event
   }
+  const assignPetToEvent = async (id: string, petId: string | null) => {
+    const { event } = await $fetch('/api/events', { method: 'PUT', body: { id, petId } }) as any
+    return event
+  }
   const triggerClean = async (deviceId: string) => {
     await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'clean' } })
   }
@@ -163,6 +174,7 @@ export const useApi = () => {
 
   return {
     getUser,
+    generateApiKey,
     updateUser,
     getDevices,
     createDevice,
@@ -171,6 +183,7 @@ export const useApi = () => {
     getDevice,
     getLogs,
     createEvent,
+    assignPetToEvent,
     triggerClean,
     triggerFlatten,
     triggerEmpty,

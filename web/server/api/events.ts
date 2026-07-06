@@ -16,6 +16,18 @@ export default defineEventHandler(async (event) => {
     return { success: true, event: newEvent }
   }
 
+  if (method === 'PUT') {
+    const body = await readBody(event)
+    if (!body.id || body.petId === undefined) {
+      return { success: false, error: 'Missing id or petId' }
+    }
+    const updatedEvent = await prisma.litterEvent.update({
+      where: { id: body.id },
+      data: { petId: body.petId }
+    })
+    return { success: true, event: updatedEvent }
+  }
+
   const query = getQuery(event)
   const deviceId = query.deviceId as string
 
@@ -48,7 +60,9 @@ export default defineEventHandler(async (event) => {
       const name = pet ? pet.name : 'An unknown cat'
       description = `${name} used the litter box (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'quick-visit') {
-      description = `A cat visited but didn't use it (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
+      const pet = pets.find(p => p.id === e.petId)
+      const name = pet ? pet.name : 'A cat'
+      description = `${name} visited but didn't use it (Weight: ${formatWeight(e.weight || 0)}, Duration: ${e.duration}s)`
     } else if (e.type === 'reset-deodorizer' && e.rawData) {
       try {
         const parsed = JSON.parse(e.rawData)
@@ -94,6 +108,15 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    const timeZone = user?.timezone || 'UTC'
+    let timestampStr = ''
+    try {
+      timestampStr = new Date(e.timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone })
+    } catch (err) {
+      // Fallback if invalid timezone string
+      timestampStr = new Date(e.timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
+    }
+
     return {
       id: e.id,
       deviceId: e.deviceId,
@@ -101,7 +124,7 @@ export default defineEventHandler(async (event) => {
       type: e.type,
       rawTimestamp: e.timestamp.toISOString(),
       // Format to MM/DD HH:mm
-      timestamp: new Date(e.timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }),
+      timestamp: timestampStr,
       description
     }
   })
