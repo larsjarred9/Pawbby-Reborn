@@ -31,7 +31,7 @@ model User {
   notifyDashFlatten     Boolean @default(true)
   notifyDashError       Boolean @default(true)
   
-  apiKey                String? @unique
+  apiKey                String?
 }
 
 model Pet {
