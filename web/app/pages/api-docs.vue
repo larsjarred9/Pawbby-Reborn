@@ -37,7 +37,7 @@
 
         <h3 class="font-bold text-sm mb-2 text-white/80">Example cURL</h3>
         <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto whitespace-pre">
-curl -X POST http://localhost:3000/api/external/action \
+curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/action \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"deviceId": "device_id_here", "action": "clean"}'
@@ -62,7 +62,7 @@ curl -X POST http://localhost:3000/api/external/action \
 
         <h3 class="font-bold text-sm mb-2 text-white/80">Example cURL</h3>
         <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto whitespace-pre">
-curl "http://localhost:3000/api/external/events?deviceId=device_id_here&limit=10&from=2023-10-01T00:00:00Z" \
+curl "http://YOUR_PAWBBY_IP:3333/api/external/events?deviceId=device_id_here&limit=10&from=2023-10-01T00:00:00Z" \
   -H "Authorization: Bearer YOUR_API_KEY"
         </div>
       </section>
