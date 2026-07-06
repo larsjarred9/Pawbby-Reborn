@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,9 +8,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare && prisma generate",
     "anonymize": "node scripts/anonymize.js",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
