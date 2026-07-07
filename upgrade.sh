@@ -11,7 +11,11 @@ git pull origin main
 # 2. Navigate to web app
 cd web || { echo "❌ Failed to enter 'web' directory"; exit 1; }
 
-# 3. Install new dependencies if any
+# 3. Clear Vite/Nuxt cache to prevent manifest errors
+echo "🧹 Clearing Nuxt cache..."
+npx nuxi clean
+
+# 4. Install new dependencies if any
 echo "📦 Installing any new dependencies..."
 npm install
 
