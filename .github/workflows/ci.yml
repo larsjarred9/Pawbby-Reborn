@@ -1,0 +1,55 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-pm2-build:
+    name: Test Bare Metal (PM2) Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+          
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./web
+        
+      - name: Test Database Sync (Prisma)
+        run: npx prisma db push
+        working-directory: ./web
+        env:
+          DATABASE_URL: file:./dev.db
+          
+      - name: Test Nuxt Build
+        run: npm run build
+        working-directory: ./web
+        
+      - name: Install PM2
+        run: sudo npm install -g pm2
+        
+      - name: Test PM2 Startup
+        run: |
+          pm2 start ecosystem.config.cjs --env production
+          sleep 5
+          pm2 status pawbby
+
+  test-docker-build:
+    name: Test Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Test Docker Compose Build
+        run: docker compose build

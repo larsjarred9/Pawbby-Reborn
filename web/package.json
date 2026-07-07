@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && prisma generate",
+    "postinstall": "nuxt prepare",
     "anonymize": "node scripts/anonymize.js",
     "setup": "node scripts/setup.js",
     "db:push": "npx prisma db push"
