@@ -11,7 +11,11 @@ try {
   envFile.split('\n').forEach(line => {
     const match = line.match(/^([^#=]+)=(.*)$/);
     if (match) {
-      env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
+      let val = match[2].trim().replace(/^["']|["']$/g, '');
+      if (match[1].trim() === 'DATABASE_URL' && val.startsWith('file:./')) {
+        val = 'file:' + path.join(__dirname, 'web', val.replace('file:./', ''));
+      }
+      env[match[1].trim()] = val;
     }
   });
 } catch (e) {

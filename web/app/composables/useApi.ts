@@ -46,6 +46,8 @@ export interface DeviceLog {
   deviceId: string
   petId?: string
   type: 'toileted' | 'manual-clean' | 'auto-clean' | 'flatten' | 'empty' | 'error' | 'tuya-raw-data' | 'reset-deodorizer'
+  rawTimestamp?: string
+  localDate?: string
   timestamp: string
   description: string
 }
