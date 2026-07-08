@@ -796,7 +796,7 @@ const getPetLogCount = (petId: string) => {
   return logs.value.filter(l => {
     if (l.petId !== petId) return false
     if (l.type !== 'toileted' && l.type !== 'quick-visit') return false
-    if (selectedDateFilter.value && (!l.rawTimestamp || !l.rawTimestamp.startsWith(selectedDateFilter.value))) return false
+    if (selectedDateFilter.value && l.localDate !== selectedDateFilter.value) return false
     return true
   }).length
 }
@@ -804,7 +804,7 @@ const getPetLogCount = (petId: string) => {
 const getAllLogCount = computed(() => {
   return logs.value.filter(l => {
     if (l.type !== 'toileted' && l.type !== 'quick-visit') return false
-    if (selectedDateFilter.value && (!l.rawTimestamp || !l.rawTimestamp.startsWith(selectedDateFilter.value))) return false
+    if (selectedDateFilter.value && l.localDate !== selectedDateFilter.value) return false
     return true
   }).length
 })
@@ -828,8 +828,8 @@ const minDate = computed(() => {
   if (logs.value && logs.value.length > 0) {
     // The logs are ordered by timestamp descending, so the last log is the oldest
     const oldestLog = logs.value[logs.value.length - 1]
-    if (oldestLog && oldestLog.rawTimestamp) {
-      return oldestLog.rawTimestamp.split('T')[0]
+    if (oldestLog && oldestLog.localDate) {
+      return oldestLog.localDate
     }
   }
   return maxDate.value
@@ -844,7 +844,7 @@ const filteredLogs = computed(() => {
 
     // Date filter logic
     if (selectedDateFilter.value) {
-      if (!log.rawTimestamp || !log.rawTimestamp.startsWith(selectedDateFilter.value)) {
+      if (log.localDate !== selectedDateFilter.value) {
         return false
       }
     }

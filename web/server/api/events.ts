@@ -110,11 +110,15 @@ export default defineEventHandler(async (event) => {
 
     const timeZone = user?.timezone || 'UTC'
     let timestampStr = ''
+    let localDateStr = ''
     try {
       timestampStr = new Date(e.timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone })
+      const formatter = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })
+      localDateStr = formatter.format(new Date(e.timestamp))
     } catch (err) {
       // Fallback if invalid timezone string
       timestampStr = new Date(e.timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
+      localDateStr = e.timestamp.toISOString().split('T')[0]
     }
 
     return {
@@ -123,6 +127,7 @@ export default defineEventHandler(async (event) => {
       petId: e.petId,
       type: e.type,
       rawTimestamp: e.timestamp.toISOString(),
+      localDate: localDateStr,
       // Format to MM/DD HH:mm
       timestamp: timestampStr,
       description
