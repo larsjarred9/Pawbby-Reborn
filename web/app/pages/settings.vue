@@ -142,6 +142,22 @@
         </div>
       </button>
 
+      <!-- Home Assistant (MQTT) -->
+      <button @click="showMqttModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+          </svg>
+          <span class="font-medium text-lg">Home Assistant (MQTT)</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.mqttEnabled ? 'Enabled' : 'Setup' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Check for Updates -->
       <button @click="handleUpdateClick"
         class="w-full flex items-center justify-between text-white/90 hover:text-white group">
@@ -304,6 +320,58 @@
         </div>
         <div class="mt-6">
           <button @click="showNotificationsModal = false"
+            class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Assistant (MQTT) Modal -->
+    <div v-if="showMqttModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up max-h-[90vh] overflow-y-auto no-scrollbar">
+        <h3 class="text-xl font-bold text-white mb-2">Home Assistant (MQTT)</h3>
+        <p class="text-xs text-pawbby-muted mb-6">Publish your litter box to Home Assistant via MQTT auto-discovery. Entities (sensors + action buttons) appear automatically — no YAML required. Point this at your broker (e.g. the Mosquitto add-on).</p>
+        <div v-if="user" class="space-y-4">
+          <label class="flex items-center justify-between text-sm text-white/90 cursor-pointer">
+            <span class="font-medium">Enable MQTT Bridge</span>
+            <input type="checkbox" v-model="user.mqttEnabled" @change="saveMqttSettings" class="accent-pawbby-primary w-5 h-5 rounded" />
+          </label>
+          <div>
+            <label class="block text-sm text-pawbby-muted mb-1">Broker Host</label>
+            <input v-model="user.mqttHost" @change="saveMqttSettings" type="text" placeholder="192.168.1.10 or homeassistant.local"
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+          </div>
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="block text-sm text-pawbby-muted mb-1">Port</label>
+              <input v-model.number="user.mqttPort" @change="saveMqttSettings" type="number" placeholder="1883"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm text-pawbby-muted mb-1">Base Topic</label>
+              <input v-model="user.mqttBaseTopic" @change="saveMqttSettings" type="text" placeholder="pawbby"
+                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm text-pawbby-muted mb-1">Username <span class="text-pawbby-mutedDark">(optional)</span></label>
+            <input v-model="user.mqttUsername" @change="saveMqttSettings" type="text" autocomplete="off"
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+          </div>
+          <div>
+            <label class="block text-sm text-pawbby-muted mb-1">Password <span class="text-pawbby-mutedDark">(optional)</span></label>
+            <input v-model="user.mqttPassword" @change="saveMqttSettings" type="password" autocomplete="new-password"
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
+          </div>
+
+          <button @click="testMqtt" :disabled="testingMqtt || !user.mqttHost"
+            class="w-full py-3 bg-pawbby-primary/10 text-[#3D7A41] font-semibold rounded-xl hover:bg-pawbby-primary/20 transition-colors disabled:opacity-50 text-sm">
+            {{ testingMqtt ? 'Testing...' : 'Test Connection' }}
+          </button>
+        </div>
+        <div class="mt-6">
+          <button @click="showMqttModal = false"
             class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
             Close
           </button>
@@ -574,6 +642,8 @@ const checkForUpdates = async (silent = false) => {
 
 const webhookUrl = ref('')
 const testingWebhook = ref(false)
+const showMqttModal = ref(false)
+const testingMqtt = ref(false)
 const showNotificationsModal = ref(false)
 const showNotificationControlsModal = ref(false)
 const showTimezoneModal = ref(false)
@@ -637,6 +707,44 @@ const testWebhook = async () => {
     alert('Failed to send test notification. Check the URL.')
   } finally {
     testingWebhook.value = false
+  }
+}
+
+const saveMqttSettings = async () => {
+  if (!user.value) return
+  await api.updateUser({
+    mqttEnabled: user.value.mqttEnabled,
+    mqttHost: user.value.mqttHost,
+    mqttPort: user.value.mqttPort,
+    mqttUsername: user.value.mqttUsername,
+    mqttPassword: user.value.mqttPassword,
+    mqttBaseTopic: user.value.mqttBaseTopic
+  })
+}
+
+const testMqtt = async () => {
+  if (!user.value?.mqttHost) return
+  testingMqtt.value = true
+  try {
+    const res = await fetch('/api/mqtt/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mqttHost: user.value.mqttHost,
+        mqttPort: user.value.mqttPort,
+        mqttUsername: user.value.mqttUsername,
+        mqttPassword: user.value.mqttPassword
+      })
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.statusMessage || 'Connection failed')
+    }
+    alert('Successfully connected to the MQTT broker!')
+  } catch (e: any) {
+    alert('Failed to connect: ' + (e?.message || 'Check host, port and credentials.'))
+  } finally {
+    testingMqtt.value = false
   }
 }
 

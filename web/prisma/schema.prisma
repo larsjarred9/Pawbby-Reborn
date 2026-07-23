@@ -32,6 +32,13 @@ model User {
   notifyDashError       Boolean @default(true)
   
   apiKey                String?
+
+  mqttEnabled           Boolean @default(false)
+  mqttHost              String?
+  mqttPort              Int?     @default(1883)
+  mqttUsername          String?
+  mqttPassword          String?
+  mqttBaseTopic         String?  @default("pawbby")
 }
 
 model Pet {

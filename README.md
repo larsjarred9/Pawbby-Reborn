@@ -50,6 +50,24 @@ _(Alternatively, you can still update PM2 manually by running `./upgrade.sh` fro
 
 ---
 
+## 🏠 Home Assistant Integration
+
+Pawbby Reborn exposes a local REST API so you can pull your litter box into Home Assistant — no cloud, no custom component.
+
+1. Open the **Settings** tab and generate an **API Key**.
+2. Open **API Documentation** in the dashboard for a ready-to-paste `configuration.yaml` snippet.
+3. It uses Home Assistant's built-in `rest` integration to create sensors (status, waste bin, litter level, visits today, last visit weight/pet, deodorizer life, plus online/lid-open/bin-full binary sensors) and `rest_command`s to trigger **clean**, **flatten**, and **empty**.
+
+The key endpoints (all authenticate with `Authorization: Bearer YOUR_API_KEY`):
+
+| Method | Endpoint               | Purpose                               |
+| :----- | :--------------------- | :------------------------------------ |
+| `GET`  | `/api/external/state`  | Current device state (for HA sensors) |
+| `GET`  | `/api/external/events` | Recent event history                  |
+| `POST` | `/api/external/action` | Trigger `clean` / `flatten` / `empty` |
+
+---
+
 ## 📤 Sharing Your Database for Development
 
 Because the dashboard saves the raw Tuya JSON payloads from your litter box directly into the database, sharing your database with the developers is incredibly helpful for finding missing commands (like the remote auto-clean trigger).

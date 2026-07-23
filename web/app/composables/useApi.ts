@@ -10,6 +10,12 @@ export interface User {
   webhookUrl?: string
   timezone?: string
   apiKey?: string
+  mqttEnabled?: boolean
+  mqttHost?: string
+  mqttPort?: number
+  mqttUsername?: string
+  mqttPassword?: string
+  mqttBaseTopic?: string
 }
 
 export interface Pet {
