@@ -13,7 +13,9 @@ WORKDIR /app/web
 # Install dependencies and build the Nuxt app
 RUN npm install
 RUN DATABASE_URL="file:./dev.db" npx prisma generate
-RUN npm run build
+# GOMAXPROCS=1 works around an esbuild (Go) memory-corruption crash when the
+# arm64 image is built under QEMU emulation (e.g. multi-arch release builds).
+RUN GOMAXPROCS=1 npm run build
 
 # Default environment variables
 ENV NODE_ENV=production
