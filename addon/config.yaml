@@ -1,0 +1,27 @@
+name: "Pawbby Reborn"
+description: "Local Tuya device listener and dashboard for Pawbby smart litter boxes."
+version: "0.6.0"
+slug: "pawbby_reborn"
+url: "https://github.com/larsjarred9/Pawbby-Reborn"
+image: "ghcr.io/larsjarred9/pawbby-reborn"
+arch:
+  - amd64
+  - aarch64
+startup: "services"
+boot: "auto"
+
+# Host network is required so the container can receive local Tuya UDP broadcast packets for auto-discovery
+host_network: true
+
+# Provide a direct web UI link to the dashboard bypassing Ingress URL rewrite issues
+webui: "http://[HOST]:3333"
+
+# Force the Docker container to store the database in the HA persistent data folder
+environment:
+  DATABASE_URL: "file:/data/pawbby.db"
+  HOST: "0.0.0.0"
+  PORT: "3333"
+
+options: {}
+schema: {}
+panel_icon: "mdi:cat"
