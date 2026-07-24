@@ -1,7 +1,7 @@
 
 services:
   pawbby-reborn:
-    build: .
+    image: ghcr.io/larsjarred9/pawbby-reborn:latest
     container_name: pawbby-reborn
     ports:
       # Maps port 3333 on the host machine to port 3333 inside the container
