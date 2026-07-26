@@ -14,7 +14,7 @@
     "db:push": "npx prisma db push"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.10.1",
+    "@inquirer/prompts": "^8.5.2",
     "@prisma/client": "^6.19.3",
     "chart.js": "^4.5.1",
     "nuxt": "^4.4.8",
