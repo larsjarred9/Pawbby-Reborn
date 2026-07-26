@@ -30,9 +30,45 @@ There are three primary ways to run the dashboard. Choose the one that best fits
 
 | Method                | Guide                                                                                             | Use Case                                                    | Pros                                                                                              | Cons                                                                                     |
 | :-------------------- | :------------------------------------------------------------------------------------------------ | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
-| **PM2** (Recommended) | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/PM2-Deployment-(Recommended)>) | Best for most users, Raspberry Pi, or direct Linux installs | ⚡ Very lightweight<br>✨ Full support for 1-Click Updates<br>🔄 Restarts automatically on reboot | ℹ️ Requires installing PM2 globally                                                      |
-| **Docker**            | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/Docker-Deployment-(Advanced)>) | Best for advanced users with Synology or Unraid servers     | 🐳 Cleanest installation<br>📦 Keeps dependencies isolated<br>🔄 Restarts automatically on reboot | ❌ 1-Click Update feature disabled (requires manual `docker compose up --build` instead) |
+| **Home Assistant**    | [📖 Read Below](#home-assistant-add-on)                                                            | Best for Home Assistant OS users                            | 🏠 Natively integrated<br>🔄 1-click install & updates<br>🛡️ Bulletproof data persistence        | None!                                                                                    |
+| **PM2**               | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/PM2-Deployment-(Recommended)>) | Best for most users, Raspberry Pi, or direct Linux installs | ⚡ Very lightweight<br>✨ Full support for 1-Click Updates<br>🔄 Restarts automatically on reboot | ℹ️ Requires installing PM2 globally                                                      |
+| **Docker**            | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/Docker-Deployment-(Advanced)>) | Best for advanced users with Synology or Unraid servers     | 🐳 Cleanest installation<br>📦 Keeps dependencies isolated<br>🔄 Restarts automatically on reboot | ❌ 1-Click Update feature disabled (requires manual `docker compose pull` instead)       |
 | **NPM (Dev)**         | [📖 Read Guide](<https://github.com/larsjarred9/Pawbby-Reborn/wiki/NPM-Setup-(Development)>)      | Best for testing and development                            | 🛠️ Hot Module Replacement (HMR)<br>🚀 Instant feedback when coding                                | 🛑 Shuts down when terminal closes<br>🛑 Not suitable for 24/7 background usage          |
+
+### Home Assistant Add-on
+To install natively in Home Assistant OS:
+1. Go to **Settings** -> **Add-ons** -> **Add-on Store**.
+2. Click the three dots in the top right corner and select **Repositories**.
+3. Add `https://github.com/larsjarred9/Pawbby-Reborn` and click Add.
+4. Close the modal, reload the page, search for **Pawbby Reborn**, and click Install!
+
+### Docker Quickstart (GHCR)
+We officially host multi-architecture Docker images on the GitHub Container Registry (GHCR)! You no longer need to clone the repository to run Docker.
+
+Simply create a `docker-compose.yml` file anywhere on your server:
+```yaml
+services:
+  pawbby-reborn:
+    image: ghcr.io/larsjarred9/pawbby-reborn:latest
+    container_name: pawbby-reborn
+    ports:
+      - "3333:3333"
+    volumes:
+      - pawbby_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  pawbby_data:
+```
+Then run:
+```bash
+docker compose up -d
+```
+
+**Or, if you prefer a one-liner without a compose file:**
+```bash
+docker run -d --name pawbby-reborn -p 3333:3333 -v pawbby_data:/app/data --restart unless-stopped ghcr.io/larsjarred9/pawbby-reborn:latest
+```
 
 ---
 
@@ -43,6 +79,16 @@ We are actively discovering new payloads and improving the dashboard. As of **ve
 1. If an update is available, a green banner will appear on your dashboard.
 2. Click **Review & Update**.
 3. Click **Confirm & Update**. The app will automatically pull the newest code, install dependencies, sync the database, and restart your PM2 service without you ever touching a terminal!
+
+### Docker Updates
+If you are running via Docker Compose, the UI auto-updater is disabled. To update, simply run:
+```bash
+docker compose pull
+docker compose up -d
+```
+
+### Home Assistant Updates
+If you are running the Home Assistant Add-on, simply navigate to your **Home Assistant Settings -> Add-ons -> Pawbby Reborn** and click **Update**.
 
 _⚠️ **Note for Early Adopters:** If you are currently running version `0.1.x`, you cannot use the auto-updater. Please read the [UPGRADING.md](UPGRADING.md) guide for manual instructions to transition your installation to the new `0.3.0` architecture._
 

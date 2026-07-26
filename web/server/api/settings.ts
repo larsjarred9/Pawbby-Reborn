@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     if (body.user) {
       // Destructure to prevent mass assignment vulnerabilities
       const {
-        name, email, weightUnit, webhookUrl, timezone,
+        name, email, weightUnit, webhookUrl, timezone, enableAutomatedBackups,
         notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
         notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError,
         mqttEnabled, mqttHost, mqttPort, mqttUsername, mqttPassword, mqttBaseTopic
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const safeData = {
-        name, email, weightUnit, webhookUrl, timezone,
+        name, email, weightUnit, webhookUrl, timezone, enableAutomatedBackups,
         notifyPushVisit, notifyPushAutoClean, notifyPushManualClean, notifyPushEmpty, notifyPushFlatten, notifyPushError,
         notifyDashVisit, notifyDashAutoClean, notifyDashManualClean, notifyDashEmpty, notifyDashFlatten, notifyDashError,
         mqttEnabled, mqttHost, mqttPort: mqttPortValue, mqttUsername, mqttPassword, mqttBaseTopic

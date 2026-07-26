@@ -664,12 +664,33 @@ const editDevice = ref({
   localKey: ''
 })
 
+let initialDateSet = false
+
 const loadData = async () => {
   const devices = await api.getDevices()
   device.value = devices.find((d: any) => d.id === deviceId) || null
   pets.value = await api.getPets()
   user.value = await api.getUser()
-  logs.value = await api.getLogs(deviceId)
+  
+  if (!initialDateSet && user.value) {
+    selectedDateFilter.value = getLocalYMD(new Date(), user.value.timezone)
+    initialDateSet = true
+  }
+
+  const rawLogs = await api.getLogs(deviceId)
+  const timeZone = user.value?.timezone || 'UTC'
+
+  logs.value = rawLogs.map((log: any) => {
+    let timestampStr = log.timestamp
+    let localDateStr = log.localDate
+    
+    if (log.rawTimestamp) {
+      timestampStr = formatLogTime(log.rawTimestamp, timeZone)
+      localDateStr = formatLocalDate(log.rawTimestamp, timeZone)
+    }
+    
+    return { ...log, timestamp: timestampStr, localDate: localDateStr }
+  })
 }
 
 const loadHistory = async () => {
@@ -809,19 +830,14 @@ const getAllLogCount = computed(() => {
   }).length
 })
 
-const getLocalYMD = (d: Date) => {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+
 
 // Filtering
 const selectedPetFilter = ref('all')
 const selectedDateFilter = ref(getLocalYMD(new Date()))
 
 const maxDate = computed(() => {
-  return getLocalYMD(new Date())
+  return getLocalYMD(new Date(), user.value?.timezone)
 })
 
 const minDate = computed(() => {

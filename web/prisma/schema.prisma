@@ -16,6 +16,7 @@ model User {
   weightUnit   String   @default("kg")
   webhookUrl   String?
   timezone     String?  @default("UTC")
+  enableAutomatedBackups Boolean @default(true)
   
   notifyPushVisit       Boolean @default(true)
   notifyPushAutoClean   Boolean @default(false)

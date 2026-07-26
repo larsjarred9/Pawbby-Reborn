@@ -158,6 +158,22 @@
         </div>
       </button>
 
+      <!-- Automated Daily Backups -->
+      <button @click="toggleAutomatedBackups" v-if="user" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+          </svg>
+          <span class="font-medium text-lg">Daily Backups</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user.enableAutomatedBackups ? 'Enabled' : 'Disabled' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Check for Updates -->
       <button @click="handleUpdateClick"
         class="w-full flex items-center justify-between text-white/90 hover:text-white group">
@@ -672,6 +688,12 @@ const saveTimezone = async () => {
 const saveWebhookUrl = async () => {
   if (!user.value) return
   await api.updateUser({ webhookUrl: webhookUrl.value })
+}
+
+const toggleAutomatedBackups = async () => {
+  if (!user.value) return
+  user.value.enableAutomatedBackups = !user.value.enableAutomatedBackups
+  await saveNotificationSettings()
 }
 
 const saveNotificationSettings = async () => {
