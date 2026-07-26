@@ -15,6 +15,13 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // 4. The external API (Home Assistant & other integrations) authenticates with a
+  // Bearer API key inside each handler, not the dashboard session cookie. Let it
+  // through here so that Bearer check can actually run.
+  if (event.path.startsWith('/api/external/')) {
+    return
+  }
+
   // 4. Verify the session
   const sessionConfig = {
     password: process.env.SESSION_PASSWORD || 'pawbby-reborn-local-secret-32-chars!',

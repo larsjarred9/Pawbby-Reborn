@@ -421,6 +421,10 @@ export default defineNitroPlugin((nitroApp) => {
 
           if (stateChanged) {
             deviceStates.set(config.id, state);
+            // Let integrations (e.g. the MQTT bridge) push fresh state immediately.
+            nitroApp.hooks.callHook("device:state-changed" as any, {
+              deviceId: config.id,
+            });
           }
         };
 
