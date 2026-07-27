@@ -16,7 +16,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const isPublicRoute = PUBLIC_ROUTES.includes(to.path)
 
   if (isAuthenticated) {
-    // If logged in and trying to access an auth page, redirect home
+    // Sub-users are completely blocked from the settings and users pages
+    if ((to.path === '/settings' || to.path === '/users') && !data.value.isAdmin) return navigateTo('/')
+
+    // If logged in and trying to access an auth page (and it's not the admin registering), redirect home
     if (isPublicRoute) return navigateTo('/')
     return
   }

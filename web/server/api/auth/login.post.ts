@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
   
   const session = await useSession(event, sessionConfig)
-  await session.update({ userId: user.id })
+  await session.update({ userId: user.id, role: user.role })
 
-  return { success: true, user: { id: user.id, name: user.name, email: user.email } }
+  return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
 })

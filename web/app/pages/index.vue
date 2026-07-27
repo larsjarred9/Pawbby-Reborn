@@ -4,7 +4,7 @@
     <header class="flex justify-between items-center p-6 pb-4">
       <div class="w-6"></div> <!-- Spacer for centering -->
       <img src="/logo-nobg.png" alt="PAWBBY" class="h-12 object-contain" />
-      <button @click="showAddModal = true" class="text-2xl text-white/80 hover:text-white transition-colors">
+      <button v-if="user?.role === 'ADMIN'" @click="showAddModal = true" class="text-2xl text-white/80 hover:text-white transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
           stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -16,7 +16,7 @@
     <div class="px-4 py-2 space-y-4 pb-20">
 
       <!-- Update Banner -->
-      <div v-if="showUpdateBanner" class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-4 flex items-center justify-between mb-2">
+      <div v-if="user?.role === 'ADMIN' && showUpdateBanner" class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-4 flex items-center justify-between mb-2">
         <div class="flex items-center space-x-3">
           <div class="bg-[#3D7A41]/20 p-2 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#3D7A41]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -427,6 +427,7 @@ const api = useApi()
 const devices = ref<any[]>([])
 const showAddModal = ref(false)
 const isSaving = ref(false)
+const user = ref<any>(null)
 
 const newDevice = ref({
   name: '',
@@ -438,6 +439,7 @@ const newDevice = ref({
 
 const loadDevices = async () => {
   devices.value = await api.getDevices()
+  user.value = await api.getUser()
 }
 
 const currentStep = ref(1)

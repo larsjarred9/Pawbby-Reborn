@@ -14,6 +14,7 @@ model User {
   avatarUrl    String?
   weightUnit   String   @default("kg")
   webhookUrl   String?
+  role         String   @default("ADMIN")
   timezone     String?  @default("UTC")
   enableAutomatedBackups Boolean @default(true)
   

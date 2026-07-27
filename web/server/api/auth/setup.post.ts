@@ -13,9 +13,38 @@ export default defineEventHandler(async (event) => {
   let user = await prisma.user.findFirst()
 
   if (user) {
-    // If user exists AND has a password, setup is already complete!
     if (user.passwordHash) {
-      throw createError({ statusCode: 403, statusMessage: 'Setup already completed. Please login.' })
+      // If user exists and has a password, we only allow creating a new account if logged in as an ADMIN
+      const sessionConfig = {
+        password: process.env.SESSION_PASSWORD || 'pawbby-reborn-local-secret-32-chars!',
+      }
+      const session = await useSession(event, sessionConfig)
+      let isAdmin = false
+      if (session.data.userId) {
+        if (session.data.role) {
+          isAdmin = session.data.role === 'ADMIN'
+        } else {
+          // Legacy session without role, check DB
+          const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
+          isAdmin = dbUser?.role === 'ADMIN'
+        }
+      }
+
+      if (!isAdmin) {
+        throw createError({ statusCode: 403, statusMessage: 'Only administrators can create new accounts.' })
+      }
+
+      // Create new sub-user
+      const subUser = await prisma.user.create({
+        data: {
+          name,
+          email,
+          passwordHash: hashPassword(password),
+          role: 'USER'
+        }
+      })
+      
+      return { success: true, user: { id: subUser.id, name: subUser.name, email: subUser.email, role: subUser.role } }
     }
 
     // User exists but NO password (0.3.0 migration)
@@ -24,16 +53,18 @@ export default defineEventHandler(async (event) => {
       data: {
         name,
         email,
-        passwordHash: hashPassword(password)
+        passwordHash: hashPassword(password),
+        role: 'ADMIN' // Ensure migrated user is admin
       }
     })
   } else {
-    // 2. Create new user
+    // 2. Create the very first user (ADMIN)
     user = await prisma.user.create({
       data: {
         name,
         email,
-        passwordHash: hashPassword(password)
+        passwordHash: hashPassword(password),
+        role: 'ADMIN'
       }
     })
   }
@@ -48,7 +79,7 @@ export default defineEventHandler(async (event) => {
   }
   
   const session = await useSession(event, sessionConfig)
-  await session.update({ userId: user.id })
+  await session.update({ userId: user.id, role: user.role })
 
-  return { success: true, user: { id: user.id, name: user.name, email: user.email } }
+  return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
 })

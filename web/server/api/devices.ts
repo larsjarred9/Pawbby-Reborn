@@ -20,6 +20,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "POST") {
+    if (event.context.userRole !== "ADMIN") {
+      throw createError({ statusCode: 403, statusMessage: "Only administrators can modify devices." });
+    }
+
     const body = await readBody(event);
 
     // Create new device
@@ -45,6 +49,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "PUT") {
+    if (event.context.userRole !== "ADMIN") {
+      throw createError({ statusCode: 403, statusMessage: "Only administrators can modify devices." });
+    }
+
     const body = await readBody(event);
     const { id, name, mode, deviceId, ipAddress, localKey, tuyaClientId, tuyaClientSecret, tuyaRegion, deodorizerDuration } = body;
     if (!id) throw new Error("Device ID required for update");
@@ -69,6 +77,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "DELETE") {
+    if (event.context.userRole !== "ADMIN") {
+      throw createError({ statusCode: 403, statusMessage: "Only administrators can delete devices." });
+    }
+
     const query = getQuery(event);
     if (query.id) {
       await prisma.device.delete({ where: { id: String(query.id) } });

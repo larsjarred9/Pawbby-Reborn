@@ -28,6 +28,7 @@
         </div>
 
         <p v-if="errorMsg" class="text-[#D84C4C] text-sm text-center py-2">{{ errorMsg }}</p>
+        <p v-if="successMsg" class="text-[#3D7A41] text-sm text-center py-2">{{ successMsg }}</p>
 
         <button type="submit" :disabled="isLoading"
           class="w-full mt-8 py-4 bg-[#3D7A41] text-white font-bold text-lg rounded-xl shadow-lg shadow-[#3D7A41]/20 hover:bg-[#3D7A41]/90 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
@@ -50,17 +51,19 @@ const form = ref({
 })
 const isLoading = ref(false)
 const errorMsg = ref('')
+const successMsg = ref('')
+const isSubUserSetup = ref(false)
 
 async function handleRegister() {
   isLoading.value = true
   errorMsg.value = ''
+  successMsg.value = ''
   
   try {
     await $fetch('/api/auth/setup', {
       method: 'POST',
       body: form.value
     })
-    // Force hard reload to re-run middleware and get past the setup wizard if needed
     window.location.href = '/'
   } catch (err: any) {
     errorMsg.value = err.data?.statusMessage || 'An error occurred during registration.'
