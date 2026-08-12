@@ -73,7 +73,7 @@ jobs:
 
       - name: Build and push image
         if: steps.check.outputs.exists == 'false'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: ${{ github.event.inputs.platforms || 'linux/amd64,linux/arm64' }}
