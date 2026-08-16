@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^7.9.1",
     "chart.js": "^4.5.1",
     "mqtt": "^5.15.2",
     "nuxt": "^4.4.8",
