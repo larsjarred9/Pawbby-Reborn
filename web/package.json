@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "type": "module",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^7.9.1",
     "chart.js": "^4.5.1",
     "mqtt": "^5.15.2",
     "nuxt": "^4.4.8",
@@ -28,6 +28,6 @@
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/spark-md5": "^3.0.5",
-    "prisma": "^6.19.3"
+    "prisma": "^7.9.1"
   }
 }
