@@ -127,7 +127,8 @@ jobs:
             if [ -f pawbby_reborn/CHANGELOG.md ]; then
               cat pawbby_reborn/CHANGELOG.md
             fi
-          } > pawbby_reborn/CHANGELOG.md
+          } > pawbby_reborn/CHANGELOG.tmp
+          mv pawbby_reborn/CHANGELOG.tmp pawbby_reborn/CHANGELOG.md
 
           # Commit and push
           git config user.name "github-actions[bot]"
