@@ -70,12 +70,20 @@ DATABASE_URL="${customDbUrl}"
   fs.writeFileSync(envPath, envContent);
   console.log('\n✅ Successfully generated .env file!');
 
-  console.log('🗄️  Initializing the database schema...');
+  console.log('🗄️  Applying database migrations...');
   try {
-    execSync('npx prisma db push', { stdio: 'inherit' });
-    console.log('✅ Database synchronized successfully!');
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    console.log('✅ Database migrations successful!');
   } catch (error) {
-    console.error('❌ Failed to synchronize the database. Please run "npx prisma db push" manually.');
+    console.error('❌ Failed to migrate the database. Please run "npx prisma migrate deploy" manually.');
+  }
+
+  console.log('ℹ️  Performing prisma client generation...');
+  try {
+    execSync('npx prisma generate', { stdio: 'inherit' });
+    console.log('✅ Prisma client generation successfull!');
+  } catch (error) {
+    console.error('❌ Failed to generate the client. Please run "npx prisma generate" manually.');
   }
 
   console.log('\n🎉 Setup complete! You are ready to go.');
