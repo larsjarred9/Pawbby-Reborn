@@ -73,15 +73,15 @@
 
     <!-- Setup Wizard Modal -->
     <div v-if="showAddModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-pawbby-card rounded-3xl w-full max-w-xl border border-white/10 relative overflow-hidden shadow-2xl animate-fade-in-up">
+      <div class="bg-pawbby-card rounded-3xl w-full max-w-xl border border-white/10 relative overflow-hidden shadow-2xl animate-fade-in-up flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         
         <!-- Progress Bar -->
-        <div class="absolute top-0 left-0 w-full h-1 bg-white/5">
+        <div class="absolute top-0 left-0 w-full h-1 bg-white/5 z-10">
           <div class="h-full bg-gradient-to-r from-[#3D7A41] to-[#5BC266] transition-all duration-500"
                :style="{ width: (currentStep / 7) * 100 + '%' }"></div>
         </div>
 
-        <div class="p-8">
+        <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1 mt-1">
           <div class="flex justify-between items-center mb-8">
             <h2 class="text-2xl font-bold text-white tracking-tight">
               <span v-if="currentStep === 1">Say Hello 👋</span>

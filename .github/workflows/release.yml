@@ -98,7 +98,7 @@ jobs:
           GH_TOKEN: ${{ secrets.ADDON_REPO_TOKEN }}
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
-          git clone https://x-access-token:${GH_TOKEN}@github.com/larsjarred9/Pawbby-Reborn-HA.git addon-repo
+          gh repo clone larsjarred9/Pawbby-Reborn-HA addon-repo
           cd addon-repo
           sed -i "s/^version: .*/version: \"${VERSION}\"/" pawbby_reborn/config.yaml
           git config user.name "github-actions[bot]"
