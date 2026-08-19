@@ -1,7 +1,14 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   const { data, error } = await useFetch('/api/auth/status')
   
-  if (error.value || !data.value) return
+  if (error.value || !data.value) {
+    // Fail closed: if we can't verify auth status, do not allow access to protected routes
+    const publicRoutes = ['/login', '/register', '/set-password']
+    if (!publicRoutes.includes(to.path)) {
+      return navigateTo('/login')
+    }
+    return
+  }
   
   const { isAuthenticated, hasUser, hasPassword } = data.value
   

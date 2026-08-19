@@ -4,10 +4,7 @@ export default defineEventHandler(async (event) => {
   const method = event.method
 
   if (method === 'GET') {
-    let user = await prisma.user.findFirst()
-    if (!user) {
-      user = await prisma.user.create({ data: { name: 'User', email: 'hello@example.com', weightUnit: 'kg' } })
-    }
+    const user = await prisma.user.findFirst()
     return { user }
   }
 
