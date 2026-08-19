@@ -430,7 +430,6 @@ const api = useApi()
 const devices = ref<any[]>([])
 const showAddModal = ref(false)
 const isSaving = ref(false)
-const user = ref<any>(null)
 
 const newDevice = ref({
   name: '',
@@ -442,7 +441,6 @@ const newDevice = ref({
 
 const loadDevices = async () => {
   devices.value = await api.getDevices()
-  user.value = await api.getUser()
 }
 
 const currentStep = ref(1)

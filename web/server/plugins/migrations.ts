@@ -13,7 +13,7 @@ export default defineNitroPlugin(async (nitroApp) => {
 
     // 3. If there are users, but NO admins, this is an upgrade from 0.6.2
     if (adminCount === 0) {
-      console.log('🔄 Running runtime migration: Elevating existing users to ADMIN to preserve access after 0.7.0 upgrade...')
+      console.log('🔄 Running runtime migration: Elevating all existing pre-RBAC users to ADMIN to preserve their access...')
       await prisma.user.updateMany({
         data: { role: 'ADMIN' }
       })

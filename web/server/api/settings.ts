@@ -9,13 +9,13 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    if (event.context.userRole !== 'ADMIN') {
-      throw createError({ statusCode: 403, statusMessage: 'Only administrators can modify settings.' })
-    }
-
     const body = await readBody(event)
     
     if (body.user) {
+      const sensitiveKeys = ['webhookUrl', 'enableAutomatedBackups', 'mqttEnabled', 'mqttHost', 'mqttPort', 'mqttUsername', 'mqttPassword', 'mqttBaseTopic', 'apiKey']
+      if (event.context.userRole !== 'ADMIN' && sensitiveKeys.some((k) => k in body.user)) {
+        throw createError({ statusCode: 403, statusMessage: 'Only administrators can modify system settings.' })
+      }
       // Destructure to prevent mass assignment vulnerabilities
       const {
         name, email, weightUnit, webhookUrl, timezone, enableAutomatedBackups,

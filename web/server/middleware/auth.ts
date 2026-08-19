@@ -39,7 +39,8 @@ export default defineEventHandler(async (event) => {
   if (!userRole) {
     const prisma = (await import('../utils/prisma')).default
     const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
-    userRole = dbUser?.role
+    userRole = dbUser?.role ?? 'USER'
+    await session.update({ userId: session.data.userId, role: userRole })
   }
 
   // Attach user ID and role to the context so we can use it in API routes if needed

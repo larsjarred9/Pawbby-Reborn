@@ -4,6 +4,7 @@ import { hashPassword } from '../../utils/auth'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { name, email, password } = body
+  const normalizedEmail = String(email).trim().toLowerCase()
 
   if (!name || !email || !password) {
     throw createError({ statusCode: 400, statusMessage: 'Name, email, and password are required' })
@@ -34,11 +35,16 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 403, statusMessage: 'Only administrators can create new accounts.' })
       }
 
+      const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+      if (existing) {
+        throw createError({ statusCode: 409, statusMessage: 'Email already in use' })
+      }
+
       // Create new sub-user
       const subUser = await prisma.user.create({
         data: {
           name,
-          email,
+          email: normalizedEmail,
           passwordHash: hashPassword(password),
           role: 'USER'
         }
@@ -52,7 +58,7 @@ export default defineEventHandler(async (event) => {
       where: { id: user.id },
       data: {
         name,
-        email,
+        email: normalizedEmail,
         passwordHash: hashPassword(password),
         role: 'ADMIN' // Ensure migrated user is admin
       }
@@ -62,7 +68,7 @@ export default defineEventHandler(async (event) => {
     user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         passwordHash: hashPassword(password),
         role: 'ADMIN'
       }

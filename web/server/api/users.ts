@@ -34,10 +34,16 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'Name, email, and password are required' })
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (existing) {
+      throw createError({ statusCode: 409, statusMessage: 'Email already in use' })
+    }
+
     const subUser = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         passwordHash: hashPassword(password),
         role: 'USER'
       }

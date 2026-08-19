@@ -23,6 +23,10 @@ if (dbUrl.startsWith('file:')) {
   // In Prisma, "file:./..." is relative to the prisma/ directory
   if (rawPath.startsWith('./')) {
     dbPath = path.resolve('prisma', rawPath);
+    if (!fs.existsSync(dbPath)) {
+      // Fallback to project root since some setups place it there
+      dbPath = path.resolve(process.cwd(), rawPath);
+    }
   } else {
     dbPath = path.resolve(rawPath);
   }
