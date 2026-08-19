@@ -228,10 +228,6 @@
     </button>
     <!-- Account Actions -->
     <div class="mt-auto pt-8 pb-4 space-y-4">
-      <button @click="doLogout"
-        class="w-full text-center py-4 bg-white/5 text-white font-semibold text-lg hover:bg-white/10 rounded-2xl transition-colors">
-        Log Out
-      </button>
       <button @click="doClearCache"
         class="w-full text-center py-4 text-[#D84C4C] font-semibold text-lg hover:bg-white/5 rounded-2xl transition-colors">
         Remove stored information
@@ -582,7 +578,16 @@ const doGenerateApiKey = async () => {
 const copyApiKey = async () => {
   if (user.value?.apiKey) {
     try {
-      await navigator.clipboard.writeText(user.value.apiKey)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(user.value.apiKey)
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = user.value.apiKey;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
       alert('API Key copied to clipboard!')
     } catch (e) {
       alert('Failed to copy to clipboard.')
@@ -595,15 +600,6 @@ const handleUpdateClick = () => {
     showUpgradeModal.value = true
   } else {
     checkForUpdates()
-  }
-}
-
-const doLogout = async () => {
-  try {
-    await $fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/login'
-  } catch (e) {
-    console.error(e)
   }
 }
 

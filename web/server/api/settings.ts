@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const method = event.method
 
   if (method === 'GET') {
-    const user = await prisma.user.findFirst()
+    const user = await prisma.user.findUnique({ where: { id: event.context.userId } })
     return { user }
   }
 
@@ -12,6 +12,10 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     
     if (body.user) {
+      const sensitiveKeys = ['webhookUrl', 'enableAutomatedBackups', 'mqttEnabled', 'mqttHost', 'mqttPort', 'mqttUsername', 'mqttPassword', 'mqttBaseTopic', 'apiKey']
+      if (event.context.userRole !== 'ADMIN' && sensitiveKeys.some((k) => k in body.user)) {
+        throw createError({ statusCode: 403, statusMessage: 'Only administrators can modify system settings.' })
+      }
       // Destructure to prevent mass assignment vulnerabilities
       const {
         name, email, weightUnit, webhookUrl, timezone, enableAutomatedBackups,
@@ -33,12 +37,7 @@ export default defineEventHandler(async (event) => {
         mqttEnabled, mqttHost, mqttPort: mqttPortValue, mqttUsername, mqttPassword, mqttBaseTopic
       }
 
-      const user = await prisma.user.findFirst()
-      if (user) {
-        await prisma.user.update({ where: { id: user.id }, data: safeData })
-      } else {
-        await prisma.user.create({ data: safeData })
-      }
+      await prisma.user.update({ where: { id: event.context.userId }, data: safeData })
 
       // Reconnect the MQTT bridge only when MQTT settings actually changed, so
       // unrelated saves (timezone, notifications, ...) don't blip Home Assistant.

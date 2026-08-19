@@ -50,6 +50,7 @@ const form = ref({
 })
 const isLoading = ref(false)
 const errorMsg = ref('')
+const isSubUserSetup = ref(false)
 
 async function handleRegister() {
   isLoading.value = true
@@ -60,7 +61,6 @@ async function handleRegister() {
       method: 'POST',
       body: form.value
     })
-    // Force hard reload to re-run middleware and get past the setup wizard if needed
     window.location.href = '/'
   } catch (err: any) {
     errorMsg.value = err.data?.statusMessage || 'An error occurred during registration.'

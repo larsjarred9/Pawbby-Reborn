@@ -9,13 +9,25 @@ export default defineEventHandler(async (event) => {
   const isAuthenticated = !!session.data.userId
 
   // Check if any user exists in the DB
-  const user = await prisma.user.findFirst()
+  const firstUser = await prisma.user.findFirst()
   
+  let isAdmin = false
+  if (isAuthenticated) {
+    if (session.data.role) {
+      isAdmin = session.data.role === 'ADMIN'
+    } else {
+      // Legacy session without role, check DB
+      const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
+      isAdmin = dbUser?.role === 'ADMIN'
+    }
+  }
+
   return {
     isAuthenticated,
-    hasUser: !!user,
-    hasPassword: !!user?.passwordHash,
-    legacyName: user && !user.passwordHash ? user.name : null,
-    legacyEmail: user && !user.passwordHash ? user.email : null
+    isAdmin,
+    hasUser: !!firstUser,
+    hasPassword: !!firstUser?.passwordHash,
+    legacyName: firstUser && !firstUser.passwordHash ? firstUser.name : null,
+    legacyEmail: firstUser && !firstUser.passwordHash ? firstUser.email : null
   }
 })

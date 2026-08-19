@@ -48,8 +48,9 @@
 
       <div class="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
         <!-- Dynamic Pets -->
-        <div v-for="pet in pets" :key="pet.id" class="flex flex-col items-center space-y-2 min-w-[64px] cursor-pointer"
-          @click="openEditPet(pet)">
+        <div v-for="pet in pets" :key="pet.id" class="flex flex-col items-center space-y-2 min-w-[64px]"
+          :class="{ 'cursor-pointer': isAdmin }"
+          @click="isAdmin && openEditPet(pet)">
           <div class="w-16 h-16 rounded-2xl overflow-hidden border border-white/5 bg-white/5">
             <img v-if="pet.imageBase64" :src="pet.imageBase64" class="w-full h-full object-cover" />
             <div v-else class="w-full h-full flex items-center justify-center text-pawbby-muted text-xs">No img</div>
@@ -58,7 +59,7 @@
         </div>
 
         <!-- Add Button -->
-        <div class="flex flex-col items-center space-y-2 min-w-[64px]">
+        <div v-if="isAdmin" class="flex flex-col items-center space-y-2 min-w-[64px]">
           <button @click="openAddPet"
             class="w-16 h-16 rounded-2xl bg-pawbby-card flex items-center justify-center text-pawbby-muted hover:text-white transition-colors border border-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -72,7 +73,7 @@
 
     <!-- Menu Links -->
     <div class="space-y-6 pt-4">
-      <NuxtLink to="/settings" class="w-full flex items-center justify-between text-white/80 hover:text-white group">
+      <NuxtLink v-if="isAdmin" to="/settings" class="w-full flex items-center justify-between text-white/80 hover:text-white group">
         <div class="flex items-center space-x-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" stroke-width="1.5">
@@ -81,6 +82,22 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span class="font-medium text-lg">Settings</span>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </NuxtLink>
+
+      <NuxtLink v-if="isAdmin" to="/users" class="w-full flex items-center justify-between text-white/80 hover:text-white group">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span class="font-medium text-lg">User Management</span>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
@@ -136,6 +153,16 @@
             clip-rule="evenodd" />
         </svg>
       </a>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="pt-4">
+      <button @click="doLogout" class="w-full bg-[#D84C4C]/10 text-[#D84C4C] hover:bg-[#D84C4C]/20 border border-[#D84C4C]/20 rounded-2xl h-14 flex items-center justify-center font-bold transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Logout
+      </button>
     </div>
 
     <!-- Edit Profile Modal -->
@@ -293,7 +320,9 @@
 import { ref, onMounted } from 'vue'
 import { useApi, type User, type Pet } from '~/composables/useApi'
 import { version } from '../../package.json'
+import { useAuthState } from '~/composables/useAuthState'
 
+const { isAdmin } = useAuthState()
 const api = useApi()
 
 const user = ref<User | null>(null)
@@ -307,6 +336,15 @@ const loadData = async () => {
 onMounted(() => {
   loadData()
 })
+
+const doLogout = async () => {
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    window.location.href = '/login'
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 // Profile Edit Modal
 const isEditProfileOpen = ref(false)

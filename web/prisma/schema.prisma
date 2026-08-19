@@ -9,11 +9,12 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   name         String
-  email        String
+  email        String   @unique
   passwordHash String?
   avatarUrl    String?
   weightUnit   String   @default("kg")
   webhookUrl   String?
+  role         String   @default("USER")
   timezone     String?  @default("UTC")
   enableAutomatedBackups Boolean @default(true)
   

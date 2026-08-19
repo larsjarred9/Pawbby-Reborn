@@ -9,6 +9,7 @@ export interface User {
   weightUnit?: 'kg' | 'lb'
   webhookUrl?: string
   timezone?: string
+  role?: string
   apiKey?: string
   mqttEnabled?: boolean
   mqttHost?: string
@@ -68,6 +69,9 @@ export const useApi = () => {
 
   const getUser = async (): Promise<User> => {
     const { user } = await $fetch('/api/settings') as any
+    if (user && !user.avatarUrl && user.email) {
+      user.avatarUrl = getGravatar(user.email)
+    }
     return user
   }
 
@@ -81,6 +85,22 @@ export const useApi = () => {
     if (updates.email) user.avatarUrl = getGravatar(updates.email)
     await $fetch('/api/settings', { method: 'POST', body: { user } })
     return user
+  }
+
+  const getUsers = async (): Promise<User[]> => {
+    const users = await $fetch('/api/users') as User[]
+    return users.map(u => {
+      if (!u.avatarUrl && u.email) u.avatarUrl = getGravatar(u.email)
+      return u
+    })
+  }
+
+  const deleteUser = async (id: string) => {
+    await $fetch(`/api/users?id=${id}`, { method: 'DELETE' })
+  }
+
+  const addUser = async (userData: any) => {
+    return await $fetch('/api/users', { method: 'POST', body: userData })
   }
 
   const getPets = async (): Promise<Pet[]> => {
@@ -182,6 +202,9 @@ export const useApi = () => {
 
   return {
     getUser,
+    getUsers,
+    deleteUser,
+    addUser,
     generateApiKey,
     updateUser,
     getDevices,

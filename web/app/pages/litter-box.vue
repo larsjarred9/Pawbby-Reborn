@@ -15,7 +15,7 @@
           {{ isOnline ? 'Online' : 'Offline' }}
         </span>
       </div>
-      <button @click="openSettings" class="text-white p-2 hover:text-white/80 transition-colors">
+      <button v-if="user?.role === 'ADMIN'" @click="openSettings" class="text-white p-2 hover:text-white/80 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
           stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round"
@@ -88,8 +88,8 @@
         </svg>
         <span class="text-sm font-semibold text-white/90 text-center">{{ device?.wasteBin || '-' }}</span>
       </div>
-      <div @click="showDeodorizerModal = true"
-        class="bg-pawbby-card rounded-xl p-3 flex flex-col items-center justify-center space-y-2 border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+      <div @click="user?.role === 'ADMIN' && (showDeodorizerModal = true)"
+        :class="['bg-pawbby-card rounded-xl p-3 flex flex-col items-center justify-center space-y-2 border border-white/5', user?.role === 'ADMIN' ? 'cursor-pointer hover:bg-white/5 transition-colors' : '']">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
           stroke="currentColor" stroke-width="1.5">
           <rect x="7" y="10" width="10" height="10" rx="3" />
@@ -114,7 +114,7 @@
           <div :class="[activeTab === 'history' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
-        <div @click="activeTab = 'control'" class="flex flex-col items-center space-y-1 cursor-pointer">
+        <div v-if="user?.role === 'ADMIN'" @click="activeTab = 'control'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
             :class="[activeTab === 'control' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Control</span>
           <div :class="[activeTab === 'control' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">

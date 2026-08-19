@@ -98,12 +98,47 @@ jobs:
           GH_TOKEN: ${{ secrets.ADDON_REPO_TOKEN }}
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
+          set -euo pipefail
+
           gh auth setup-git
           gh repo clone larsjarred9/Pawbby-Reborn-HA addon-repo
+
           cd addon-repo
-          sed -i "s/^version: .*/version: \"${VERSION}\"/" pawbby_reborn/config.yaml
+
+          # Bump version in config
+          if grep -q '^version:' pawbby_reborn/config.yaml; then
+            sed -i "s/^version:.*/version: \"${VERSION}\"/" pawbby_reborn/config.yaml
+          else
+            echo "ERROR: version field not found in pawbby_reborn/config.yaml"
+            exit 1
+          fi
+
+          # Get release notes
+          NOTES="$(gh release view "v${VERSION}" \
+            --repo "${{ github.repository }}" \
+            --json body \
+            --jq '.body')"
+
+          # Generate/update changelog
+          {
+            printf '# v%s\n\n' "${VERSION}"
+            printf '%s\n\n' "${NOTES}"
+
+            if [ -f pawbby_reborn/CHANGELOG.md ]; then
+              cat pawbby_reborn/CHANGELOG.md
+            fi
+          } > pawbby_reborn/CHANGELOG.md
+
+          # Commit and push
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pawbby_reborn/config.yaml
-          git diff --staged --quiet || git commit -m "chore: bump addon version to ${VERSION}"
+
+          git add pawbby_reborn/config.yaml pawbby_reborn/CHANGELOG.md
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: release v${VERSION} and update changelog"
           git push

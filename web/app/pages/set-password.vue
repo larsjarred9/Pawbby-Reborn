@@ -6,8 +6,8 @@
 
       <div class="text-center mb-8 relative">
         <img src="/logo-nobg.png" alt="PAWBBY" class="h-16 object-contain mx-auto mb-6 drop-shadow-[0_0_15px_rgba(61,122,65,0.3)]" />
-        <h1 class="text-3xl font-bold text-white mb-2">Welcome to 0.4.0!</h1>
-        <p class="text-pawbby-muted">To keep your local network secure, please create a dashboard password.</p>
+        <h1 class="text-3xl font-bold text-white mb-2">Welcome to {{ version }}!</h1>
+        <p class="text-pawbby-muted">To protect your dashboard from unauthorized local network access and enable subuser management, please create an admin password.</p>
       </div>
 
       <form @submit.prevent="handleSetPassword" class="space-y-5 relative z-10">
@@ -43,6 +43,8 @@
 </template>
 
 <script setup lang="ts">
+import { version } from '../../package.json'
+
 const form = ref({
   name: '',
   email: '',
