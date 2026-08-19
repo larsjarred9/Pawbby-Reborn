@@ -61,7 +61,7 @@ DISABLE_UPDATES="${disableUpdates}"
 WEBHOOK_STRICT_MODE="${strictWebhooks}"
 
 # SQLite Database Location
-# By default, Prisma creates this file in the \`prisma\` folder (i.e. prisma/dev.db).
+# By default, Prisma creates this file in the \`root\` folder (i.e. ./dev.db).
 # You can change this path if you are running in Docker or
 # prefer the database to be stored elsewhere (e.g. "file:/mnt/data/dev.db")
 DATABASE_URL="${customDbUrl}"
