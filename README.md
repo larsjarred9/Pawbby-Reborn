@@ -39,7 +39,7 @@ There are three primary ways to run the dashboard. Choose the one that best fits
 To install natively in Home Assistant OS:
 1. Go to **Settings** -> **Add-ons** -> **Add-on Store**.
 2. Click the three dots in the top right corner and select **Repositories**.
-3. Add `https://github.com/larsjarred9/Pawbby-Reborn` and click Add.
+3. Add `https://github.com/larsjarred9/Pawbby-Reborn-HA` and click Add.
 4. Close the modal, reload the page, search for **Pawbby Reborn**, and click Install!
 
 ### Docker Quickstart (GHCR)
