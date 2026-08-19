@@ -31,8 +31,18 @@ export default defineEventHandler(async (event) => {
       return { updateAvailable: false, error: 'No releases found on GitHub' }
     }
 
-    // If local version doesn't match the remote main branch version, an update is available!
-    const updateAvailable = localVersion !== remoteVersion
+    // Helper to check if remote is strictly newer than local (e.g. 0.6.2 vs 0.5.0)
+    const isNewer = (remote: string, local: string) => {
+      const r = remote.split('.').map(Number)
+      const l = local.split('.').map(Number)
+      for (let i = 0; i < 3; i++) {
+        if (r[i] > l[i]) return true
+        if (r[i] < l[i]) return false
+      }
+      return false
+    }
+
+    const updateAvailable = isNewer(remoteVersion, localVersion)
 
     return {
       updateAvailable,
