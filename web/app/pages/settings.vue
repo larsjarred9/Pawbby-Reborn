@@ -582,7 +582,16 @@ const doGenerateApiKey = async () => {
 const copyApiKey = async () => {
   if (user.value?.apiKey) {
     try {
-      await navigator.clipboard.writeText(user.value.apiKey)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(user.value.apiKey)
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = user.value.apiKey;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
       alert('API Key copied to clipboard!')
     } catch (e) {
       alert('Failed to copy to clipboard.')

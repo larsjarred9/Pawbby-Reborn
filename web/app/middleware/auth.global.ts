@@ -13,6 +13,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   
   const { isAuthenticated, hasUser, hasPassword } = data.value
   
+  // Hydrate global auth state for Vue components
+  const { isAdmin } = useAuthState()
+  isAdmin.value = !!data.value.isAdmin
+  
   const isPublicRoute = PUBLIC_ROUTES.includes(to.path)
 
   if (isAuthenticated) {
