@@ -3,10 +3,10 @@ import prisma from '../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   // Find the primary user
-  let user = await prisma.user.findFirst()
+  const user = await prisma.user.findFirst()
   
   if (!user) {
-    user = await prisma.user.create({ data: { name: 'User', email: 'hello@example.com', weightUnit: 'kg' } })
+    throw createError({ statusCode: 400, statusMessage: 'No user exists. Please complete setup first.' })
   }
 
   // Generate a new secure API key
