@@ -20,7 +20,10 @@ echo ""
 
 # 1. Pull latest code from GitHub
 echo "🔄 Pulling latest changes from GitHub..."
-git reset --hard HEAD # Discard any accidental local changes that would block the pull
+if [ -n "$(git status --porcelain)" ]; then
+    echo "❌ Local git changes detected. Please commit, stash, or wipe them (git reset --hard) before upgrading."
+    exit 1
+fi
 git pull origin main
 
 # 2. Navigate to web app

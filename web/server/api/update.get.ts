@@ -3,6 +3,9 @@ import path from 'path'
 
 export default defineCachedEventHandler(async (event) => {
   const updatesDisabled = process.env.DISABLE_UPDATES === 'true'
+  if (updatesDisabled) {
+    return { updateAvailable: false, disabled: true, error: 'Updates are disabled on this instance' }
+  }
 
   try {
     // 1. Get the local version from package.json
@@ -20,8 +23,7 @@ export default defineCachedEventHandler(async (event) => {
         'User-Agent': 'Pawbby-Reborn-Local-Server',
         'Cache-Control': 'no-cache'
       }
-    })
-    clearTimeout(timeoutId)
+    }).finally(() => clearTimeout(timeoutId))
 
     if (!response.ok) {
       console.error('[Update Checker] Failed to fetch from GitHub:', response.statusText)
