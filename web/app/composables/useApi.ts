@@ -69,6 +69,9 @@ export const useApi = () => {
 
   const getUser = async (): Promise<User> => {
     const { user } = await $fetch('/api/settings') as any
+    if (user && !user.avatarUrl && user.email) {
+      user.avatarUrl = getGravatar(user.email)
+    }
     return user
   }
 
@@ -85,7 +88,11 @@ export const useApi = () => {
   }
 
   const getUsers = async (): Promise<User[]> => {
-    return await $fetch('/api/users') as User[]
+    const users = await $fetch('/api/users') as User[]
+    return users.map(u => {
+      if (!u.avatarUrl && u.email) u.avatarUrl = getGravatar(u.email)
+      return u
+    })
   }
 
   const deleteUser = async (id: string) => {
