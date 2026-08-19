@@ -4,8 +4,23 @@ echo "🐾 Upgrading Pawbby Reborn to latest version"
 echo "==========================================="
 echo ""
 
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# 0. Backup the database
+echo "💾 Backing up the database..."
+if [ -f "web/dev.db" ]; then
+    BACKUP_NAME="dev.db.bak-$(date +%F_%H-%M-%S)"
+    cp web/dev.db "web/$BACKUP_NAME"
+    echo "✅ Database backed up to $BACKUP_NAME!"
+else
+    echo "⚠️ No database found to backup, skipping..."
+fi
+echo ""
+
 # 1. Pull latest code from GitHub
 echo "🔄 Pulling latest changes from GitHub..."
+git reset --hard HEAD # Discard any accidental local changes that would block the pull
 git pull origin main
 
 # 2. Navigate to web app
