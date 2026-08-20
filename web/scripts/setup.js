@@ -76,14 +76,16 @@ DATABASE_URL="${customDbUrl}"
     console.log('✅ Database migrations successful!');
   } catch (error) {
     console.error('❌ Failed to migrate the database. Please run "npx prisma migrate deploy" manually.');
+    process.exit(0);
   }
 
   console.log('ℹ️  Performing prisma client generation...');
   try {
     execSync('npx prisma generate', { stdio: 'inherit' });
-    console.log('✅ Prisma client generation successfull!');
+    console.log('✅ Prisma client generation successful!');
   } catch (error) {
     console.error('❌ Failed to generate the client. Please run "npx prisma generate" manually.');
+    process.exit(0);
   }
 
   console.log('\n🎉 Setup complete! You are ready to go.');
