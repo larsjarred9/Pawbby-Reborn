@@ -7,6 +7,6 @@ const adapter = new PrismaLibSql({ url: dbUrl })
 export const prisma = new PrismaClient({ 
   adapter,
   log: ['error'] 
-});
+})
 
-export default prisma;
+export default prisma
