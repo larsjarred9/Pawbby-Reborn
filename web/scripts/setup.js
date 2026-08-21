@@ -72,11 +72,28 @@ DATABASE_URL="${customDbUrl}"
 
   console.log('🗄️  Applying database migrations...');
   try {
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    execSync('npx prisma migrate deploy', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
     console.log('✅ Database migrations successful!');
   } catch (error) {
-    console.error('❌ Failed to migrate the database. Please run "npx prisma migrate deploy" manually.');
-    process.exit(1);
+    const output = (error.stdout || '') + (error.stderr || '');
+
+    // Check if the database already has tables but no migration history (P3005)
+    if (output.includes('P3005') || output.includes('not empty')) {
+      console.log('⚠️  Existing database detected without migration history. Baselining...');
+      try {
+        execSync('npx prisma migrate resolve --applied 0_init', { stdio: 'inherit' });
+        console.log('✅ Baselined successfully! Re-running migrations...');
+        execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+        console.log('✅ Database migrations successful!');
+      } catch (innerError) {
+        console.error('❌ Failed to baseline and migrate the database.');
+        process.exit(1);
+      }
+    } else {
+      console.error(output);
+      console.error('❌ Failed to migrate the database. Please run "npx prisma migrate deploy" manually.');
+      process.exit(1);
+    }
   }
 
   console.log('ℹ️  Performing prisma client generation...');
