@@ -11,10 +11,6 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    if (event.context.userRole !== 'ADMIN') {
-      throw createError({ statusCode: 403, statusMessage: 'Only administrators can modify pets.' })
-    }
-
     const body = await readBody(event)
     const { name, birthDate, weight, imageBase64 } = body
     const safeData = { name, birthDate, weight, imageBase64 }
@@ -27,9 +23,6 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'DELETE') {
-    if (event.context.userRole !== 'ADMIN') {
-      throw createError({ statusCode: 403, statusMessage: 'Only administrators can delete pets.' })
-    }
 
     const query = getQuery(event)
     if (query.id) {

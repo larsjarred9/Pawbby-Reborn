@@ -114,7 +114,7 @@
           <div :class="[activeTab === 'history' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
-        <div v-if="user?.role === 'ADMIN'" @click="activeTab = 'control'" class="flex flex-col items-center space-y-1 cursor-pointer">
+        <div @click="activeTab = 'control'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
             :class="[activeTab === 'control' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Control</span>
           <div :class="[activeTab === 'control' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
