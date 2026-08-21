@@ -48,9 +48,8 @@
 
       <div class="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
         <!-- Dynamic Pets -->
-        <div v-for="pet in pets" :key="pet.id" class="flex flex-col items-center space-y-2 min-w-[64px]"
-          :class="{ 'cursor-pointer': isAdmin }"
-          @click="isAdmin && openEditPet(pet)">
+        <div v-for="pet in pets" :key="pet.id" class="flex flex-col items-center space-y-2 min-w-[64px] cursor-pointer"
+          @click="openEditPet(pet)">
           <div class="w-16 h-16 rounded-2xl overflow-hidden border border-white/5 bg-white/5">
             <img v-if="pet.imageBase64" :src="pet.imageBase64" class="w-full h-full object-cover" />
             <div v-else class="w-full h-full flex items-center justify-center text-pawbby-muted text-xs">No img</div>
@@ -59,7 +58,7 @@
         </div>
 
         <!-- Add Button -->
-        <div v-if="isAdmin" class="flex flex-col items-center space-y-2 min-w-[64px]">
+        <div class="flex flex-col items-center space-y-2 min-w-[64px]">
           <button @click="openAddPet"
             class="w-16 h-16 rounded-2xl bg-pawbby-card flex items-center justify-center text-pawbby-muted hover:text-white transition-colors border border-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
