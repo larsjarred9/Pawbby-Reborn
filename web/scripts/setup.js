@@ -61,7 +61,7 @@ DISABLE_UPDATES="${disableUpdates}"
 WEBHOOK_STRICT_MODE="${strictWebhooks}"
 
 # SQLite Database Location
-# By default, Prisma creates this file in the \`prisma\` folder (i.e. prisma/dev.db).
+# By default, Prisma creates this file in the \`root\` folder (i.e. ./dev.db).
 # You can change this path if you are running in Docker or
 # prefer the database to be stored elsewhere (e.g. "file:/mnt/data/dev.db")
 DATABASE_URL="${customDbUrl}"
@@ -70,12 +70,39 @@ DATABASE_URL="${customDbUrl}"
   fs.writeFileSync(envPath, envContent);
   console.log('\n✅ Successfully generated .env file!');
 
-  console.log('🗄️  Initializing the database schema...');
+  console.log('🗄️  Applying database migrations...');
   try {
-    execSync('npx prisma db push', { stdio: 'inherit' });
-    console.log('✅ Database synchronized successfully!');
+    execSync('npx prisma migrate deploy', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
+    console.log('✅ Database migrations successful!');
   } catch (error) {
-    console.error('❌ Failed to synchronize the database. Please run "npx prisma db push" manually.');
+    const output = (error.stdout || '') + (error.stderr || '');
+
+    // Check if the database already has tables but no migration history (P3005)
+    if (output.includes('P3005') || output.includes('not empty')) {
+      console.log('⚠️  Existing database detected without migration history. Baselining...');
+      try {
+        execSync('npx prisma migrate resolve --applied 0_init', { stdio: 'inherit' });
+        console.log('✅ Baselined successfully! Re-running migrations...');
+        execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+        console.log('✅ Database migrations successful!');
+      } catch (innerError) {
+        console.error('❌ Failed to baseline and migrate the database.');
+        process.exit(1);
+      }
+    } else {
+      console.error(output);
+      console.error('❌ Failed to migrate the database. Please run "npx prisma migrate deploy" manually.');
+      process.exit(1);
+    }
+  }
+
+  console.log('ℹ️  Performing prisma client generation...');
+  try {
+    execSync('npx prisma generate', { stdio: 'inherit' });
+    console.log('✅ Prisma client generation successful!');
+  } catch (error) {
+    console.error('❌ Failed to generate the client. Please run "npx prisma generate" manually.');
+    process.exit(1);
   }
 
   console.log('\n🎉 Setup complete! You are ready to go.');

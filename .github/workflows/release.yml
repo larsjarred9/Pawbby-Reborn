@@ -25,6 +25,7 @@ jobs:
   publish:
     name: Publish Docker image
     runs-on: ubuntu-latest
+    if: github.repository == 'larsjarred9/Pawbby-Reborn'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
