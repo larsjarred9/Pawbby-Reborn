@@ -14,6 +14,13 @@ export default defineNitroPlugin((nitroApp) => {
     lastCatLeaveTime: number;
   }
 
+  const VISIT_STATUSES = new Set([
+    "cat_enter",
+    "cat_near",
+    "cat_near_leave",
+    "cat_leave",
+  ]);
+
   const activeDevices = new Map<string, any>();
   const retryTimeouts = new Map<string, any>();
   const pingIntervals = new Map<string, any>();
@@ -345,36 +352,59 @@ export default defineNitroPlugin((nitroApp) => {
               });
             }
 
-            // Quick visit detection: If it returns to idle but we were still tracking an unconfirmed visit
             if (
-              newStatus === "work_idle" &&
-              state.catEnteredAt &&
-              state.peakWeight > 0
+              newStatus === "collect_full" &&
+              state.currentStatus !== "collect_full"
             ) {
-              const durationSecs = Math.round(
-                (Date.now() - state.catEnteredAt) / 1000,
-              );
-              const weightInKg = state.peakWeight / 1000;
-
-              const matchedPetId = null;
-              
-              // We do NOT attempt to identify the pet for quick-visits, 
-              // because half a heavy cat leaning in looks identical to a small cat fully inside.
-
-              console.log(
-                `[PawID] Quick peek detected! Weight: ${weightInKg}kg, Duration: ${durationSecs}s.`,
-              );
-
               await prisma.litterEvent.create({
-                data: {
-                  type: "quick-visit",
-                  deviceId: config.id,
-                  petId: matchedPetId,
-                  weight: weightInKg,
-                  duration: durationSecs,
-                },
+                data: { type: "bin-full", deviceId: config.id },
               });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "🗑️ Waste bin is full and needs to be emptied.", "error");
+            }
+            if (
+              newStatus === "collect_normal" &&
+              state.currentStatus !== "collect_normal"
+            ) {
+              await prisma.litterEvent.create({
+                data: { type: "bin-normal", deviceId: config.id },
+              });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "✅ Waste bin is no longer full.", "error");
+            }
 
+            // Quick visit detection: If it returns to idle but we were still tracking an unconfirmed visit
+            if (newStatus === "work_idle" && state.catEnteredAt) {
+              if (state.peakWeight > 0) {
+                const durationSecs = Math.round(
+                  (Date.now() - state.catEnteredAt) / 1000,
+                );
+                const weightInKg = state.peakWeight / 1000;
+
+                const matchedPetId = null;
+
+                // We do NOT attempt to identify the pet for quick-visits,
+                // because half a heavy cat leaning in looks identical to a small cat fully inside.
+
+                console.log(
+                  `[PawID] Quick peek detected! Weight: ${weightInKg}kg, Duration: ${durationSecs}s.`,
+                );
+
+                await prisma.litterEvent.create({
+                  data: {
+                    type: "quick-visit",
+                    deviceId: config.id,
+                    petId: matchedPetId,
+                    weight: weightInKg,
+                    duration: durationSecs,
+                  },
+                });
+              }
+
+              // Always clear the visit window on return to idle, even when no
+              // weight sample ever came in - otherwise a stale catEnteredAt
+              // lingers in memory and gets wrongly attributed to a later,
+              // unrelated DP 107 confirmation.
               state.catEnteredAt = null;
               state.peakWeight = 0;
             }
@@ -402,20 +432,24 @@ export default defineNitroPlugin((nitroApp) => {
             stateChanged = true;
           }
 
-          // 4. Detect Cat Entry & Track Peak Weight
-          if (state.currentStatus === "cat_enter") {
-            if (!state.catEnteredAt) {
-              state.catEnteredAt = Date.now();
-              state.peakWeight = 0;
+          // 4. Detect Cat Entry & Track Peak Weight across the whole visit
+          // (device often flips past "cat_enter" before the next DP 112 sample arrives)
+          if (state.currentStatus === "cat_enter" && !state.catEnteredAt) {
+            state.catEnteredAt = Date.now();
+            state.peakWeight = 0;
+            stateChanged = true;
+          }
+
+          if (
+            state.catEnteredAt &&
+            VISIT_STATUSES.has(state.currentStatus) &&
+            dps["112"]
+          ) {
+            const currentWeight = dps["112"];
+            const catWeight = currentWeight - state.baseWeight;
+            if (catWeight > state.peakWeight) {
+              state.peakWeight = catWeight;
               stateChanged = true;
-            }
-            if (dps["112"]) {
-              const currentWeight = dps["112"];
-              const catWeight = currentWeight - state.baseWeight;
-              if (catWeight > state.peakWeight) {
-                state.peakWeight = catWeight;
-                stateChanged = true;
-              }
             }
           }
 

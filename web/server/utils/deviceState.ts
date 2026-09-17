@@ -104,12 +104,17 @@ export async function computeDeviceState(device: {
     where: { deviceId, type: 'bin-replaced' },
     orderBy: { timestamp: 'desc' },
   })
+  const latestCollectNormal = await prisma.litterEvent.findFirst({
+    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"collect_normal"' } },
+    orderBy: { timestamp: 'desc' },
+  })
 
   let isBinFullState = false
   if (latestCollectFull) {
     const fullTime = latestCollectFull.timestamp.getTime()
     const replacedTime = latestBinReplaced ? latestBinReplaced.timestamp.getTime() : 0
-    if (fullTime > replacedTime) isBinFullState = true
+    const normalTime = latestCollectNormal ? latestCollectNormal.timestamp.getTime() : 0
+    if (fullTime > replacedTime && fullTime > normalTime) isBinFullState = true
   }
 
   // Check DP 116 for status
@@ -131,7 +136,7 @@ export async function computeDeviceState(device: {
         } else if (dp116 === 'collect_full') {
           status = 'Bin Full'
           wasteBin = 'Full'
-        } else if (dp116 !== 'work_idle') {
+        } else if (dp116 !== 'work_idle' && dp116 !== 'collect_normal') {
           status = 'Busy'
         }
       }

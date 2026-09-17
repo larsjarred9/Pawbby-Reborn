@@ -96,6 +96,10 @@ export default defineEventHandler(async (event) => {
       description = `${formatWeight(e.weight || 0)} of fresh litter was added to the box.`
     } else if (e.type === 'litter-removed') {
       description = `${formatWeight(e.weight || 0)} of litter was removed from the box.`
+    } else if (e.type === 'bin-normal') {
+      description = 'Waste bin level is back to normal.'
+    } else if (e.type === 'bin-full') {
+      description = 'Waste bin is full.'
     } else if (e.type === 'tuya-raw-data' && e.rawData) {
       // Try to parse the raw data to extract something readable if possible
       try {
