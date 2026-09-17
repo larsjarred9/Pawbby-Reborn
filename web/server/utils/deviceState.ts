@@ -40,27 +40,57 @@ export async function computeDeviceState(device: {
   })
 
   let wasteBin = 'Normal'
-  let litterLevel = 'Sufficient*'
+  let litterLevel = 'Sufficient'
   let status = 'Ready'
   let lidOpen = false
 
-  // Find the most recent raw data that contains DP 102 (clean cycle count/fault code)
-  const latestDP102Event = await prisma.litterEvent.findFirst({
-    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"102"' } },
+  // Check DP 116 or recent litter events for native litter level
+  const latestLitterLowEvent = await prisma.litterEvent.findFirst({
+    where: {
+      deviceId,
+      OR: [
+        { type: 'litter-low' },
+        { type: 'tuya-raw-data', rawData: { contains: '"cat_litter_little"' } },
+      ],
+    },
     orderBy: { timestamp: 'desc' },
   })
-  if (latestDP102Event?.rawData) {
-    try {
-      const parsed = JSON.parse(latestDP102Event.rawData)
-      const base64Str = parsed?.dps?.['102']
-      if (typeof base64Str === 'string') {
-        const buffer = Buffer.from(base64Str, 'base64')
-        // If bytes 1 or 2 indicate a fault code, assume it's the insufficient litter error
-        if (buffer.length > 2 && (buffer[1] > 0 || buffer[2] > 0)) {
-          litterLevel = 'Insufficient*'
+  const latestLitterSufficientEvent = await prisma.litterEvent.findFirst({
+    where: {
+      deviceId,
+      OR: [
+        { type: 'litter-sufficient' },
+        { type: 'tuya-raw-data', rawData: { contains: '"cat_litter_eno' } },
+      ],
+    },
+    orderBy: { timestamp: 'desc' },
+  })
+
+  if (latestLitterLowEvent) {
+    const lowTime = latestLitterLowEvent.timestamp.getTime()
+    const suffTime = latestLitterSufficientEvent ? latestLitterSufficientEvent.timestamp.getTime() : 0
+    if (lowTime > suffTime) {
+      litterLevel = 'Low'
+    } else {
+      litterLevel = 'Sufficient'
+    }
+  } else if (latestLitterSufficientEvent) {
+    litterLevel = 'Sufficient'
+  } else {
+    // Fallback heuristic: check DP 112 for low weight if no native DP 116 events yet
+    const latestDP112Event = await prisma.litterEvent.findFirst({
+      where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"112"' } },
+      orderBy: { timestamp: 'desc' },
+    })
+    if (latestDP112Event?.rawData) {
+      try {
+        const parsed = JSON.parse(latestDP112Event.rawData)
+        if (parsed?.dps?.['112'] !== undefined) {
+          const weight = Number(parsed.dps['112'])
+          if (weight > 0 && weight < 1500) litterLevel = 'Low'
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+    }
   }
 
   // Check DP 114 for motor/sensor errors
@@ -73,22 +103,7 @@ export async function computeDeviceState(device: {
       const parsed = JSON.parse(latestDP114Event.rawData)
       if (parsed?.dps?.['114']) {
         const dp114 = String(parsed.dps['114']).toLowerCase()
-        if (dp114 !== 'motor_ok') litterLevel = 'Insufficient*'
-      }
-    } catch (e) {}
-  }
-
-  // Check DP 112 for low weight
-  const latestDP112Event = await prisma.litterEvent.findFirst({
-    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"112"' } },
-    orderBy: { timestamp: 'desc' },
-  })
-  if (latestDP112Event?.rawData) {
-    try {
-      const parsed = JSON.parse(latestDP112Event.rawData)
-      if (parsed?.dps?.['112'] !== undefined) {
-        const weight = Number(parsed.dps['112'])
-        if (weight > 0 && weight < 1500) litterLevel = 'Insufficient*'
+        if (dp114 !== 'motor_ok') litterLevel = 'Low'
       }
     } catch (e) {}
   }
@@ -145,10 +160,16 @@ export async function computeDeviceState(device: {
         } else if (dp116 === 'collect_install') {
           status = 'Bin Removed'
           binRemoved = true
+        } else if (dp116 === 'roller_uninstall_ok') {
+          status = 'Drum Removed'
         } else if (dp116 === 'collect_full') {
           status = 'Bin Full'
           wasteBin = 'Full'
-        } else if (dp116 !== 'work_idle' && dp116 !== 'collect_normal') {
+        } else if (dp116 === 'cat_litter_little') {
+          litterLevel = 'Low'
+        } else if (dp116 === 'cat_litter_enough' || dp116.startsWith('cat_litter_eno')) {
+          litterLevel = 'Sufficient'
+        } else if (dp116 !== 'work_idle' && dp116 !== 'collect_normal' && dp116 !== 'lid_close') {
           status = 'Busy'
         }
       }
@@ -180,6 +201,24 @@ export async function computeDeviceState(device: {
     const elapsedDays = (Date.now() - new Date(device.deodorizerLastReset).getTime()) / 86400000
     deodorizerDaysLeft = Math.max(0, Math.round(duration - elapsedDays))
     deodorizerActive = deodorizerDaysLeft > 0
+  }
+
+  // Check DP 115 for hardware deodorizer days remaining reported by device
+  const latestDP115Event = await prisma.litterEvent.findFirst({
+    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"115"' } },
+    orderBy: { timestamp: 'desc' },
+  })
+  if (latestDP115Event?.rawData) {
+    try {
+      const parsed = JSON.parse(latestDP115Event.rawData)
+      if (parsed?.dps?.['115'] !== undefined) {
+        const d115 = Number(parsed.dps['115'])
+        if (!isNaN(d115) && d115 >= 0) {
+          deodorizerDaysLeft = d115
+          deodorizerActive = d115 > 0
+        }
+      }
+    } catch (e) {}
   }
 
   return {

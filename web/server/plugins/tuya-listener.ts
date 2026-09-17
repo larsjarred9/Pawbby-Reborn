@@ -6,6 +6,8 @@ export default defineNitroPlugin((nitroApp) => {
     baseWeight: number;
     currentStatus: string;
     isBinFull: boolean;
+    isLitterLow?: boolean;
+    isDrumRemoved?: boolean;
     catEnteredAt: number | null;
     peakWeight: number;
     pendingLitterCheck: boolean;
@@ -13,6 +15,9 @@ export default defineNitroPlugin((nitroApp) => {
     lastCleanTime: number;
     lastEmptyTime: number;
     lastCatLeaveTime: number;
+    lidOpenedDuringVisit?: boolean;
+    lastVisitEndedAt?: number;
+    lastVisitEndWeight?: number;
   }
 
   const VISIT_STATUSES = new Set([
@@ -20,6 +25,22 @@ export default defineNitroPlugin((nitroApp) => {
     "cat_near",
     "cat_near_leave",
     "cat_leave",
+  ]);
+
+  const BUSY_STATUSES = new Set([
+    "cat_enter",
+    "cat_near",
+    "cat_near_leave",
+    "cat_leave",
+    "lid_open",
+    "collect_install",
+    "roller_uninstall_ok",
+    "work_smooth",
+    "work_aclean",
+    "work_mclean",
+    "work_empty",
+    "work_dumping",
+    "work_resetting",
   ]);
 
   const activeDevices = new Map<string, any>();
@@ -217,6 +238,27 @@ export default defineNitroPlugin((nitroApp) => {
               weightInKg = state.peakWeight / 1000;
             }
 
+            // Fallback: parse firmware-reported cat weight directly from DP 107
+            // Format: 01 00 00 05 [WW WW] 00 [xx] 00 (bytes 4-5 = weight in grams)
+            if (typeof dps["107"] === "string") {
+              try {
+                const buf = Buffer.from(dps["107"], "base64");
+                if (buf.length >= 6 && buf[0] === 0x01 && buf[3] === 0x05) {
+                  const fwWeightGrams = buf.readUInt16BE(4);
+                  if (fwWeightGrams > 500 && fwWeightGrams < 25000) {
+                    if (weightInKg === 0) {
+                      weightInKg = fwWeightGrams / 1000;
+                    }
+                  }
+                  if (buf.length >= 8 && buf[7] > 0 && durationSecs === 60) {
+                    durationSecs = buf[7];
+                  }
+                }
+              } catch (e) {
+                console.error("[Tuya] Error decoding DP 107 payload:", e);
+              }
+            }
+
             // PawID Matching Logic
             const pets = await prisma.pet.findMany();
             let matchedPetId = null;
@@ -264,8 +306,11 @@ export default defineNitroPlugin((nitroApp) => {
             }
 
             // Reset visit state
+            state.lastVisitEndedAt = Date.now();
+            state.lastVisitEndWeight = state.peakWeight;
             state.catEnteredAt = null;
             state.peakWeight = 0;
+            state.lidOpenedDuringVisit = false;
             stateChanged = true;
           }
 
@@ -348,6 +393,9 @@ export default defineNitroPlugin((nitroApp) => {
               newStatus === "lid_open" &&
               state.currentStatus !== "lid_open"
             ) {
+              if (state.catEnteredAt) {
+                state.lidOpenedDuringVisit = true;
+              }
               await prisma.litterEvent.create({
                 data: { type: "lid-removed", deviceId: config.id },
               });
@@ -406,9 +454,45 @@ export default defineNitroPlugin((nitroApp) => {
               if (user) await dispatchWebhook(user, "✅ Waste bin is no longer full.", "error");
             }
 
+            if (newStatus === "cat_litter_little" && !state.isLitterLow) {
+              state.isLitterLow = true;
+              await prisma.litterEvent.create({
+                data: { type: "litter-low", deviceId: config.id },
+              });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "⚠️ Litter level is low. Please refill the litter box.", "error");
+            }
+            if ((newStatus === "cat_litter_enough" || newStatus.startsWith("cat_litter_eno")) && state.isLitterLow) {
+              state.isLitterLow = false;
+              await prisma.litterEvent.create({
+                data: { type: "litter-sufficient", deviceId: config.id },
+              });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "✅ Litter level is sufficient.", "error");
+            }
+
+            if (newStatus === "roller_uninstall_ok" && !state.isDrumRemoved) {
+              state.isDrumRemoved = true;
+              await prisma.litterEvent.create({
+                data: { type: "drum-removed", deviceId: config.id },
+              });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "⚠️ Drum/roller removed from the litter box!", "error");
+            }
+            if (state.isDrumRemoved && newStatus !== "roller_uninstall_ok") {
+              state.isDrumRemoved = false;
+              await prisma.litterEvent.create({
+                data: { type: "drum-installed", deviceId: config.id },
+              });
+            }
+
             // Quick visit detection: If it returns to idle but we were still tracking an unconfirmed visit
             if (newStatus === "work_idle" && state.catEnteredAt) {
-              if (state.peakWeight > 0) {
+              if (state.lidOpenedDuringVisit) {
+                console.log(
+                  "[PawID] Discarding quick-visit: lid was opened during window (likely litter refill).",
+                );
+              } else if (state.peakWeight > 0) {
                 const durationSecs = Math.round(
                   (Date.now() - state.catEnteredAt) / 1000,
                 );
@@ -438,8 +522,11 @@ export default defineNitroPlugin((nitroApp) => {
               // weight sample ever came in - otherwise a stale catEnteredAt
               // lingers in memory and gets wrongly attributed to a later,
               // unrelated DP 107 confirmation.
+              state.lastVisitEndedAt = Date.now();
+              state.lastVisitEndWeight = state.peakWeight;
               state.catEnteredAt = null;
               state.peakWeight = 0;
+              state.lidOpenedDuringVisit = false;
             }
 
             state.currentStatus = newStatus;
@@ -466,23 +553,49 @@ export default defineNitroPlugin((nitroApp) => {
           }
 
           // 4. Detect Cat Entry & Track Peak Weight across the whole visit
-          // (device often flips past "cat_enter" before the next DP 112 sample arrives)
+          // (device often flips past "cat_enter" before the next DP 112/113 sample arrives)
           if (state.currentStatus === "cat_enter" && !state.catEnteredAt) {
-            state.catEnteredAt = Date.now();
-            state.peakWeight = 0;
+            const now = Date.now();
+            // Check if cat re-entered within 15s of leaving (split visit)
+            if (
+              state.lastVisitEndedAt &&
+              now - state.lastVisitEndedAt < 15000 &&
+              (state.lastVisitEndWeight || 0) > 0
+            ) {
+              console.log("[PawID] Cat re-entered within 15s - merging split visit.");
+              state.peakWeight = state.lastVisitEndWeight || 0;
+            } else {
+              state.peakWeight = 0;
+            }
+            state.catEnteredAt = now;
+            state.lidOpenedDuringVisit = false;
             stateChanged = true;
           }
 
           if (
             state.catEnteredAt &&
-            VISIT_STATUSES.has(state.currentStatus) &&
-            dps["112"]
+            VISIT_STATUSES.has(state.currentStatus)
           ) {
-            const currentWeight = dps["112"];
-            const catWeight = currentWeight - state.baseWeight;
-            if (catWeight > state.peakWeight) {
-              state.peakWeight = catWeight;
-              stateChanged = true;
+            // Check DP 113: firmware direct live cat weight in grams
+            if (
+              typeof dps["113"] === "number" &&
+              dps["113"] > 500 &&
+              dps["113"] < 25000
+            ) {
+              if (dps["113"] > state.peakWeight) {
+                state.peakWeight = dps["113"];
+                stateChanged = true;
+              }
+            }
+
+            // Also check DP 112: scale weight delta
+            if (dps["112"] && state.baseWeight > 0) {
+              const currentWeight = dps["112"];
+              const catWeight = currentWeight - state.baseWeight;
+              if (catWeight > state.peakWeight && catWeight < 25000) {
+                state.peakWeight = catWeight;
+                stateChanged = true;
+              }
             }
           }
 
@@ -567,7 +680,18 @@ export default defineNitroPlugin((nitroApp) => {
       appTriggeredActions.set(deviceId, Date.now());
 
       try {
+        const state = deviceStates.get(deviceId);
+        const inSettleWindow =
+          state?.lastVisitEndedAt &&
+          Date.now() - state.lastVisitEndedAt < 15000;
+
         if (action === "flatten") {
+          if (state && BUSY_STATUSES.has(state.currentStatus)) {
+            console.warn(
+              `[Tuya Action] Refusing flatten command for ${deviceId}: box is busy (${state.currentStatus})`,
+            );
+            return;
+          }
           console.log(
             `[Tuya Action] Sending flatten command (DP 106) to ${deviceId}...`,
           );
@@ -575,15 +699,60 @@ export default defineNitroPlugin((nitroApp) => {
           await prisma.litterEvent.create({
             data: { type: "flatten-app", deviceId },
           });
-          const state = deviceStates.get(deviceId);
           if (state) {
             state.currentStatus = "work_smooth"; // Prevent duplicate if hardware does echo it later
             state.lastFlattenTime = Date.now();
           }
         } else if (action === "clean") {
-          // TODO: Need payload for clean
-          console.log(`[Tuya Action] Clean command not implemented yet!`);
+          if (
+            state &&
+            (BUSY_STATUSES.has(state.currentStatus) || inSettleWindow)
+          ) {
+            console.warn(
+              `[Tuya Action] Refusing clean command for ${deviceId}: box is busy, cat present, or settle window active (${state.currentStatus})`,
+            );
+            return;
+          }
+
+          console.log(
+            `[Tuya Action] Sending clean command (DP 106) to ${deviceId}...`,
+          );
+          await device.set({ dps: 106, set: "AQAAAA==" });
+          await prisma.litterEvent.create({
+            data: { type: "manual-clean-app", deviceId },
+          });
+          const stateAfter = deviceStates.get(deviceId);
+          if (stateAfter) {
+            stateAfter.currentStatus = "work_mclean";
+            stateAfter.lastCleanTime = Date.now();
+          }
+        } else if (action === "tare") {
+          if (
+            state &&
+            (BUSY_STATUSES.has(state.currentStatus) || inSettleWindow)
+          ) {
+            console.warn(
+              `[Tuya Action] Refusing tare command for ${deviceId}: box is busy or cat present (${state.currentStatus})`,
+            );
+            return;
+          }
+
+          console.log(
+            `[Tuya Action] Sending tare/zero command (DP 109) to ${deviceId}...`,
+          );
+          await device.set({ dps: 109, set: "AQEAAA==" });
+        } else if (action === "cancel_clean") {
+          console.log(
+            `[Tuya Action] Sending cancel clean command (DP 106) to ${deviceId}...`,
+          );
+          await device.set({ dps: 106, set: "AQMAAA==" });
         } else if (action === "empty") {
+          if (state && BUSY_STATUSES.has(state.currentStatus)) {
+            console.warn(
+              `[Tuya Action] Refusing empty command for ${deviceId}: box is busy (${state.currentStatus})`,
+            );
+            return;
+          }
           console.log(
             `[Tuya Action] Sending empty command (DP 106) to ${deviceId}...`,
           );
@@ -591,7 +760,6 @@ export default defineNitroPlugin((nitroApp) => {
           await prisma.litterEvent.create({
             data: { type: "empty-app", deviceId },
           });
-          const state = deviceStates.get(deviceId);
           if (state) {
             state.currentStatus = "work_empty"; // Prevent duplicate
             state.lastEmptyTime = Date.now();

@@ -39,6 +39,16 @@
             </svg>
             <span>Bin Removed</span>
           </div>
+          <div v-else-if="device?.status === 'Drum Removed'"
+            class="bg-amber-600/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Drum Removed</span>
+          </div>
           <div v-else-if="device?.lidOpen"
             class="bg-orange-500/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -286,6 +296,43 @@
                 </svg>
               </div>
 
+              <div v-else-if="log.type === 'drum-removed'"
+                class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'drum-installed'"
+                class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'litter-low'"
+                class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <div v-else-if="log.type === 'litter-sufficient'"
+                class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
               <div
                 v-else-if="(log.type === 'toileted' || log.type === 'quick-visit') && getPetInfo(log.petId)?.imageBase64"
                 class="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-white/5">
@@ -365,8 +412,8 @@
         <h3 class="text-white/90 font-semibold text-lg text-center mb-6">Device Controls</h3>
 
         <div class="grid grid-cols-1 gap-4">
-          <button @click="confirmClean" disabled
-            class="bg-pawbby-card border border-white/10 p-5 rounded-2xl flex items-center justify-between opacity-50 cursor-not-allowed">
+          <button @click="confirmClean" :disabled="isBusy"
+            class="bg-pawbby-card border border-white/10 p-5 rounded-2xl flex items-center justify-between hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <div class="flex items-center space-x-4">
               <div class="bg-[#3D7A41] p-3 rounded-xl text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -377,7 +424,7 @@
               </div>
               <div class="text-left">
                 <h4 class="text-white font-semibold text-lg">Clean Litter</h4>
-                <p class="text-pawbby-muted text-sm mt-1">Temporarily disabled</p>
+                <p class="text-pawbby-muted text-sm mt-1">Start a cleaning cycle</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -423,6 +470,29 @@
               <div class="text-left">
                 <h4 class="text-white font-semibold text-lg">Empty Litter Box</h4>
                 <p class="text-pawbby-muted text-sm mt-1">Dump all litter into waste bin</p>
+              </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
+              fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <button @click="confirmTare" :disabled="isBusy"
+            class="bg-pawbby-card border border-white/10 p-5 rounded-2xl flex items-center justify-between hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <div class="flex items-center space-x-4">
+              <div class="bg-indigo-600/80 p-3 rounded-xl text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                </svg>
+              </div>
+              <div class="text-left">
+                <h4 class="text-white font-semibold text-lg">Zero / Tare Scale</h4>
+                <p class="text-pawbby-muted text-sm mt-1">Calibrate empty scale to 0g</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -602,6 +672,36 @@
       </div>
     </div>
 
+    <!-- Tare Confirmation Modal -->
+    <div v-if="showTareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden text-center">
+        <div
+          class="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2">Zero / Tare Scale</h2>
+        <p class="text-pawbby-muted text-sm mb-6 leading-relaxed">
+          Ensure the litter box is empty of cats, on a flat surface, and steady before calibrating the scale.
+        </p>
+
+        <div class="space-y-3">
+          <button @click="proceedTareAction"
+            class="w-full py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-colors">
+            Zero Scale Now
+          </button>
+          <button @click="showTareModal = false"
+            class="w-full py-2 text-pawbby-muted text-sm hover:text-white transition-colors mt-2">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
       <!-- Assign Pet Modal -->
     <div v-if="showAssignPetModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div
@@ -669,6 +769,7 @@ const showSettingsModal = ref(false)
 const showDeodorizerModal = ref(false)
 const showLiabilityModal = ref(false)
 const showEmptyModal = ref(false)
+const showTareModal = ref(false)
 const showAssignPetModal = ref(false)
 const eventToAssign = ref<DeviceLog | null>(null)
 const pendingAction = ref<'clean' | 'flatten'>('flatten')
@@ -890,7 +991,7 @@ const filteredLogs = computed(() => {
       if ((log.type === 'manual-clean' || log.type === 'manual-clean-app') && !user.value.notifyDashManualClean) return false;
       if ((log.type === 'empty' || log.type === 'empty-app') && !user.value.notifyDashEmpty) return false;
       if ((log.type === 'flatten' || log.type === 'flatten-app' || log.type === 'auto-flatten') && !user.value.notifyDashFlatten) return false;
-      if ((log.type === 'lid-removed' || log.type === 'lid-replaced' || log.type === 'bin-removed' || log.type === 'bin-replaced') && !user.value.notifyDashError) return false;
+      if ((log.type === 'lid-removed' || log.type === 'lid-replaced' || log.type === 'bin-removed' || log.type === 'bin-replaced' || log.type === 'drum-removed' || log.type === 'drum-installed' || log.type === 'litter-low' || log.type === 'litter-sufficient') && !user.value.notifyDashError) return false;
     }
 
     return true
@@ -927,6 +1028,20 @@ const confirmEmpty = () => {
 const proceedEmptyAction = () => {
   showEmptyModal.value = false
   doEmpty()
+}
+
+const confirmTare = () => {
+  showTareModal.value = true
+}
+
+const proceedTareAction = () => {
+  showTareModal.value = false
+  doTare()
+}
+
+const doTare = async () => {
+  await api.triggerTare(deviceId)
+  setTimeout(loadData, 2000)
 }
 
 const currentChartData = computed(() => {

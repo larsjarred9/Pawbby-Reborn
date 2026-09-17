@@ -100,6 +100,14 @@ export default defineEventHandler(async (event) => {
       description = 'Waste bin level is back to normal.'
     } else if (e.type === 'bin-full') {
       description = 'Waste bin is full.'
+    } else if (e.type === 'litter-low') {
+      description = 'Sensor alert: Litter level is low. Refill required.'
+    } else if (e.type === 'litter-sufficient') {
+      description = 'Litter level is back to sufficient.'
+    } else if (e.type === 'drum-removed') {
+      description = 'Safety trigger: The drum/roller was removed from the litter box.'
+    } else if (e.type === 'drum-installed') {
+      description = 'The drum/roller was re-installed.'
     } else if (e.type === 'tuya-raw-data' && e.rawData) {
       // Try to parse the raw data to extract something readable if possible
       try {
