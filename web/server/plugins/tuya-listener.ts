@@ -5,6 +5,7 @@ export default defineNitroPlugin((nitroApp) => {
   interface DeviceState {
     baseWeight: number;
     currentStatus: string;
+    isBinFull: boolean;
     catEnteredAt: number | null;
     peakWeight: number;
     pendingLitterCheck: boolean;
@@ -113,9 +114,39 @@ export default defineNitroPlugin((nitroApp) => {
 
         // Initialize state
         if (!deviceStates.has(config.id)) {
+          const latestCollectFull = await prisma.litterEvent.findFirst({
+            where: {
+              deviceId: config.id,
+              OR: [
+                { type: "bin-full" },
+                { type: "tuya-raw-data", rawData: { contains: '"collect_full"' } },
+              ],
+            },
+            orderBy: { timestamp: "desc" },
+          });
+
+          let initialBinFull = false;
+          if (latestCollectFull) {
+            const latestClear = await prisma.litterEvent.findFirst({
+              where: {
+                deviceId: config.id,
+                OR: [
+                  { type: "bin-normal" },
+                  { type: "bin-replaced" },
+                  { type: "tuya-raw-data", rawData: { contains: '"collect_normal"' } },
+                ],
+              },
+              orderBy: { timestamp: "desc" },
+            });
+            if (!latestClear || latestCollectFull.timestamp.getTime() > latestClear.timestamp.getTime()) {
+              initialBinFull = true;
+            }
+          }
+
           deviceStates.set(config.id, {
             baseWeight: 0,
             currentStatus: "work_idle",
+            isBinFull: initialBinFull,
             catEnteredAt: null,
             peakWeight: 0,
             pendingLitterCheck: false,
@@ -354,8 +385,9 @@ export default defineNitroPlugin((nitroApp) => {
 
             if (
               newStatus === "collect_full" &&
-              state.currentStatus !== "collect_full"
+              !state.isBinFull
             ) {
+              state.isBinFull = true;
               await prisma.litterEvent.create({
                 data: { type: "bin-full", deviceId: config.id },
               });
@@ -364,8 +396,9 @@ export default defineNitroPlugin((nitroApp) => {
             }
             if (
               newStatus === "collect_normal" &&
-              state.currentStatus !== "collect_normal"
+              state.isBinFull
             ) {
+              state.isBinFull = false;
               await prisma.litterEvent.create({
                 data: { type: "bin-normal", deviceId: config.id },
               });

@@ -97,7 +97,13 @@ export async function computeDeviceState(device: {
 
   // Check for persistent Bin Full state
   const latestCollectFull = await prisma.litterEvent.findFirst({
-    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"collect_full"' } },
+    where: {
+      deviceId,
+      OR: [
+        { type: 'bin-full' },
+        { type: 'tuya-raw-data', rawData: { contains: '"collect_full"' } },
+      ],
+    },
     orderBy: { timestamp: 'desc' },
   })
   const latestBinReplaced = await prisma.litterEvent.findFirst({
@@ -105,7 +111,13 @@ export async function computeDeviceState(device: {
     orderBy: { timestamp: 'desc' },
   })
   const latestCollectNormal = await prisma.litterEvent.findFirst({
-    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"collect_normal"' } },
+    where: {
+      deviceId,
+      OR: [
+        { type: 'bin-normal' },
+        { type: 'tuya-raw-data', rawData: { contains: '"collect_normal"' } },
+      ],
+    },
     orderBy: { timestamp: 'desc' },
   })
 
