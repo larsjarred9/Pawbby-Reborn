@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Bad Request: Missing deviceId or action in request body' })
   }
 
-  const allowedActions = ['clean', 'flatten', 'empty']
+  const allowedActions = ['clean', 'flatten', 'empty', 'tare', 'cancel_clean']
   if (!allowedActions.includes(action)) {
     throw createError({ statusCode: 400, statusMessage: `Bad Request: Invalid action. Allowed actions: ${allowedActions.join(', ')}` })
   }

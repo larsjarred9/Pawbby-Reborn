@@ -32,14 +32,14 @@
 | DP  | Code              | Name (CN)     | Access | Type   | Notes                                                    |
 |-----|-------------------|---------------|--------|--------|----------------------------------------------------------|
 | 101 | work_state        | 工作状态       | RW ✏️  | raw    | ❓ NEVER TRIED — current: AQAAAQQ= (01 00 00 01 04)     |
-| 102 | fault_code        | 故障码         | RW ✏️  | raw    | clean result/count: AQAACwAAAAAAAAAAAAAA                 |
+| 102 | fault_code        | 故障码         | RW ✏️  | raw    | clean result code: AQAACwAAAAAAAAAAAAAA (0x0B status code, not counter) |
 | 103 | device_state      | 设备状态       | RW ✏️  | raw    | composite status blob (changes with every state)         |
 | 104 | cat_info          | 猫咪信息       | RW ✏️  | raw    | cat profile data (empty in practice)                     |
 | 105 | device_control    | 设备控制       | RW ✏️  | raw    | ❓ NEVER TRIED — general device control                  |
-| 106 | clean_control     | 清理控制       | RW ✏️  | raw    | FLATTEN / EMPTY commands (confirmed working)             |
-| 107 | toilet_data       | 如厕数据       | RW ✏️  | raw    | cat visit summary (AQAABRBQABUA seen)                   |
+| 106 | clean_control     | 清理控制       | RW ✏️  | raw    | CLEAN / FLATTEN / EMPTY commands (all confirmed working ✅) |
+| 107 | toilet_data       | 如厕数据       | RW ✏️  | raw    | cat visit summary (01 00 00 05 [weight WW WW in g] 00 [xx] 00) |
 | 108 | device_info       | 设备信息       | RW ✏️  | raw    | AQAAEk1HUzEwNDA0MjUwNDE4MDA0NA==                       |
-| 109 | weight_cal        | 称重校准       | RW ✏️  | raw    | ❓ weight calibration/tare — NEVER TRIED                 |
+| 109 | weight_cal        | 称重校准       | RW ✏️  | raw    | TARE / zero scale: AQEAAA== (01 01 00 00) ✅ CONFIRMED  |
 | 110 | calibrat_result   | 校准结果       | RW ✏️  | raw    | calibration result: AQEAAQA=                            |
 | 111 | debug_data_01     | 调试数据01     | ro     | value  | raw weight ADC (e.g. 4116)                              |
 | 112 | debug_data_02     | 调试数据02     | ro     | value  | filtered weight in grams (e.g. 5636)                    |
@@ -70,12 +70,11 @@
 ### Broadcast-Only DPs (device pushes, not in `status()`)
 
 #### DP 102 — Clean cycle result reporter
-- Broadcasts at **END** of every manual clean cycle (`work_mclean`)
+- Broadcasts at **END** of clean cycles (`work_mclean` and `work_aclean`)
 - Value observed: `'AQAACwAAAAAAAAAAAAAA'`
 - Decoded bytes: `01 00 00 0B 00 00 00 00 00 00 00 00 00 00 00`
-- Byte[3] = `0x0B` = 11 (likely total clean cycle count, increments)
-- Status: ❓ NOT yet tested as a TRIGGER — priority for next session
-- Hypothesis: read-only result DP (device writes it after clean)
+- Byte[3] = `0x0B` = 11: **Clean result status code**, NOT a counter. Tested across consecutive manual and auto clean cycles by @managementboy; the value remains static `0x0B`.
+- Status: Read-only result DP (device writes it after clean)
 
 #### DP 103 — Composite binary device status blob (设备状态 / "Device status")
 > NOTE: Was previously guessed as DP 115 — CORRECTED, it is DP 103
@@ -98,22 +97,24 @@
 - Status: ❓ NOT yet tested as a TRIGGER
 
 #### DP 106 — Main command trigger (工作状态 / "Work status")
-- Payload format (base64 of 5 bytes): `[01][mode][00][01][00]`
+- Payload format: 4 or 5 bytes
+  - Standard command: `[01][mode][00][00]` or `[01][mode][00][01][00]`
 
-**Confirmed command modes (sent by us → state observed):**
+**Confirmed command modes (sent by us / community → state observed):**
 
-| Payload      | Bytes              | Result                                 |
-|--------------|--------------------|----------------------------------------|
-| `AQEAAQA=`   | 01 01 00 01 00     | `work_smooth` = FLATTEN ✅ (confirmed) |
-| `AQIAAQA=`   | 01 02 00 01 00     | `work_empty` = EMPTY/DUMP ✅ ⚠️ BE CAREFUL |
-| `AQMAAQA=`   | 01 03 00 01 00     | `cat_near` = side effect, not useful  |
-| `AQQAAQA=`   | 01 04 00 01 00     | `cat_near_leave` = side effect        |
-| modes 05–12  |                    | `work_idle` = no effect               |
-| integer 1–6  |                    | `work_idle` = no effect               |
+| Payload      | Bytes              | Result                                 | Notes |
+|--------------|--------------------|----------------------------------------|-------|
+| `AQAAAA==`   | 01 00 00 00        | `work_mclean` = MANUAL CLEAN ✅ (confirmed) | Starts ~119s clean cycle immediately; ends with DP 102 (credit: @managementboy) |
+| `AQEAAQA=`   | 01 01 00 01 00     | `work_smooth` = FLATTEN ✅ (confirmed) | Levels litter surface |
+| `AQIAAQA=`   | 01 02 00 01 00     | `work_empty` = EMPTY/DUMP ✅ ⚠️ BE CAREFUL | Dumps all litter into waste bin |
+| `AQMAAQA=`   | 01 03 00 01 00     | `cat_near` = side effect, not useful  | |
+| `AQQAAQA=`   | 01 04 00 01 00     | `cat_near_leave` = side effect        | |
+| `01 01 00 00`| 01 01 00 00        | `startFP` from APK notes (untested)   | |
+| `01 03 00 00`| 01 03 00 00        | `cancelClear` from APK notes (untested) | |
+| modes 05–12  |                    | `work_idle` = no effect               | |
+| integer 1–6  |                    | `work_idle` = no effect               | |
 
-**Deep-test result** (`find_clean_deep.py` — exhaustive):
-- Mode=01 + any variation of bytes [2],[3],[4] → always `work_smooth` (flatten)
-- Conclusion: **byte[1]=01 ALWAYS means flatten** regardless of other bytes
+> ℹ️ **Note on `work_mclean` discovery:** The original DP 106 sweep started at byte `01` (`AQEAAQA=`), which missed byte `00` (`AQAAAA==`). Thanks to @managementboy, remote manual clean via `AQAAAA==` (`startClear = 01000000` in APK decompilation) is confirmed working! Always verify box is idle and no cat is present before sending.
 
 **Reported BY device itself (echo on status changes):**
 
@@ -122,22 +123,29 @@
 | `AQAAAQA=` | 01 00 00 01 00 | `work_idle` = standby                           |
 | `AQIAAQA=` | 01 02 00 01 00 | `work_aclean` = AUTO clean (device self-triggers)|
 
-> NOTE: 工作状态 may be a separate READ-ONLY reporting DP, not the writable DP 106
-
-❌ `work_mclean` NOT triggered via DP 106
-
 #### DP 107 — Cat visit data reporter (如厕数据 / "Toilet data")
 - ✅ CONFIRMED as 如厕数据 DP
 - Broadcasts ONLY when cat has a real interaction (not just a peek/cat_near)
 - Fires just before auto-clean (`work_aclean`) is triggered
-- Value observed: `'AQAABRBQABUA'`
 - Timing: broadcasts ~at `cat_near_leave`, then `work_aclean` fires ~70s later
 - NOT triggered for quick `cat_near`-only visits (cat just sniffs, doesn't enter)
-- Previous tests (bool True / int 1 / int 0) all returned `work_idle`
-- ❓ NOT yet tested with its native base64 payload as a trigger
+- Value format: base64 string decoding to `01 00 00 05 [WW WW] 00 [xx] 00`
+  - Bytes 0–3: `01 00 00 05`
+  - Bytes 4–5: Big-endian 16-bit uint = **Cat's weight in grams** (credit: hypothesis by @managementboy, confirmed by known samples):
+    - `'AQAABRCYAAsA'` -> `10 98` = **4248g**
+    - `'AQAABRBQABUA'` -> `10 50` = **4176g**
+    - `'AQAABQ/RACIA'` -> `0f d1` = **4049g** (matches DP 111/113 status values)
+  - Byte 6: `00`
+  - Byte 7: `xx` (e.g. `11`, `21`, `34` in samples) — likely visit duration in seconds or internal status/confidence flag
 
-#### DP 108–110
-- No response to bool/int values (unknown function)
+#### DP 109 — Weight calibration / Tare (称重校准 / "Weight cal")
+- Payload: `AQEAAA==` (bytes: `01 01 00 00`, matching `resetWeight = createValue(1, 0, 1)`)
+- ✅ CONFIRMED working (credit: @managementboy): zeroes/tares the load cells.
+- Box responds with empty ACK on Tuya command `0x0d`.
+
+#### DP 108, 110
+- DP 108: `device_info` (e.g. `AQAAEk1HUzEwNDA0MjUwNDE4MDA0NA==`)
+- DP 110: `calibrat_result` (calibration result: `AQEAAQA=`)
 
 ---
 
@@ -157,33 +165,42 @@
 
 #### DP 113 — Debug sensor 3 (调试数据03 / "Debug data 03")
 - Values: integer
-- At idle: same value as DP 111 (e.g. 4049)
+- At idle: same value as DP 111 (e.g. 4049, raw ADC tare offset)
+- During an active cat visit (`cat_enter` → `cat_leave`): **reports the live cat weight in grams** directly calculated by firmware (e.g. 4248g)
 - Resets to 0 when cat leaves (`cat_near_leave` event)
-- May represent: litter disturbance delta or tare offset
 
 #### DP 114 — Motor status
 - Values: `"motor_ok"`
 
-#### DP 115 — UNKNOWN
-- Previously guessed as 设备状态 — **INCORRECT**
-- The composite status blob is actually DP 103 (see above)
-- DP 115 does not appear in `status()` or live broadcasts observed so far
+#### DP 115 — Deodorant Cartridge Life (`deodorant_days`)
+- Confirmed by @managementboy (`DATAPOINTS.md`)
+- Reports remaining deodorant pod lifetime in days (e.g. `30` down to `0`).
 
 #### DP 116 — Device state machine (数据标志03 / "Data flag 03")
 - **READ-ONLY** reporting DP
 - All known states:
 
-| State           | Description                                             |
-|-----------------|---------------------------------------------------------|
-| `work_idle`     | idle / standby                                          |
-| `cat_near`      | cat approaching, detected near box                      |
-| `cat_enter`     | cat is inside using the box                             |
-| `cat_leave`     | cat stepping out (weight dropping)                      |
-| `cat_near_leave`| cat has fully left the sensor range                     |
-| `work_smooth`   | FLATTEN / leveling litter (triggered via DP 106)        |
-| `work_aclean`   | AUTOMATIC clean (~1 min after cat visit, device self-triggers) |
-| `work_mclean`   | MANUAL clean ❓ trigger not yet found remotely           |
-| `work_empty`    | EMPTY / dump litter (triggered via DP 106 ⚠️)           |
+| State                | Description                                                          |
+|----------------------|----------------------------------------------------------------------|
+| `work_idle`          | idle / standby                                                       |
+| `cat_near`           | cat approaching, detected near box                                   |
+| `cat_enter`          | cat is inside using the box                                          |
+| `cat_leave`          | cat stepping out (weight dropping)                                   |
+| `cat_near_leave`     | cat has fully left the sensor range                                  |
+| `work_smooth`        | FLATTEN / leveling litter (triggered via DP 106)                     |
+| `work_aclean`        | AUTOMATIC clean (~1 min after cat visit, device self-triggers)      |
+| `work_mclean`        | MANUAL clean (triggered via DP 106 `AQAAAA==` ✅)                    |
+| `work_empty`         | EMPTY / dump litter (triggered via DP 106 ⚠️)                        |
+| `work_dumping`       | Intermediate drum tilting/dumping phase                              |
+| `work_resetting`     | Drum homing / resetting phase                                        |
+| `lid_open`           | Top lid / cover removed (freezes DP 112 scale reading!)              |
+| `lid_close`          | Top lid / cover closed                                               |
+| `roller_uninstall_ok`| Drum / roller removed from chassis (cleaning / maintenance)          |
+| `collect_install`    | Waste drawer pulled out / removed                                    |
+| `collect_full`       | Waste bin full                                                       |
+| `collect_normal`     | Waste bin normal (not full)                                          |
+| `cat_litter_little`  | Litter level is low (sensor alert)                                   |
+| `cat_litter_enough`  | Litter level sufficient / restored                                  |
 
 #### DP 117 — Motor debug string (电机相关数据 / "Motor related data")
 - Format: `"cu=X FG=X BRK=X PWM=X POWER=X"`
@@ -226,6 +243,63 @@
 | DPs 118–135 | flatten payload tested — all work_idle                              |
 | DPs 118–150 | mode-03 payload tested — all work_idle                              |
 | DPs 136+    | NOT YET TESTED                                                      |
+
+---
+
+## Protocol Architecture & Firmware Quirks (Reverse Engineering Notes)
+
+### 1. Command Encoding (`createValue`)
+From APK decompilation (credit: @managementboy), command bytes follow the structure:
+`createValue(version, cmd, flag, data)` = `[ver (1B)][cmd (1B)][flag (2B)][data (optional)]`
+- **Clean Now** (`startClear`): `(1, 0, 0)` → `01 00 00 00` (`AQAAAA==`) on DP 106
+- **Tare / Zero Scale** (`resetWeight`): `(1, 1, 0)` → `01 01 00 00` (`AQEAAA==`) on DP 109
+- **Cancel Clean** (`cancelClear`): `(1, 3, 0)` → `01 03 00 00` (`AQMAAA==`) on DP 106 (from APK decompilation)
+- **Flatten / Level** (`startFP`): `(1, 1, 0)` → `01 01 00 01 00` (`AQEAAQA=`) on DP 106
+- **Empty Tray**: `(1, 2, 0)` → `01 02 00 01 00` (`AQIAAQA=`) on DP 106
+
+### 2. Live Cat Weight Reporting (DP 113)
+During an active cat visit (`cat_enter` → `cat_leave`), **DP 113 directly reports the live cat weight in grams** as calculated by the box firmware (e.g. `4248` matching DP 107). It resets to `0` when `cat_near_leave` fires.
+
+### 3. "Lid Open Freezes DP 112" & Refill Trap
+- When the top cover/lid is opened (`lid_open`), **DP 112 readings are latched/frozen** by the firmware. Identical readings over minutes do not indicate a steady measurement.
+- Human approach triggers `cat_near`; pouring in fresh litter increases weight. If `lid_open` is active, visit weight measurement must be discarded to prevent litter refills being falsely recorded as cat visits.
+
+### 4. `cat_near_leave` vs Presence
+- `cat_near_leave` indicates the cat has already stepped away from the scale sensor area.
+- It must not be treated as `cat_present = true`, otherwise presence stays latched on and delays closing the measurement window.
+
+### 5. Split Visit Window
+- Cats frequently step out for 5–15 seconds and step right back in.
+- If `cat_near` or `cat_enter` reoccurs within 15 seconds of `cat_near_leave`, merging into the same visit prevents fragmented logs.
+
+### 6. Local Tuya v3.4 Transport Notes
+- TCP Port 6668.
+- The box allows strictly **one TCP connection at a time**; the vendor mobile app must be closed.
+- Keepalive: connections drop after ~30s idle, so a heartbeat (cmd `0x09` with `{}`) is required every 10s.
+- Status queries: responds to `DP_QUERY` (`0x0a`); ignores `DP_QUERY_NEW` (`0x10`).
+- Writes: command `0x0d` (`CONTROL_NEW`) requires a 15-byte prefix (`"3.4"` followed by 12 null bytes).
+
+### 7. Native Litter Level Detection (`cat_litter_little` & `cat_litter_enough`)
+- Firmware directly reports litter level status via DP 116 enums:
+  - `cat_litter_little`: Box optical/load sensors detect low litter.
+  - `cat_litter_enough` (or prefix `cat_litter_eno*`): Box detects adequate litter level.
+- Replaces previous heuristics (such as inspecting raw weight < 1500g or misinterpreting DP 102).
+
+### 8. Drum Removal Detection (`roller_uninstall_ok`)
+- When the rotating drum/roller is unlatched and lifted out for washing/cleaning, DP 116 reports `roller_uninstall_ok`.
+- Safe systems should flag the box as "Drum Removed" and refuse any remote motor commands (`clean`, `flatten`, `empty`, `tare`) while in this state.
+
+### 9. Multi-Cat Weight Clustering (1-D 2-Means)
+- Reverse-engineered in @managementboy's `pawbby_resident.lua`:
+  - Collects recent visit weights (e.g. latest 60 samples from DP 107 / scale peaks).
+  - Evaluates all `n - 1` split points of sorted weights to minimize Sum of Squared Errors (SSE).
+  - Validation test: Enforces cluster separation `(mean_high - mean_low) >= max(400g, 4 * sd)`.
+  - If a home only has one cat (or weights are too close to distinguish safely), the standard deviation test prevents the system from hallucinating two different cats.
+
+---
+
+## Acknowledgements & Community Contributions
+Special thanks to **[@managementboy](https://github.com/managementboy/pawbby)** for reverse-engineering and field-testing the KNX / LogicMachine local Tuya v3.4 implementation, discovering the remote clean (`01 00 00 00`) & tare (`01 01 00 00`) payloads, decoding the DP 107 byte structure, clarifying DP 102 / DP 115 / DP 116 states, and documenting firmware quirks.
 
 ---
 

@@ -165,6 +165,12 @@ export const useApi = () => {
   const triggerEmpty = async (deviceId: string) => {
     await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'empty' } })
   }
+  const triggerTare = async (deviceId: string) => {
+    await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'tare' } })
+  }
+  const triggerCancelClean = async (deviceId: string) => {
+    await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'cancel_clean' } })
+  }
 
   const resizeImage = (file: File, maxWidth = 400, maxHeight = 400): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -218,6 +224,8 @@ export const useApi = () => {
     triggerClean,
     triggerFlatten,
     triggerEmpty,
+    triggerTare,
+    triggerCancelClean,
     getPets,
     addPet,
     updatePet,

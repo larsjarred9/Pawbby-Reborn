@@ -31,7 +31,7 @@
         <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto mb-4 whitespace-pre">
 {
   "deviceId": "YOUR_DEVICE_ID",
-  "action": "clean" // "clean", "flatten", or "empty"
+  "action": "clean" // "clean", "flatten", "empty", "tare", or "cancel_clean"
 }
         </div>
 
@@ -90,7 +90,7 @@ curl "http://YOUR_PAWBBY_IP:3333/api/external/events?deviceId=device_id_here&lim
   "online": true,
   "status": "Ready",
   "wasteBin": "Normal",
-  "litterLevel": "Sufficient*",
+  "litterLevel": "Sufficient",
   "lidOpen": false,
   "binRemoved": false,
   "todayToileted": 3,
@@ -190,9 +190,23 @@ rest_command:
       Authorization: "Bearer YOUR_API_KEY"
       Content-Type: "application/json"
     payload: '{"deviceId": "YOUR_DEVICE_ID", "action": "empty"}'
+  pawbby_tare:
+    url: "http://YOUR_PAWBBY_IP:3333/api/external/action"
+    method: POST
+    headers:
+      Authorization: "Bearer YOUR_API_KEY"
+      Content-Type: "application/json"
+    payload: '{"deviceId": "YOUR_DEVICE_ID", "action": "tare"}'
+  pawbby_cancel_clean:
+    url: "http://YOUR_PAWBBY_IP:3333/api/external/action"
+    method: POST
+    headers:
+      Authorization: "Bearer YOUR_API_KEY"
+      Content-Type: "application/json"
+    payload: '{"deviceId": "YOUR_DEVICE_ID", "action": "cancel_clean"}'
         </div>
-        <p class="text-xs text-pawbby-muted">Call the commands from an automation or a <code class="text-white/80">script</code> via <code class="text-white/80">service: rest_command.pawbby_flatten</code>. Home Assistant must be able to reach Pawbby over your local network. <code class="text-white/80">WEBHOOK_STRICT_MODE</code> only affects outbound webhooks, not this inbound API.</p>
-        <p class="text-xs text-[#D84C4C]/90 mt-2">⚠️ Note: <code class="text-white/80">flatten</code> (straighten litter) and <code class="text-white/80">empty</code> are fully supported. <code class="text-white/80">clean</code> is not yet implemented — its device payload hasn't been reverse-engineered, so the command is currently a no-op (and is omitted from the MQTT buttons).</p>
+        <p class="text-xs text-pawbby-muted">Call the commands from an automation or a <code class="text-white/80">script</code> via <code class="text-white/80">service: rest_command.pawbby_clean</code>. Home Assistant must be able to reach Pawbby over your local network. <code class="text-white/80">WEBHOOK_STRICT_MODE</code> only affects outbound webhooks, not this inbound API.</p>
+        <p class="text-xs text-pawbby-primary/90 mt-2">✨ All actions (<code class="text-white/80">clean</code>, <code class="text-white/80">flatten</code>, <code class="text-white/80">empty</code>, <code class="text-white/80">tare</code>, and <code class="text-white/80">cancel_clean</code>) are fully supported via local LAN control and protected by safety interlocks.</p>
       </section>
     </div>
   </div>
