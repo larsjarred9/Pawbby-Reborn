@@ -94,6 +94,28 @@ export default defineNitroPlugin((nitroApp) => {
     }
   };
 
+  const recordEvent = async (payload: {
+    type?: string;
+    deviceId?: string;
+    petId?: string | null;
+    weight?: number | null;
+    duration?: number | null;
+    rawData?: string | null;
+    data?: any;
+  }) => {
+    const data = payload.data || payload;
+    const event = await prisma.litterEvent.create({ data });
+    nitroApp.hooks.callHook("device:event" as any, {
+      deviceId: data.deviceId,
+      type: data.type,
+      petId: data.petId,
+      weight: data.weight,
+      duration: data.duration,
+      timestamp: event.timestamp.toISOString(),
+    });
+    return event;
+  };
+
   const startTuyaListener = async () => {
     try {
       const devices = await prisma.device.findMany({
@@ -307,15 +329,13 @@ export default defineNitroPlugin((nitroApp) => {
               `[PawID] Toilet visit detected via DP 107! Weight: ${weightInKg}kg, Duration: ${durationSecs}s. Matched Pet: ${matchedPetId || "Unknown"}`,
             );
 
-            await prisma.litterEvent.create({
-              data: {
-                type: "toileted",
-                deviceId: config.id,
-                petId: matchedPetId,
-                weight: weightInKg > 0 ? weightInKg : null,
-                duration: durationSecs,
-                rawData: JSON.stringify(dps["107"]),
-              },
+            await recordEvent({
+              type: "toileted",
+              deviceId: config.id,
+              petId: matchedPetId,
+              weight: weightInKg > 0 ? weightInKg : null,
+              duration: durationSecs,
+              rawData: JSON.stringify(dps["107"]),
             });
 
             // Trigger Webhook Notification
@@ -358,8 +378,9 @@ export default defineNitroPlugin((nitroApp) => {
               state.currentStatus !== "work_aclean"
             ) {
               if (now - state.lastCleanTime > 60000) {
-                await prisma.litterEvent.create({
-                  data: { type: "auto-clean", deviceId: config.id },
+                await recordEvent({
+                  type: "auto-clean",
+                  deviceId: config.id,
                 });
                 state.lastCleanTime = now;
                 const user = await prisma.user.findFirst();
@@ -372,8 +393,9 @@ export default defineNitroPlugin((nitroApp) => {
             ) {
               if (now - state.lastCleanTime > 60000) {
                 const type = isApp ? "manual-clean-app" : "manual-clean";
-                await prisma.litterEvent.create({
-                  data: { type, deviceId: config.id },
+                await recordEvent({
+                  type,
+                  deviceId: config.id,
                 });
                 state.lastCleanTime = now;
                 const user = await prisma.user.findFirst();
@@ -393,11 +415,9 @@ export default defineNitroPlugin((nitroApp) => {
                 if (isApp) flattenType = "flatten-app";
                 else if (now - state.lastCatLeaveTime < 5 * 60 * 1000) flattenType = "auto-flatten";
 
-                await prisma.litterEvent.create({
-                  data: {
-                    type: flattenType,
-                    deviceId: config.id,
-                  },
+                await recordEvent({
+                  type: flattenType,
+                  deviceId: config.id,
                 });
                 state.lastFlattenTime = now;
                 const user = await prisma.user.findFirst();
@@ -410,8 +430,9 @@ export default defineNitroPlugin((nitroApp) => {
             ) {
               if (now - state.lastEmptyTime > 60000) {
                 const type = isApp ? "empty-app" : "empty";
-                await prisma.litterEvent.create({
-                  data: { type, deviceId: config.id },
+                await recordEvent({
+                  type,
+                  deviceId: config.id,
                 });
                 state.lastEmptyTime = now;
                 const user = await prisma.user.findFirst();
@@ -425,8 +446,9 @@ export default defineNitroPlugin((nitroApp) => {
               if (state.catEnteredAt) {
                 state.lidOpenedDuringVisit = true;
               }
-              await prisma.litterEvent.create({
-                data: { type: "lid-removed", deviceId: config.id },
+              await recordEvent({
+                type: "lid-removed",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "⚠️ Top cover/lid removed from the litter box!", "error");
@@ -435,8 +457,9 @@ export default defineNitroPlugin((nitroApp) => {
               state.currentStatus === "lid_open" &&
               newStatus !== "lid_open"
             ) {
-              await prisma.litterEvent.create({
-                data: { type: "lid-replaced", deviceId: config.id },
+              await recordEvent({
+                type: "lid-replaced",
+                deviceId: config.id,
               });
               state.pendingLitterCheck = true;
             }
@@ -445,8 +468,9 @@ export default defineNitroPlugin((nitroApp) => {
               newStatus === "collect_install" &&
               state.currentStatus !== "collect_install"
             ) {
-              await prisma.litterEvent.create({
-                data: { type: "bin-removed", deviceId: config.id },
+              await recordEvent({
+                type: "bin-removed",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "⚠️ Waste bin removed from the litter box!", "error");
@@ -455,8 +479,9 @@ export default defineNitroPlugin((nitroApp) => {
               state.currentStatus === "collect_install" &&
               newStatus !== "collect_install"
             ) {
-              await prisma.litterEvent.create({
-                data: { type: "bin-replaced", deviceId: config.id },
+              await recordEvent({
+                type: "bin-replaced",
+                deviceId: config.id,
               });
             }
 
@@ -465,8 +490,9 @@ export default defineNitroPlugin((nitroApp) => {
               !state.isBinFull
             ) {
               state.isBinFull = true;
-              await prisma.litterEvent.create({
-                data: { type: "bin-full", deviceId: config.id },
+              await recordEvent({
+                type: "bin-full",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "🗑️ Waste bin is full and needs to be emptied.", "error");
@@ -476,8 +502,9 @@ export default defineNitroPlugin((nitroApp) => {
               state.isBinFull
             ) {
               state.isBinFull = false;
-              await prisma.litterEvent.create({
-                data: { type: "bin-normal", deviceId: config.id },
+              await recordEvent({
+                type: "bin-normal",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "✅ Waste bin is no longer full.", "error");
@@ -485,16 +512,18 @@ export default defineNitroPlugin((nitroApp) => {
 
             if (newStatus === "cat_litter_little" && !state.isLitterLow) {
               state.isLitterLow = true;
-              await prisma.litterEvent.create({
-                data: { type: "litter-low", deviceId: config.id },
+              await recordEvent({
+                type: "litter-low",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "⚠️ Litter level is low. Please refill the litter box.", "error");
             }
             if ((newStatus === "cat_litter_enough" || newStatus.startsWith("cat_litter_eno")) && state.isLitterLow) {
               state.isLitterLow = false;
-              await prisma.litterEvent.create({
-                data: { type: "litter-sufficient", deviceId: config.id },
+              await recordEvent({
+                type: "litter-sufficient",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "✅ Litter level is sufficient.", "error");
@@ -502,16 +531,18 @@ export default defineNitroPlugin((nitroApp) => {
 
             if (newStatus === "roller_uninstall_ok" && !state.isDrumRemoved) {
               state.isDrumRemoved = true;
-              await prisma.litterEvent.create({
-                data: { type: "drum-removed", deviceId: config.id },
+              await recordEvent({
+                type: "drum-removed",
+                deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
               if (user) await dispatchWebhook(user, "⚠️ Drum/roller removed from the litter box!", "error");
             }
             if (state.isDrumRemoved && newStatus !== "roller_uninstall_ok") {
               state.isDrumRemoved = false;
-              await prisma.litterEvent.create({
-                data: { type: "drum-installed", deviceId: config.id },
+              await recordEvent({
+                type: "drum-installed",
+                deviceId: config.id,
               });
             }
 
@@ -536,7 +567,7 @@ export default defineNitroPlugin((nitroApp) => {
                   `[PawID] Quick peek detected! Weight: ${weightInKg}kg, Duration: ${durationSecs}s.`,
                 );
 
-                await prisma.litterEvent.create({
+                await recordEvent({
                   data: {
                     type: "quick-visit",
                     deviceId: config.id,
@@ -567,7 +598,7 @@ export default defineNitroPlugin((nitroApp) => {
             if (state.pendingLitterCheck && state.baseWeight > 0) {
               const diff = dps["112"] - state.baseWeight;
               if (Math.abs(diff) >= 50) { // Only log if > 50g changed
-                await prisma.litterEvent.create({
+                await recordEvent({
                   data: {
                     type: diff > 0 ? "litter-added" : "litter-removed",
                     deviceId: config.id,
@@ -737,7 +768,7 @@ export default defineNitroPlugin((nitroApp) => {
             `[Tuya Action] Sending flatten command (DP 106) to ${deviceId}...`,
           );
           await device.set({ dps: 106, set: "AQEAAQA=" });
-          await prisma.litterEvent.create({
+          await recordEvent({
             data: { type: "flatten-app", deviceId },
           });
           if (state) {
@@ -759,7 +790,7 @@ export default defineNitroPlugin((nitroApp) => {
             `[Tuya Action] Sending clean command (DP 106) to ${deviceId}...`,
           );
           await device.set({ dps: 106, set: "AQAAAA==" });
-          await prisma.litterEvent.create({
+          await recordEvent({
             data: { type: "manual-clean-app", deviceId },
           });
           const stateAfter = deviceStates.get(deviceId);
@@ -798,7 +829,7 @@ export default defineNitroPlugin((nitroApp) => {
             `[Tuya Action] Sending empty command (DP 106) to ${deviceId}...`,
           );
           await device.set({ dps: 106, set: "AQIAAQA=" });
-          await prisma.litterEvent.create({
+          await recordEvent({
             data: { type: "empty-app", deviceId },
           });
           if (state) {

@@ -6,6 +6,7 @@ export interface DeviceLiveState {
   litterLevel: string // "Sufficient" | "Low"
   lidOpen: boolean
   binRemoved: boolean
+  drumRemoved: boolean
   todayToileted: number
   lastHeartbeat: Date | null
   latestWeight: number | null // kg, from the most recent completed visit
@@ -145,6 +146,29 @@ export async function computeDeviceState(device: {
     if (fullTime > replacedTime && fullTime > normalTime) isBinFullState = true
   }
 
+  // Check for persistent Drum Removed state
+  const latestDrumRemoved = await prisma.litterEvent.findFirst({
+    where: {
+      deviceId,
+      OR: [
+        { type: 'drum-removed' },
+        { type: 'tuya-raw-data', rawData: { contains: '"roller_uninstall_ok"' } },
+      ],
+    },
+    orderBy: { timestamp: 'desc' },
+  })
+  const latestDrumInstalled = await prisma.litterEvent.findFirst({
+    where: { deviceId, type: 'drum-installed' },
+    orderBy: { timestamp: 'desc' },
+  })
+  let isDrumRemovedState = false
+  if (latestDrumRemoved) {
+    const removedTime = latestDrumRemoved.timestamp.getTime()
+    const installedTime = latestDrumInstalled ? latestDrumInstalled.timestamp.getTime() : 0
+    if (removedTime > installedTime) isDrumRemovedState = true
+  }
+  let drumRemoved = isDrumRemovedState
+
   // Check DP 116 for status
   const latestDP116Event = await prisma.litterEvent.findFirst({
     where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"116"' } },
@@ -163,6 +187,7 @@ export async function computeDeviceState(device: {
           binRemoved = true
         } else if (dp116 === 'roller_uninstall_ok') {
           status = 'Drum Removed'
+          drumRemoved = true
         } else if (dp116 === 'collect_full') {
           status = 'Bin Full'
           wasteBin = 'Full'
@@ -175,6 +200,11 @@ export async function computeDeviceState(device: {
         }
       }
     } catch (e) {}
+  }
+
+  // Override status if drum is removed
+  if (drumRemoved && status === 'Ready') {
+    status = 'Drum Removed'
   }
 
   // Override status if the bin is persistently full (and not currently removed or open)
@@ -233,6 +263,7 @@ export async function computeDeviceState(device: {
     litterLevel,
     lidOpen,
     binRemoved,
+    drumRemoved,
     todayToileted,
     lastHeartbeat: latestRaw ? latestRaw.timestamp : null,
     latestWeight: lastVisit?.weight ?? null,

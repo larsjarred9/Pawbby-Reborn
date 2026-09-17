@@ -9,7 +9,7 @@ import { computePetStates } from '../utils/petState'
 // Assistant automatically under one "Pawbby" device per litter box — no YAML needed.
 export default defineNitroPlugin((nitroApp) => {
   const DISCOVERY_PREFIX = 'homeassistant'
-  const ALLOWED_ACTIONS = ['clean', 'flatten', 'empty']
+  const ALLOWED_ACTIONS = ['clean', 'flatten', 'empty', 'tare', 'cancel_clean']
   const ONLINE_WINDOW_MS = 15 * 60 * 1000
 
   let client: MqttClient | null = null
@@ -18,6 +18,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   const availabilityTopic = () => `${baseTopic}/bridge/availability`
   const stateTopic = (id: string) => `${baseTopic}/${id}/state`
+  const eventTopic = (id: string) => `${baseTopic}/${id}/event`
   const commandTopic = (id: string, action: string) => `${baseTopic}/${id}/command/${action}`
   const petStateTopic = (id: string) => `${baseTopic}/pet/${id}/state`
 
@@ -36,13 +37,16 @@ export default defineNitroPlugin((nitroApp) => {
     { key: 'lid_open', name: 'Lid Open', tpl: "{{ 'on' if value_json.lidOpen else 'off' }}", device_class: 'opening' },
     { key: 'bin_full', name: 'Waste Bin Full', tpl: "{{ 'on' if value_json.wasteBin == 'Full' else 'off' }}", device_class: 'problem' },
     { key: 'bin_removed', name: 'Bin Removed', tpl: "{{ 'on' if value_json.binRemoved else 'off' }}", device_class: 'problem' },
+    { key: 'drum_removed', name: 'Drum Removed', tpl: "{{ 'on' if value_json.drumRemoved else 'off' }}", device_class: 'problem' },
+    { key: 'litter_low', name: 'Litter Low', tpl: "{{ 'on' if value_json.litterLow else 'off' }}", device_class: 'problem' },
   ] as const
 
-  // Only actions the daemon can actually perform are exposed as buttons. "clean" is
-  // intentionally omitted — its Tuya payload is not yet known (no-op in tuya-listener).
   const BUTTONS = [
+    { key: 'clean', name: 'Clean', action: 'clean', icon: 'mdi:broom' },
     { key: 'flatten', name: 'Flatten', action: 'flatten', icon: 'mdi:road-variant' },
     { key: 'empty', name: 'Empty', action: 'empty', icon: 'mdi:delete-empty' },
+    { key: 'tare', name: 'Zero Scale', action: 'tare', icon: 'mdi:scale' },
+    { key: 'cancel_clean', name: 'Cancel Clean', action: 'cancel_clean', icon: 'mdi:stop-circle' },
   ] as const
 
   // Per-cat sensors — each cat becomes its own Home Assistant device. Only raw
@@ -76,8 +80,10 @@ export default defineNitroPlugin((nitroApp) => {
       status: state.status,
       wasteBin: state.wasteBin,
       litterLevel: state.litterLevel,
+      litterLow: state.litterLevel === 'Low',
       lidOpen: state.lidOpen,
       binRemoved: state.binRemoved,
+      drumRemoved: state.drumRemoved,
       todayToileted: state.todayToileted,
       latestWeight: state.latestWeight,
       lastVisitPet: state.lastVisitPet,
@@ -159,6 +165,45 @@ export default defineNitroPlugin((nitroApp) => {
           { retain: true },
         )
       }
+
+      // Home Assistant MQTT Event entity for real-time notifications
+      const eventCfg: any = {
+        name: 'Event',
+        unique_id: `pawbby_${device.id}_event`,
+        object_id: `pawbby_${device.name}_event`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+        state_topic: eventTopic(device.id),
+        event_types: [
+          'toileted',
+          'quick-visit',
+          'auto-clean',
+          'manual-clean',
+          'manual-clean-app',
+          'flatten',
+          'flatten-app',
+          'auto-flatten',
+          'empty',
+          'empty-app',
+          'lid-removed',
+          'lid-replaced',
+          'bin-removed',
+          'bin-replaced',
+          'bin-full',
+          'bin-normal',
+          'litter-low',
+          'litter-sufficient',
+          'drum-removed',
+          'drum-installed',
+          'litter-added',
+          'litter-removed',
+        ],
+        device: dev,
+        ...avail,
+      }
+      client.publish(
+        `${DISCOVERY_PREFIX}/event/pawbby_${device.id}/event/config`,
+        JSON.stringify(eventCfg),
+        { retain: true },
+      )
     }
   }
 
@@ -329,6 +374,19 @@ export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook('device:state-changed' as any, ({ deviceId }: any) => {
     publishState(deviceId).catch((e) => console.error('[MQTT] State push failed:', e?.message))
     publishPetState().catch((e) => console.error('[MQTT] Pet state push failed:', e?.message))
+  })
+
+  // Broadcast events to MQTT and HA Event entity in real-time
+  nitroApp.hooks.hook('device:event' as any, (evt: any) => {
+    if (!client) return
+    const payload = {
+      event_type: evt.type,
+      ...evt,
+    }
+    client.publish(eventTopic(evt.deviceId), JSON.stringify(payload))
+    client.publish(`${baseTopic}/events`, JSON.stringify(payload))
+    publishState(evt.deviceId).catch((e) => console.error('[MQTT] State push after event failed:', e?.message))
+    publishPetState().catch((e) => console.error('[MQTT] Pet state push after event failed:', e?.message))
   })
 
   // Start slightly after the Tuya listener so devices are known.
