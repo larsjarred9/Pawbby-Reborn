@@ -28,6 +28,7 @@ export default defineNitroPlugin((nitroApp) => {
   ]);
 
   const BUSY_STATUSES = new Set([
+    "unknown",
     "cat_enter",
     "cat_near",
     "cat_near_leave",
@@ -164,10 +165,38 @@ export default defineNitroPlugin((nitroApp) => {
             }
           }
 
+          // Restore latest DP 116 state from DB so we fail closed if the box is disassembled/busy/opened
+          const latestDP116Event = await prisma.litterEvent.findFirst({
+            where: {
+              deviceId: config.id,
+              type: "tuya-raw-data",
+              rawData: { contains: '"116"' },
+            },
+            orderBy: { timestamp: "desc" },
+          });
+
+          let initialStatus = "unknown";
+          let initialDrumRemoved = false;
+          let initialLitterLow = false;
+
+          if (latestDP116Event?.rawData) {
+            try {
+              const parsed = JSON.parse(latestDP116Event.rawData);
+              if (parsed?.dps?.["116"]) {
+                const st = String(parsed.dps["116"]);
+                initialStatus = st;
+                if (st === "roller_uninstall_ok") initialDrumRemoved = true;
+                if (st === "cat_litter_little") initialLitterLow = true;
+              }
+            } catch (e) {}
+          }
+
           deviceStates.set(config.id, {
             baseWeight: 0,
-            currentStatus: "work_idle",
+            currentStatus: initialStatus,
             isBinFull: initialBinFull,
+            isLitterLow: initialLitterLow,
+            isDrumRemoved: initialDrumRemoved,
             catEnteredAt: null,
             peakWeight: 0,
             pendingLitterCheck: false,
@@ -614,6 +643,11 @@ export default defineNitroPlugin((nitroApp) => {
         currentDevice.on("connected", () => {
           console.log(`[Tuya] Connected to device ${config.name}!`);
 
+          // Immediately request state refresh to synchronize latest DPs
+          try {
+            currentDevice.get({ schema: true }).catch(() => {});
+          } catch (e) {}
+
           if (!pingIntervals.has(config.id)) {
             const interval = setInterval(
               () => {
@@ -681,8 +715,15 @@ export default defineNitroPlugin((nitroApp) => {
 
       try {
         const state = deviceStates.get(deviceId);
+        if (!state || state.currentStatus === "unknown") {
+          console.warn(
+            `[Tuya Action] Refusing action '${action}' for ${deviceId}: device status is uninitialized/unknown. Awaiting first DP 116 reading.`,
+          );
+          return;
+        }
+
         const inSettleWindow =
-          state?.lastVisitEndedAt &&
+          state.lastVisitEndedAt &&
           Date.now() - state.lastVisitEndedAt < 15000;
 
         if (action === "flatten") {

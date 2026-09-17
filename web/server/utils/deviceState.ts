@@ -1,9 +1,9 @@
 import prisma from './prisma'
 
 export interface DeviceLiveState {
-  status: string // "Ready" | "Busy" | "Lid Open" | "Bin Removed" | "Bin Full"
+  status: string // "Ready" | "Busy" | "Lid Open" | "Bin Removed" | "Bin Full" | "Drum Removed" | "Motor Error"
   wasteBin: string // "Normal" | "Full"
-  litterLevel: string // "Sufficient*" | "Insufficient*"
+  litterLevel: string // "Sufficient" | "Low"
   lidOpen: boolean
   binRemoved: boolean
   todayToileted: number
@@ -98,12 +98,13 @@ export async function computeDeviceState(device: {
     where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"114"' } },
     orderBy: { timestamp: 'desc' },
   })
+  let isMotorError = false
   if (latestDP114Event?.rawData) {
     try {
       const parsed = JSON.parse(latestDP114Event.rawData)
       if (parsed?.dps?.['114']) {
         const dp114 = String(parsed.dps['114']).toLowerCase()
-        if (dp114 !== 'motor_ok') litterLevel = 'Low'
+        if (dp114 !== 'motor_ok') isMotorError = true
       }
     } catch (e) {}
   }
@@ -180,6 +181,11 @@ export async function computeDeviceState(device: {
   if (isBinFullState) {
     wasteBin = 'Full'
     if (!lidOpen && !binRemoved && status === 'Ready') status = 'Bin Full'
+  }
+
+  // Override status if motor error was detected and device is otherwise idle
+  if (isMotorError && status === 'Ready') {
+    status = 'Motor Error'
   }
 
   // Most recent completed visit (weight + which pet)
