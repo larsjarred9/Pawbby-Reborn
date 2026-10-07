@@ -27,6 +27,31 @@ export interface Pet {
   imageBase64?: string
 }
 
+export interface DeviceSettings {
+  autoClean: boolean
+  softClumps: boolean
+  sleepEnabled: boolean
+  sleepStart: string // "HH:MM" device local time
+  sleepStop: string
+  autoOffScreen: boolean
+  childLock: boolean
+  autoCleanDelayMin: number
+  weightUnit: 'kg' | 'lb'
+  litterLevelRaw: number
+  deodorantDays: number
+  binFull: boolean
+  binRemoved: boolean
+  lidOpen: boolean
+  catIn: boolean
+  catNear: boolean
+  catInLongTime: boolean
+  raw: string
+}
+
+export type DeviceSettingKey =
+  | 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
+  | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'weight_unit' | 'sync_timezone'
+
 export interface Device {
   id: string
   name: string
@@ -46,6 +71,10 @@ export interface Device {
   litterLevel: string
   wasteBin: string
   daysLeft: number
+  lidOpen?: boolean
+  binRemoved?: boolean
+  settings?: DeviceSettings | null
+  settingsUpdatedAt?: string | null
 }
 
 export interface DeviceLog {
@@ -171,6 +200,10 @@ export const useApi = () => {
   const triggerCancelClean = async (deviceId: string) => {
     await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'cancel_clean' } })
   }
+  /** Change a hardware setting on the box (DP 105). See server/utils/deviceSettings.ts for keys/values. */
+  const updateDeviceSetting = async (deviceId: string, setting: DeviceSettingKey, value?: any) => {
+    return await $fetch('/api/device-settings', { method: 'POST', body: { deviceId, setting, value } }) as any
+  }
 
   const resizeImage = (file: File, maxWidth = 400, maxHeight = 400): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -226,6 +259,7 @@ export const useApi = () => {
     triggerEmpty,
     triggerTare,
     triggerCancelClean,
+    updateDeviceSetting,
     getPets,
     addPet,
     updatePet,

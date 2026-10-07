@@ -30,6 +30,22 @@ function shape(device: any, state: Awaited<ReturnType<typeof computeDeviceState>
     deodorizerActive: state.deodorizerActive,
     deodorizerDaysLeft: state.deodorizerDaysLeft,
     lastHeartbeat: state.lastHeartbeat,
+    // Hardware settings (DP 103 snapshot); null until the box has reported once
+    settings: state.settings
+      ? {
+          autoClean: state.settings.autoClean,
+          softClumps: state.settings.softClumps,
+          sleepEnabled: state.settings.sleepEnabled,
+          sleepStart: state.settings.sleepStart,
+          sleepStop: state.settings.sleepStop,
+          autoCleanDelayMin: state.settings.autoCleanDelayMin,
+          autoOffScreen: state.settings.autoOffScreen,
+          childLock: state.settings.childLock,
+          weightUnit: state.settings.weightUnit,
+          deodorantDays: state.settings.deodorantDays,
+        }
+      : null,
+    settingsUpdatedAt: state.settingsUpdatedAt,
   }
 }
 

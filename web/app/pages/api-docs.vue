@@ -45,6 +45,43 @@ curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/action \
       </section>
 
       <section class="bg-black/20 rounded-2xl p-6 border border-white/5">
+        <h2 class="text-lg font-bold mb-4 text-pawbby-primary">Change Device Setting</h2>
+        <div class="flex items-center gap-3 mb-4">
+          <span class="bg-[#5865F2]/20 text-[#5865F2] px-2 py-1 rounded font-bold text-xs">POST</span>
+          <code class="text-sm font-mono">/api/external/settings</code>
+        </div>
+        <p class="text-sm text-pawbby-muted mb-4">Changes a hardware setting stored on the litter box itself (the options the original app exposed). The box confirms by pushing a fresh status snapshot, which shows up under <code class="text-white/80">settings</code> in <code class="text-white/80">/api/external/state</code> a few seconds later.</p>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">Request Body (JSON)</h3>
+        <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto mb-4 whitespace-pre" v-pre>
+{
+  "deviceId": "YOUR_DEVICE_ID",
+  "setting": "auto_clean_delay",
+  "value": 5
+}
+        </div>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">Settings</h3>
+        <ul class="list-disc pl-5 text-sm text-pawbby-muted mb-4 space-y-2">
+          <li><code class="text-white/80">auto_clean</code>, <code class="text-white/80">sleep_mode</code>, <code class="text-white/80">soft_clumps</code>, <code class="text-white/80">auto_off_screen</code>, <code class="text-white/80">child_lock</code> — <code class="text-white/80">true</code> / <code class="text-white/80">false</code></li>
+          <li><code class="text-white/80">auto_clean_delay</code> — minutes to wait after the cat leaves, <code class="text-white/80">1</code>–<code class="text-white/80">60</code></li>
+          <li><code class="text-white/80">sleep_window</code> — <code class="text-white/80">{"start": "22:00", "stop": "08:30"}</code> (device local time; auto-clean pauses in this window while <code class="text-white/80">sleep_mode</code> is on)</li>
+          <li><code class="text-white/80">weight_unit</code> — <code class="text-white/80">"kg"</code> or <code class="text-white/80">"lb"</code> (unit shown on the box's screen)</li>
+          <li><code class="text-white/80">sync_timezone</code> — UTC offset in whole hours; omit <code class="text-white/80">value</code> to use your dashboard time zone</li>
+          <li><code class="text-white/80">reset_deodorant</code> — no value; resets the pod-life counter on the box</li>
+        </ul>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">Example cURL</h3>
+        <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto whitespace-pre" v-pre>
+curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/settings \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"deviceId": "device_id_here", "setting": "sleep_window", "value": {"start": "22:00", "stop": "07:00"}}'
+        </div>
+        <p class="text-xs text-pawbby-muted mt-3">Over MQTT the same settings are exposed as Home Assistant <code class="text-white/80">switch</code> and <code class="text-white/80">number</code> entities automatically, and can be set by publishing to <code class="text-white/80">&lt;base&gt;/&lt;deviceId&gt;/set/&lt;setting&gt;</code> (e.g. <code class="text-white/80">ON</code>, <code class="text-white/80">5</code>, or <code class="text-white/80">22:00-07:00</code>).</p>
+      </section>
+
+      <section class="bg-black/20 rounded-2xl p-6 border border-white/5">
         <h2 class="text-lg font-bold mb-4 text-pawbby-primary">Get Event History</h2>
         <div class="flex items-center gap-3 mb-4">
           <span class="bg-[#3D7A41]/20 text-[#3D7A41] px-2 py-1 rounded font-bold text-xs">GET</span>
@@ -100,6 +137,19 @@ curl "http://YOUR_PAWBBY_IP:3333/api/external/events?deviceId=device_id_here&lim
   "deodorizerActive": true,
   "deodorizerDaysLeft": 21,
   "lastHeartbeat": "2026-07-22T20:31:45.000Z",
+  "settings": {
+    "autoClean": true,
+    "softClumps": false,
+    "sleepEnabled": true,
+    "sleepStart": "22:00",
+    "sleepStop": "08:30",
+    "autoCleanDelayMin": 5,
+    "autoOffScreen": true,
+    "childLock": false,
+    "weightUnit": "kg",
+    "deodorantDays": 21
+  },
+  "settingsUpdatedAt": "2026-07-22T20:31:45.000Z",
   "pets": [
     {
       "id": "pet_id_here",

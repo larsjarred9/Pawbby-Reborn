@@ -1,5 +1,7 @@
 import TuyaDevice from "tuyapi";
 import prisma from "../utils/prisma";
+import { decodeDeviceStatus } from "../utils/deviceSettings";
+import type { SettingCommand } from "../utils/deviceSettings";
 
 export default defineNitroPlugin((nitroApp) => {
   interface DeviceState {
@@ -19,6 +21,7 @@ export default defineNitroPlugin((nitroApp) => {
     lastVisitEndedAt?: number;
     lastVisitEndWeight?: number;
     lastCleanCompletedAt?: number;
+    lastSettingsRaw?: string;
   }
 
   const VISIT_STATUSES = new Set([
@@ -378,6 +381,18 @@ export default defineNitroPlugin((nitroApp) => {
             state.peakWeight = 0;
             state.lidOpenedDuringVisit = false;
             stateChanged = true;
+          }
+
+          // 1b. Settings / status snapshot (DP 103 - deviceStatus)
+          // Carries every user setting (auto-clean, soft clumps, sleep window, delay...).
+          // Decoding it here lets integrations refresh immediately after a settings write.
+          if (typeof dps["103"] === "string") {
+            const decoded = decodeDeviceStatus(dps["103"]);
+            if (decoded) {
+              const prev = state.lastSettingsRaw;
+              state.lastSettingsRaw = dps["103"];
+              if (prev !== dps["103"]) stateChanged = true;
+            }
           }
 
           // 2. Update State Machine Flag (DP 116)
@@ -876,6 +891,53 @@ export default defineNitroPlugin((nitroApp) => {
           `[Tuya Action] Failed to send action ${action} to ${deviceId}`,
           e,
         );
+      }
+    },
+  );
+
+  // Hardware settings (DP 105 "deviceGate"): auto-clean on/off, soft clumps, sleep mode +
+  // window, auto-clean delay, screen options, deodorant reset, weight unit, time zone.
+  // The payload is pre-validated/encoded by server/utils/deviceSettings.ts; the device
+  // acknowledges by pushing a fresh DP 103 snapshot, which is what the UI reads back.
+  nitroApp.hooks.hook(
+    "tuya:setting" as any,
+    async ({ deviceId, command, result }: { deviceId: string; command: SettingCommand; result?: { ok: boolean; error?: string } }) => {
+      const device = activeDevices.get(deviceId);
+      if (!device) {
+        const msg = `Device ${deviceId} is not connected.`;
+        console.error(`[Tuya Setting] ${msg}`);
+        if (result) {
+          result.ok = false;
+          result.error = msg;
+        }
+        return;
+      }
+
+      try {
+        console.log(
+          `[Tuya Setting] ${command.description} → DP 105 = ${command.payload} (${deviceId})`,
+        );
+        await device.set({ dps: 105, set: command.payload });
+
+        await prisma.litterEvent.create({
+          data: {
+            type: "settings-changed",
+            deviceId,
+            rawData: JSON.stringify({
+              setting: command.key,
+              description: command.description,
+              payload: command.payload,
+            }),
+          },
+        });
+
+        if (result) result.ok = true;
+      } catch (e: any) {
+        console.error(`[Tuya Setting] Failed to send ${command.key} to ${deviceId}`, e);
+        if (result) {
+          result.ok = false;
+          result.error = e?.message || "Failed to send setting to device";
+        }
       }
     },
   );

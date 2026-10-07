@@ -1,0 +1,195 @@
+# Pawbby Litter Box — Settings Protocol (DP 105 `deviceGate` / DP 103 `deviceStatus`)
+
+*Reverse-engineered from the PAWBBY 3.0.5 litter-box plugin bundle + native `TYManager` module, 2026-10-07.*
+
+> Copyright note: no app source is reproduced here; only the protocol derived from it.
+
+This covers the two features Pawbby-Reborn was missing — **auto-clean delay** ("Auto-clean delay" in the app)
+and **quiet period** ("Sleep Mode" / "Do Not Disturb at Night") — plus the other switches that live on the same DP.
+
+---
+
+## 1. Transport: the app talks plain Tuya DPs, in hex
+
+The plugin's `LitterBoxCommand` numbers (101–118) **are the local Tuya DP ids** — not a separate STOMP numbering.
+`publishCommand()` in the RN bundle calls the native `TYManager.publishCommand`, which does
+`ITuyaDevice.publishDps('{"105": "<hex>"}')`. For raw-type DPs the Tuya SDK (`DevUtil.encodeRaw`) converts the hex string
+to bytes and base64-encodes it for the wire; incoming raw DPs are base64-decoded to hex (`DevUtil.decodeRaw`) before the JS sees them.
+
+So, for tuyapi / tinytuya:
+
+```
+app hex "0106000105"  →  bytes 01 06 00 01 05  →  base64 "AQYAAQU="  →  device.set({ dps: 105, set: "AQYAAQU=" })
+```
+
+### Frame format (`createValue`) — corrected
+
+```
+[ver=01][commandWord 1B][len 2B big-endian][data len bytes]
+```
+
+The 2-byte field previously documented in VALUES.md as a "flag" is actually the **payload length** in bytes
+(`parseValueToObj` reads it back as `len`). That is why `01 01 00 01 00` (len=1, data=00) and `01 01 00 00` (len=0) both
+mean "startFP".
+
+---
+
+## 2. DP 105 — `deviceGate` command words
+
+```js
+DeviceGateType = {
+  AutoClear: 0,        // auto-clean on/off
+  RBCompatible: 1,     // "Soft Clumps Mode" (shake 2–4× before cleaning)
+  Disturb: 2,          // Sleep mode / Do-Not-Disturb on/off
+  AutoOffScreen: 3,    // auto screen-off (5 min)
+  ChildLock: 4,        // screen lock
+  LitterType: 5,       // litter type index (from setup wizard)
+  SetAutoClearTime: 6, // ★ auto-clean delay, minutes
+  SetDisturbTime: 7,   // ★ sleep / quiet period start+stop time
+  ResetDeodorant: 8,   // reset deodorant pod counter (60 days)
+  SyncTimeZone: 9,     // UTC offset in hours (signed, hex)
+  SetWeightUnit: 0x0A  // 0 = kg, 1 = lb
+}
+```
+
+Two encodings are used:
+
+| Kind | Builder | Bytes |
+|------|---------|-------|
+| 1-byte setting (gates 0–6, 9, 0A) | `createValue(1, 1, gate, hex2(value))` | `01 gg 00 01 vv` |
+| no-payload action (gate 8) | `createValue(1, 0, gate, '')` | `01 gg 00 00` |
+| 4-byte time range (gate 7) | manual: `01 07 0004 hh mm hh mm` | `01 07 00 04 sh sm eh em` |
+
+### ★ Auto-clean delay (gate 6)
+
+*"How long should the litter box wait to auto-clean after your cat exits"* — picker offers **1…60 minutes**, 1-minute steps.
+Firmware default observed = 1 min (matches the ~70 s auto-clean seen in listener logs).
+
+```
+01 06 00 01 <minutes>
+```
+
+| Minutes | Hex | base64 (tuyapi `set`) |
+|---------|-----|------------------------|
+| 1  | `0106000101` | `AQYAAQE=` |
+| 5  | `0106000105` | `AQYAAQU=` |
+| 10 | `010600010a` | `AQYAAQo=` |
+| 15 | `010600010f` | `AQYAAQ8=` |
+| 30 | `010600011e` | `AQYAAR4=` |
+| 60 | `010600013c` | `AQYAATw=` |
+
+### ★ Quiet period / Sleep mode (gates 2 + 7)
+
+Two separate commands: gate 7 sets the window, gate 2 turns the feature on/off. App toast when enabled:
+*"The device will pause auto-clean during the set time period."* Pickers: hour 00–23, minute 00–59.
+The app has a (disabled) validation string "Please set a time period within 1–12 hours", so the firmware may reject
+longer spans — untested.
+
+```
+Set window:  01 07 00 04 <start_h> <start_m> <stop_h> <stop_m>     (all 1-byte binary, NOT BCD)
+Enable:      01 02 00 01 01
+Disable:     01 02 00 01 00
+```
+
+| Action | Hex | base64 |
+|--------|-----|--------|
+| Window 22:00 → 08:30 (factory default) | `010700041600081e` | `AQcABBYACB4=` |
+| Window 23:30 → 07:00 | `01070004171e0700` | `AQcABBceBwA=` |
+| Sleep mode ON | `0102000101` | `AQIAAQE=` |
+| Sleep mode OFF | `0102000100` | `AQIAAQA=` |
+
+The sleep flag is also mirrored by the firmware on **DP 115** as the enum `nodisturb_mode_enable` / `nodisturb_mode_disable`
+(VALUES.md already logged `nodisturb_mode_disable`).
+
+### Other switches (same encoding)
+
+| Setting | ON | OFF |
+|---------|----|-----|
+| Auto-clean (gate 0) | `AQAAAQE=` | `AQAAAQA=` |
+| Soft Clumps Mode (gate 1) | `AQEAAQE=` | `AQEAAQA=` |
+| Auto screen-off (gate 3) | `AQMAAQE=` | `AQMAAQA=` |
+| Child lock (gate 4) | `AQQAAQE=` | `AQQAAQA=` |
+| Reset deodorant pod (gate 8) | `AQgAAA==` (`01080000`) | — |
+| Sync time zone UTC+2 (gate 9) | `AQkAAQI=` (`0109000102`) | — (value = `(-getTimezoneOffset()/60).toString(16)`, so UTC-5 would be sent as the JS string "-5" → the app's `formatNum` behaviour for negatives is dubious; test before relying on it) |
+| Weight unit kg / lb (gate 0A) | `AQoAAQA=` / `AQoAAQE=` | |
+
+> ⚠️ Earlier DP-sweep scripts sent "modes 01–03 as base64" to DP 105 looking for a clean trigger. Those payloads
+> (`0101000100`, `0102000100`, `0103000100`) are valid **settings writes** that turn OFF Soft Clumps, Sleep mode and
+> Auto screen-off respectively. If someone ran that sweep, those settings may have been changed on their box.
+
+The "Kitten mode" in the app is purely app-side: it just sends `AutoClear = 0` (gate 0) and stores a flag locally.
+
+---
+
+## 3. DP 103 — `deviceStatus` blob: reading the current settings back
+
+Every DP 103 broadcast (every ~10 min and on each state change) carries the full settings snapshot. Decode base64 → bytes;
+skip the 4-byte header `01 00 00 15` (len 0x15 = 21 data bytes). Offsets below are **data-byte indices** (the app indexes
+the hex string, so app offset = 2 × index):
+
+| Byte | Meaning (as used by the app) | Notes |
+|------|------------------------------|-------|
+| 0  | waste bin full (`trashcanState`) | 1 = full → "trashcan full" warning |
+| 1  | waste drawer removed | 1 → "trashcan take out" warning |
+| 2  | no cover / lid open | 1 → "no cover" warning, disables buttons |
+| 3  | weight unit | 0 = kg, 1 = lb |
+| 4  | **sleep start hour** | |
+| 5  | **sleep start minute** | |
+| 6  | cat `isIn` | |
+| 7  | cat `isNear` | |
+| 8  | **sleep stop hour** | |
+| 9  | **sleep stop minute** | |
+| 10 | auto-clean enabled | |
+| 11 | Soft Clumps enabled | |
+| 12 | **sleep mode enabled** | |
+| 13 | auto screen-off enabled | |
+| 14 | child lock enabled | |
+| 15 | (not read by app) | |
+| 16 | **auto-clean delay, minutes** | |
+| 17 | litter level | 0 = empty, 1 = low ("not full"), 2 = enough |
+| 18 | (not read by app) | |
+| 19 | deodorant pod days left | e.g. 0x3b = 59 |
+| 20 | cat in box for a long time | 1 → "cat long time in" warning |
+
+Check against a real sample from VALUES.md (`AQAAFQAAAAAWAAAACB4BAAAAAAABAgA7AA==`):
+
+```
+01 00 00 15 | 00 00 00 00 16 00 00 00 08 1e 01 00 00 00 00 00 01 02 00 3b 00
+              ^bin ^out ^lid ^kg 22 :00 in nr 08 :30 AC sc SL os cl -- 1m lit -- 59d long
+→ sleep window 22:00–08:30, sleep OFF, auto-clean ON, delay 1 min, litter level 2 (ok), deodorant 59 days
+```
+
+This matches DP 115 = `nodisturb_mode_disable` and the observed ~1-minute auto-clean after a visit. ✅
+
+---
+
+## 4. Implementation in Pawbby-Reborn (2026-10-07)
+
+| Piece | Where |
+|-------|-------|
+| Codec (DP 103 decode, DP 105 encode, input validation) | `web/server/utils/deviceSettings.ts` |
+| Daemon write path — `tuya:setting` nitro hook, logs a `settings-changed` event | `web/server/plugins/tuya-listener.ts` |
+| Settings read-back (latest DP 103 → `settings`, `settingsUpdatedAt`) | `web/server/utils/deviceState.ts` → `/api/devices`, `/api/external/state`, MQTT state payload |
+| Dashboard endpoint (session auth) | `POST /api/device-settings` `{ deviceId, setting, value }` |
+| External endpoint (API key) | `POST /api/external/settings` (documented in the in-app API docs page) |
+| Home Assistant (MQTT discovery) | `switch` × 5 (auto-clean, sleep mode, soft clumps, auto screen-off, screen lock), `number` auto-clean delay, sensors for the sleep window; commands on `<base>/<deviceId>/set/<setting>` |
+| UI | Litter box page → **Control** tab → "Device Settings" card (toggles, delay picker, quiet-period editor, weight unit, time-zone sync, deodorant counter reset) |
+
+Setting keys accepted everywhere: `auto_clean`, `sleep_mode`, `soft_clumps`, `auto_off_screen`, `child_lock` (bool),
+`auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `weight_unit` (`kg`/`lb`), `sync_timezone`
+(UTC offset hours; omitted → derived from the dashboard user's time zone), `reset_deodorant` (no value).
+
+The UI shows optimistic values for up to 60 s and then trusts the next DP 103 push from the box; the Tuya ACK alone is
+not treated as confirmation.
+
+---
+
+## 5. Status: codec verified against captures, DP 105 writes UNTESTED on hardware
+
+The decoder is unit-tested against the three real DP 103 captures above; every encoder output matches the vendor
+app's `createValue` byte-for-byte. No DP 105 write has been sent to a real box yet. Suggested first test (safe,
+reversible): set the auto-clean delay to 5 min from the dashboard, wait for the "Reported by the device" footer to
+refresh and confirm it reads 5 min, then set it back to 1.
+
+Known uncertainty: negative UTC offsets for `sync_timezone` (the vendor app itself produced malformed hex for those; we
+send the two's-complement byte).

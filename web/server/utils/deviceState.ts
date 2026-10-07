@@ -1,4 +1,5 @@
 import prisma from './prisma'
+import { decodeDeviceStatus, type DeviceSettings } from './deviceSettings'
 
 export interface DeviceLiveState {
   status: string // "Ready" | "Busy" | "Lid Open" | "Bin Removed" | "Bin Full" | "Drum Removed" | "Motor Error"
@@ -16,6 +17,9 @@ export interface DeviceLiveState {
   lastCleanedAt: Date | null
   deodorizerActive: boolean
   deodorizerDaysLeft: number | null
+  /** Hardware settings decoded from the latest DP 103 snapshot (null until the box has reported once) */
+  settings: DeviceSettings | null
+  settingsUpdatedAt: Date | null
 }
 
 /**
@@ -283,6 +287,29 @@ export async function computeDeviceState(device: {
   })
   const lastCleanedAt = lastCleanEvent?.timestamp ?? null
 
+  // Hardware settings snapshot (DP 103 - deviceStatus blob)
+  let settings: DeviceSettings | null = null
+  let settingsUpdatedAt: Date | null = null
+  const latestDP103Event = await prisma.litterEvent.findFirst({
+    where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"103"' } },
+    orderBy: { timestamp: 'desc' },
+  })
+  if (latestDP103Event?.rawData) {
+    try {
+      const parsed = JSON.parse(latestDP103Event.rawData)
+      if (typeof parsed?.dps?.['103'] === 'string') {
+        settings = decodeDeviceStatus(parsed.dps['103'])
+        if (settings) settingsUpdatedAt = latestDP103Event.timestamp
+      }
+    } catch (e) {}
+  }
+  // The firmware also reports its own deodorant-days counter inside DP 103; prefer it
+  // over the dashboard-side estimate when DP 115 hasn't told us otherwise.
+  if (settings && deodorizerDaysLeft === null) {
+    deodorizerDaysLeft = settings.deodorantDays
+    deodorizerActive = settings.deodorantDays > 0
+  }
+
   return {
     status,
     wasteBin,
@@ -299,5 +326,7 @@ export async function computeDeviceState(device: {
     lastCleanedAt,
     deodorizerActive,
     deodorizerDaysLeft,
+    settings,
+    settingsUpdatedAt,
   }
 }
