@@ -111,7 +111,7 @@
 | 12 | quiet period (sleep mode) enabled | |
 | 13 | auto screen-off enabled | |
 | 14 | child lock enabled | |
-| 15 | litter type | 0 Pawbby Natural, 1 Tofu, 2 Bentonite, 3 Mixed |
+| 15 | litter type | 0 Pawbby Natural, 1 Tofu, 2 Bentonite, 3 Mixed — all four confirmed on hardware |
 | 16 | auto-clean delay (minutes) | 1–60 (factory 1) |
 | 17 | litter level | 0 empty, 1 low, 2 enough |
 | 18 | (not used by the app) | |
@@ -247,7 +247,7 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 | `child_lock_enable` / `child_lock_disable` | child lock (gate 04) | — |
 | `time_zone` | time-zone push (gate 09) | UTC offset (e.g. `2`) |
 | `deodorant_days` | deodorant reset (gate 08) | days left (`60`) |
-| `cat_litter_bentonite` (presumably `cat_litter_<type>`) | litter type (gate 05) | — |
+| `cat_litter_pawbby` / `cat_litter_tofe` (sic) / `cat_litter_bentonite` / `cat_litter_mix` | litter type (gate 05) ids 0 / 1 / 2 / 3 | — |
 
 - Earlier note "DP 115 reports the deodorant days as a number" was a misread: DP 115 is the label, the number is on DP 113. The persistent days counter lives in DP 103 byte 19.
 

@@ -185,6 +185,8 @@ below), `reset_deodorant` (no value), `refresh` (no value).
 `01 05 00 01 <id>` with the ids the vendor app's setup wizard and settings screen use: **0** Pawbby Natural (plant-based,
 "recommended"), **1** Tofu, **2** Bentonite, **3** Mixed. The firmware uses the litter density for its remaining-litter
 estimate ("if you change the cat litter, remember to update it"). Reported back in DP 103 data byte 15.
+All four ids confirmed on hardware (2026-10-07): each write was echoed in byte 15 within a second, with the DP 115 ACK
+`cat_litter_pawbby` / `cat_litter_tofe` / `cat_litter_bentonite` / `cat_litter_mix`.
 
 **Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it from
 the SDK's cache). `refresh` re-pushes the account time zone (gate 9) — a harmless write that should make the box emit a new
@@ -223,7 +225,7 @@ Each DP 105 write is echoed as an enum on **DP 115** (`data_flag_02`), with the 
 | child lock (gate 4) | `child_lock_enable` / `child_lock_disable` | — |
 | time zone (gate 9) | `time_zone` | offset (e.g. `2`) |
 | deodorant reset (gate 8) | `deodorant_days` | days left (`60`) |
-| litter type (gate 5) | `cat_litter_bentonite` for id 2 — presumably `cat_litter_<type>` for the others (unobserved) | — |
+| litter type (gate 5) | `cat_litter_pawbby` (0), `cat_litter_tofe` (1, firmware typo for tofu), `cat_litter_bentonite` (2), `cat_litter_mix` (3) | — |
 
 The deodorant reset is **also** echoed on **DP 114** (`data_flag_01`) as `deodorant_reset`. DP 114 is therefore an
 event flag rather than a pure motor-health status; code that treated anything other than `motor_ok` as a motor error
