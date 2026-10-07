@@ -506,7 +506,6 @@
 
         <!-- Hardware Settings (DP 105 / DP 103) -->
         <h3 class="text-white/90 font-semibold text-lg text-center mb-2 mt-10">Device Settings</h3>
-        <p class="text-pawbby-muted text-xs text-center mb-6">Stored on the litter box itself — the same options the original app offered.</p>
 
         <div v-if="!effectiveSettings"
           class="bg-pawbby-card border border-white/10 p-5 rounded-2xl text-center text-pawbby-muted text-sm">
@@ -553,27 +552,6 @@
               @change="setDelay(($event.target as HTMLSelectElement).value)"
               class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50">
               <option v-for="m in 60" :key="m" :value="m">{{ m }} min</option>
-            </select>
-          </div>
-
-          <!-- Litter type -->
-          <div class="flex items-center justify-between p-5">
-            <div class="flex items-center space-x-4 min-w-0">
-              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <div class="text-left min-w-0">
-                <h4 class="text-white font-semibold">Litter type</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">The box uses the litter's density to estimate how much is left — update it when you switch litter</p>
-              </div>
-            </div>
-            <select :value="effectiveSettings.litterType" :disabled="settingBusy.litter_type"
-              @change="setLitterType(($event.target as HTMLSelectElement).value)"
-              class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50 max-w-[11rem]">
-              <option v-for="t in LITTER_TYPES" :key="t.id" :value="t.id">{{ t.name }}</option>
-              <option v-if="!LITTER_TYPES.some(t => t.id === effectiveSettings!.litterType)" :value="effectiveSettings.litterType">Unknown ({{ effectiveSettings.litterType }})</option>
             </select>
           </div>
 
@@ -624,6 +602,27 @@
               </p>
               <p class="text-xs text-pawbby-mutedDark mt-2">Times follow the box's clock, which is kept in sync with your account time zone ({{ user?.timezone || 'UTC' }}).</p>
             </div>
+          </div>
+
+          <!-- Litter type -->
+          <div class="flex items-center justify-between p-5">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <div class="text-left min-w-0">
+                <h4 class="text-white font-semibold">Litter type</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">The box uses the litter's density to estimate how much is left — update it when you switch litter</p>
+              </div>
+            </div>
+            <select :value="effectiveSettings.litterType" :disabled="settingBusy.litter_type"
+              @change="setLitterType(($event.target as HTMLSelectElement).value)"
+              class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50 max-w-[11rem]">
+              <option v-for="t in LITTER_TYPES" :key="t.id" :value="t.id">{{ t.name }}</option>
+              <option v-if="!LITTER_TYPES.some(t => t.id === effectiveSettings!.litterType)" :value="effectiveSettings.litterType">Unknown ({{ effectiveSettings.litterType }})</option>
+            </select>
           </div>
 
           <!-- Deodorizer pod counter on the device.
