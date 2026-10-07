@@ -626,8 +626,11 @@
             </div>
           </div>
 
-          <!-- Deodorizer pod counter on the device -->
-          <div class="p-5 flex items-center justify-between">
+          <!-- Deodorizer pod counter on the device.
+               Disabled on purpose (SHOW_DEVICE_DEODORANT_RESET = false): the firmware counter is
+               fixed at 60 days, so the dashboard's own pod tracker (30/60 days, deodorizer modal)
+               is used instead. The DP 105 reset command stays available via the API. -->
+          <div v-if="SHOW_DEVICE_DEODORANT_RESET" class="p-5 flex items-center justify-between">
             <div class="flex items-center space-x-4 min-w-0">
               <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1414,6 +1417,10 @@ watch(activeTab, (tab) => {
 watch(() => device.value?.id, (id) => {
   if (id && activeTab.value === 'control') refreshSettings()
 })
+
+// Hidden in the UI: Pawbby Reborn keeps its own pod counter (see the deodorizer modal).
+// Flip to true to expose the firmware's 60-day counter + reset in the Device Settings card.
+const SHOW_DEVICE_DEODORANT_RESET = false
 
 const resetDeviceDeodorant = () => {
   if (!confirm('Reset the deodorizing pod counter on the litter box? Do this after inserting a new pod.')) return
