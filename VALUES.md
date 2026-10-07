@@ -233,6 +233,7 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 #### DP 114 — Event flag 1 (`data_flag_01`)
 - Values seen: `"motor_ok"`, `"deodorant_reset"` (echoed after a DP 105 gate-08 deodorant reset)
 - ⚠️ Not a pure motor-health field — treat only fault-looking values as motor errors (Pawbby Reborn used to lock the controls on anything ≠ `motor_ok`; fixed 2026-10-07).
+- Sticky: stays on `deodorant_reset` (re-sent with every status push) until the next motor event — observed reverting to `motor_ok` when a clean cycle completed.
 
 #### DP 115 — Settings ACK enum (`data_flag_02`)
 - Echoes which setting was just changed on DP 105; the numeric payload (if any) arrives on **DP 113** at the same time:
@@ -246,6 +247,7 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 | `child_lock_enable` / `child_lock_disable` | child lock (gate 04) | — |
 | `time_zone` | time-zone push (gate 09) | UTC offset (e.g. `2`) |
 | `deodorant_days` | deodorant reset (gate 08) | days left (`60`) |
+| `cat_litter_bentonite` (presumably `cat_litter_<type>`) | litter type (gate 05) | — |
 
 - Earlier note "DP 115 reports the deodorant days as a number" was a misread: DP 115 is the label, the number is on DP 113. The persistent days counter lives in DP 103 byte 19.
 

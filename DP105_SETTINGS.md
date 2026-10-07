@@ -223,10 +223,12 @@ Each DP 105 write is echoed as an enum on **DP 115** (`data_flag_02`), with the 
 | child lock (gate 4) | `child_lock_enable` / `child_lock_disable` | — |
 | time zone (gate 9) | `time_zone` | offset (e.g. `2`) |
 | deodorant reset (gate 8) | `deodorant_days` | days left (`60`) |
+| litter type (gate 5) | `cat_litter_bentonite` for id 2 — presumably `cat_litter_<type>` for the others (unobserved) | — |
 
 The deodorant reset is **also** echoed on **DP 114** (`data_flag_01`) as `deodorant_reset`. DP 114 is therefore an
 event flag rather than a pure motor-health status; code that treated anything other than `motor_ok` as a motor error
 (Pawbby-Reborn did) locks out the controls after a pod reset. Fixed in `deviceState.ts` to flag only fault-looking values.
+The flag is sticky: it kept reporting `deodorant_reset` for ~15 min until a clean cycle completed, which reset it to `motor_ok`.
 
 Remaining uncertainty: negative UTC offsets for the time-zone push (we send the two's-complement byte; the vendor app
 itself produced malformed hex for those).
