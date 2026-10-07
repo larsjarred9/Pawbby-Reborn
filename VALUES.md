@@ -134,7 +134,7 @@ Frame: `01 <gate> <len:2 BE> <data>` (base64 on the wire). Full details, payload
 | 05 | Litter type (0–3) | `01 05 00 01 id` | bentonite `AQUAAQI=` |
 | 06 | **Auto-clean delay** (1–60 min) | `01 06 00 01 mm` | 5 min `AQYAAQU=` |
 | 07 | **Quiet period window** | `01 07 00 04 sh sm eh em` | 22:00–08:30 `AQcABBYACB4=` |
-| 08 | Reset deodorant counter | `01 08 00 00` | `AQgAAA==` |
+| 08 | Reset deodorant counter (always 60 days; a `<days>` payload byte is ignored) | `01 08 00 00` | `AQgAAA==` |
 | 09 | Time zone (UTC offset, hours) | `01 09 00 01 tz` | UTC+2 `AQkAAQI=` |
 | 0A | Weight unit | `01 0A 00 01 0x` | kg `AQoAAQA=` / lb `AQoAAQE=` |
 
@@ -241,6 +241,7 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 | DP 115 value | Triggered by | DP 113 |
 |--------------|--------------|--------|
 | `nodisturb_time` | quiet-period window (gate 07) | — |
+| `auto_clean_enable` / `auto_clean_disable` | auto-clean on/off (gate 00) | — |
 | `nodisturb_mode_enable` / `nodisturb_mode_disable` | quiet period on/off (gate 02) | — |
 | `stool_mode_enable` / `stool_mode_disable` | soft clumps (gate 01) | — |
 | `auto_screen_enable` / `auto_screen_disable` | auto screen-off (gate 03) | — |

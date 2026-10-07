@@ -109,7 +109,7 @@ The sleep flag is also mirrored by the firmware on **DP 115** as the enum `nodis
 | Soft Clumps Mode (gate 1) | `AQEAAQE=` | `AQEAAQA=` |
 | Auto screen-off (gate 3) | `AQMAAQE=` | `AQMAAQA=` |
 | Child lock (gate 4) | `AQQAAQE=` | `AQQAAQA=` |
-| Reset deodorant pod (gate 8) | `AQgAAA==` (`01080000`) | — |
+| Reset deodorant pod (gate 8) | `AQgAAA==` (`01080000`) | — (always 60 days: a one-byte payload `01 08 00 01 <days>` is ignored — tested 30 → firmware answered `deodorant_days` 60) |
 | Sync time zone UTC+2 (gate 9) | `AQkAAQI=` (`0109000102`) | — (value = `(-getTimezoneOffset()/60).toString(16)`, so UTC-5 would be sent as the JS string "-5" → the app's `formatNum` behaviour for negatives is dubious; test before relying on it) |
 | Weight unit kg / lb (gate 0A) | `AQoAAQA=` / `AQoAAQE=` | |
 
@@ -223,6 +223,7 @@ Each DP 105 write is echoed as an enum on **DP 115** (`data_flag_02`), with the 
 | auto screen-off (gate 3) | `auto_screen_enable` / `auto_screen_disable` | — |
 | child lock (gate 4) | `child_lock_enable` / `child_lock_disable` | — |
 | time zone (gate 9) | `time_zone` | offset (e.g. `2`) |
+| auto-clean on/off (gate 0) | `auto_clean_enable` / `auto_clean_disable` | — |
 | deodorant reset (gate 8) | `deodorant_days` | days left (`60`) |
 | litter type (gate 5) | `cat_litter_pawbby` (0), `cat_litter_tofe` (1, firmware typo for tofu), `cat_litter_bentonite` (2), `cat_litter_mix` (3) | — |
 
