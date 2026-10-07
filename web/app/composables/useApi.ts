@@ -36,6 +36,7 @@ export interface DeviceSettings {
   autoOffScreen: boolean
   childLock: boolean
   autoCleanDelayMin: number
+  litterType: number
   weightUnit: 'kg' | 'lb'
   litterLevelRaw: number
   deodorantDays: number
@@ -48,9 +49,17 @@ export interface DeviceSettings {
   raw: string
 }
 
+/** Litter types known by the firmware (index = value stored on the box). Keep in sync with server/utils/deviceSettings.ts */
+export const LITTER_TYPES = [
+  { id: 0, name: 'Pawbby Natural Cat Litter', hint: 'Plant-based (recommended by the vendor)' },
+  { id: 1, name: 'Tofu cat litter', hint: '' },
+  { id: 2, name: 'Bentonite cat litter', hint: 'Clay' },
+  { id: 3, name: 'Mixed cat litter', hint: 'Tofu + bentonite blend' },
+] as const
+
 export type DeviceSettingKey =
   | 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
-  | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'refresh'
+  | 'auto_clean_delay' | 'sleep_window' | 'litter_type' | 'reset_deodorant' | 'refresh'
 
 export interface Device {
   id: string

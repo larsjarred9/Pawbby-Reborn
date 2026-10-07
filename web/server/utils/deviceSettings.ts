@@ -44,6 +44,8 @@ export interface DeviceSettings {
   childLock: boolean
   /** Minutes to wait after the cat leaves before auto-cleaning (1–60) */
   autoCleanDelayMin: number
+  /** Litter type index used for the litter-level estimate (see LITTER_TYPES) */
+  litterType: number
   /** 0 = kg, 1 = lb as configured on the device */
   weightUnit: 'kg' | 'lb'
   /** 0 = empty, 1 = low, 2 = enough (firmware's own litter sensor) */
@@ -97,6 +99,7 @@ export function decodeDeviceStatus(base64: string): DeviceSettings | null {
     sleepEnabled: b(12) !== 0,
     autoOffScreen: b(13) !== 0,
     childLock: b(14) !== 0,
+    litterType: b(15),
     autoCleanDelayMin: b(16),
     litterLevelRaw: b(17),
     deodorantDays: b(19),
@@ -117,6 +120,25 @@ export function encodeGateFrame(gate: DeviceGateId, data: number[] = []): string
 }
 
 export const encodeToggle = (gate: DeviceGateId, on: boolean) => encodeGateFrame(gate, [on ? 1 : 0])
+
+/**
+ * Litter types known to the firmware (index = value sent on gate 5). The box uses the
+ * litter density to estimate the remaining litter level, so this should match what is
+ * actually in the drum.
+ */
+export const LITTER_TYPES = [
+  { id: 0, name: 'Pawbby Natural Cat Litter', hint: 'Plant-based (recommended by the vendor)' },
+  { id: 1, name: 'Tofu cat litter', hint: '' },
+  { id: 2, name: 'Bentonite cat litter', hint: 'Clay' },
+  { id: 3, name: 'Mixed cat litter', hint: 'Tofu + bentonite blend' },
+] as const
+
+export function encodeLitterType(id: number): string {
+  if (!Number.isInteger(id) || !LITTER_TYPES.some((t) => t.id === id)) {
+    throw new Error(`Litter type must be one of ${LITTER_TYPES.map((t) => `${t.id} (${t.name})`).join(', ')}`)
+  }
+  return encodeGateFrame(DeviceGate.LitterType, [id])
+}
 
 export function encodeAutoCleanDelay(minutes: number): string {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > 60) {
@@ -209,6 +231,7 @@ export const SETTING_KEYS = [
   'child_lock',
   'auto_clean_delay',
   'sleep_window',
+  'litter_type',
   'reset_deodorant',
   'refresh',
 ] as const
@@ -273,6 +296,17 @@ export function buildSettingCommand(key: string, value: unknown): SettingCommand
       const v = (value ?? {}) as { start?: string; stop?: string }
       if (!v.start || !v.stop) throw new Error('sleep_window requires { start: "HH:MM", stop: "HH:MM" }')
       return { key: 'sleep_window', payload: encodeSleepWindow(v.start, v.stop), description: `Sleep mode window set to ${v.start}–${v.stop}` }
+    }
+    case 'litter_type': {
+      // Accept the numeric id or a (case-insensitive) name / keyword
+      let id = Number(value)
+      if (typeof value === 'string' && Number.isNaN(id)) {
+        const q = value.trim().toLowerCase()
+        const found = LITTER_TYPES.find((t) => t.name.toLowerCase() === q || t.name.toLowerCase().split(' ')[0] === q)
+        if (found) id = found.id
+      }
+      const t = LITTER_TYPES.find((x) => x.id === id)
+      return { key: 'litter_type', payload: encodeLitterType(id), description: `Litter type set to ${t?.name ?? id}` }
     }
     case 'reset_deodorant':
       return { key: 'reset_deodorant', payload: encodeResetDeodorant(), description: 'Deodorant pod counter reset on device' }

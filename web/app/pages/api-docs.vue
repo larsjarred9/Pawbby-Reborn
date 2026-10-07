@@ -66,6 +66,7 @@ curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/action \
           <li><code class="text-white/80">auto_clean</code>, <code class="text-white/80">sleep_mode</code>, <code class="text-white/80">soft_clumps</code>, <code class="text-white/80">auto_off_screen</code>, <code class="text-white/80">child_lock</code> — <code class="text-white/80">true</code> / <code class="text-white/80">false</code></li>
           <li><code class="text-white/80">auto_clean_delay</code> — minutes to wait after the cat leaves, <code class="text-white/80">1</code>–<code class="text-white/80">60</code></li>
           <li><code class="text-white/80">sleep_window</code> — <code class="text-white/80">{"start": "22:00", "stop": "08:30"}</code> (device local time; auto-clean pauses in this window while <code class="text-white/80">sleep_mode</code> — the quiet period — is on)</li>
+          <li><code class="text-white/80">litter_type</code> — <code class="text-white/80">0</code> Pawbby Natural, <code class="text-white/80">1</code> Tofu, <code class="text-white/80">2</code> Bentonite, <code class="text-white/80">3</code> Mixed (the box uses the litter density for its litter-level estimate)</li>
           <li><code class="text-white/80">reset_deodorant</code> — no value; resets the pod-life counter on the box</li>
           <li><code class="text-white/80">refresh</code> — no value; asks the box to re-report its settings (there is no read command, so this re-pushes the account time zone)</li>
         </ul>
@@ -78,7 +79,7 @@ curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/settings \
   -H "Content-Type: application/json" \
   -d '{"deviceId": "device_id_here", "setting": "sleep_window", "value": {"start": "22:00", "stop": "07:00"}}'
         </div>
-        <p class="text-xs text-pawbby-muted mt-3">Over MQTT the same settings are exposed as Home Assistant <code class="text-white/80">switch</code> and <code class="text-white/80">number</code> entities automatically, and can be set by publishing to <code class="text-white/80">&lt;base&gt;/&lt;deviceId&gt;/set/&lt;setting&gt;</code> (e.g. <code class="text-white/80">ON</code>, <code class="text-white/80">5</code>, or <code class="text-white/80">22:00-07:00</code>).</p>
+        <p class="text-xs text-pawbby-muted mt-3">Over MQTT the same settings are exposed as Home Assistant <code class="text-white/80">switch</code>, <code class="text-white/80">number</code> and <code class="text-white/80">select</code> entities automatically, and can be set by publishing to <code class="text-white/80">&lt;base&gt;/&lt;deviceId&gt;/set/&lt;setting&gt;</code> (e.g. <code class="text-white/80">ON</code>, <code class="text-white/80">5</code>, or <code class="text-white/80">22:00-07:00</code>).</p>
       </section>
 
       <section class="bg-black/20 rounded-2xl p-6 border border-white/5">
@@ -144,6 +145,7 @@ curl "http://YOUR_PAWBBY_IP:3333/api/external/events?deviceId=device_id_here&lim
     "sleepStart": "22:00",
     "sleepStop": "08:30",
     "autoCleanDelayMin": 5,
+    "litterType": 0,
     "autoOffScreen": true,
     "childLock": false,
     "weightUnit": "kg",

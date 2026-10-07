@@ -3,7 +3,7 @@ import type { MqttClient } from 'mqtt'
 import prisma from '../utils/prisma'
 import { computeDeviceState } from '../utils/deviceState'
 import { computePetStates } from '../utils/petState'
-import { buildSettingCommand } from '../utils/deviceSettings'
+import { buildSettingCommand, LITTER_TYPES } from '../utils/deviceSettings'
 
 // Bridges Pawbby Reborn to Home Assistant over MQTT using HA's discovery protocol.
 // When enabled, entities (sensors, binary sensors, action buttons) appear in Home
@@ -121,6 +121,7 @@ export default defineNitroPlugin((nitroApp) => {
             sleepStart: state.settings.sleepStart,
             sleepStop: state.settings.sleepStop,
             autoCleanDelayMin: state.settings.autoCleanDelayMin,
+            litterType: state.settings.litterType,
             autoOffScreen: state.settings.autoOffScreen,
             childLock: state.settings.childLock,
             weightUnit: state.settings.weightUnit,
@@ -285,6 +286,30 @@ export default defineNitroPlugin((nitroApp) => {
         }
         client.publish(
           `${DISCOVERY_PREFIX}/number/pawbby_${device.id}/auto_clean_delay/config`,
+          JSON.stringify(cfg),
+          { retain: true },
+        )
+      }
+
+      {
+        // Litter type: HA "select" with the human names; the command handler maps names → id.
+        const cfg: any = {
+          name: 'Litter Type',
+          unique_id: `pawbby_${device.id}_set_litter_type`,
+          object_id: `pawbby_${device.name}_litter_type`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+          state_topic: stateTopic(device.id),
+          value_template:
+            '{% set names = ' + JSON.stringify(LITTER_TYPES.map((t) => t.name)) + ' %}' +
+            '{{ names[value_json.settings.litterType] if value_json.settings and value_json.settings.litterType < names | length else none }}',
+          command_topic: settingTopic(device.id, 'litter_type'),
+          options: LITTER_TYPES.map((t) => t.name),
+          icon: 'mdi:grain',
+          entity_category: 'config',
+          device: dev,
+          ...avail,
+        }
+        client.publish(
+          `${DISCOVERY_PREFIX}/select/pawbby_${device.id}/litter_type/config`,
           JSON.stringify(cfg),
           { retain: true },
         )

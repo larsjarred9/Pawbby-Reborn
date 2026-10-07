@@ -556,6 +556,27 @@
             </select>
           </div>
 
+          <!-- Litter type -->
+          <div class="flex items-center justify-between p-5">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <div class="text-left min-w-0">
+                <h4 class="text-white font-semibold">Litter type</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">The box uses the litter's density to estimate how much is left — update it when you switch litter</p>
+              </div>
+            </div>
+            <select :value="effectiveSettings.litterType" :disabled="settingBusy.litter_type"
+              @change="setLitterType(($event.target as HTMLSelectElement).value)"
+              class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50 max-w-[11rem]">
+              <option v-for="t in LITTER_TYPES" :key="t.id" :value="t.id">{{ t.name }}</option>
+              <option v-if="!LITTER_TYPES.some(t => t.id === effectiveSettings!.litterType)" :value="effectiveSettings.litterType">Unknown ({{ effectiveSettings.litterType }})</option>
+            </select>
+          </div>
+
           <!-- Quiet period (sleep mode toggle + window) -->
           <div class="p-5">
             <div class="flex items-center justify-between">
@@ -872,7 +893,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useApi, type Device, type Pet, type DeviceLog, type User, type DeviceSettings } from '~/composables/useApi'
+import { useApi, LITTER_TYPES, type Device, type Pet, type DeviceLog, type User, type DeviceSettings } from '~/composables/useApi'
 import { Bar, Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js'
 
@@ -1237,7 +1258,7 @@ const doEmpty = async () => {
 /* ------------------------------------------------------------------ */
 
 type ToggleKey = 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
-type SettingKey = ToggleKey | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'refresh'
+type SettingKey = ToggleKey | 'auto_clean_delay' | 'sleep_window' | 'litter_type' | 'reset_deodorant' | 'refresh'
 
 const svgIcon = (path: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="${path}" /></svg>`
@@ -1350,6 +1371,12 @@ const setDelay = (val: string) => {
   const minutes = Number(val)
   if (!minutes) return
   applySetting('auto_clean_delay', minutes, { autoCleanDelayMin: minutes })
+}
+
+const setLitterType = (val: string) => {
+  const id = Number(val)
+  if (!Number.isInteger(id)) return
+  applySetting('litter_type', id, { litterType: id })
 }
 
 const saveSleepWindow = () => {

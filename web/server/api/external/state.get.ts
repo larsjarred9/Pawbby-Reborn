@@ -39,6 +39,7 @@ function shape(device: any, state: Awaited<ReturnType<typeof computeDeviceState>
           sleepStart: state.settings.sleepStart,
           sleepStop: state.settings.sleepStop,
           autoCleanDelayMin: state.settings.autoCleanDelayMin,
+          litterType: state.settings.litterType,
           autoOffScreen: state.settings.autoOffScreen,
           childLock: state.settings.childLock,
           weightUnit: state.settings.weightUnit,

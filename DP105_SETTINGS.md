@@ -144,7 +144,7 @@ the hex string, so app offset = 2 × index):
 | 12 | **sleep mode enabled** | |
 | 13 | auto screen-off enabled | |
 | 14 | child lock enabled | |
-| 15 | (not read by app) | |
+| 15 | **litter type** | 0 Pawbby Natural, 1 Tofu, 2 Bentonite, 3 Mixed (gate 5) |
 | 16 | **auto-clean delay, minutes** | |
 | 17 | litter level | 0 = empty, 1 = low ("not full"), 2 = enough |
 | 18 | (not read by app) | |
@@ -177,8 +177,14 @@ This matches DP 115 = `nodisturb_mode_disable` and the observed ~1-minute auto-c
 | Account sync | The box's **weight unit** and **time zone** mirror the dashboard account (`user.weightUnit` / `user.timezone`): the daemon pushes the time zone on every connect, corrects the unit whenever a DP 103 snapshot disagrees (10-min cooldown), and both are re-pushed when they change in Settings. |
 
 Setting keys accepted by the API/MQTT: `auto_clean`, `sleep_mode` (quiet period), `soft_clumps`, `auto_off_screen`,
-`child_lock` (bool), `auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `reset_deodorant` (no value),
-`refresh` (no value).
+`child_lock` (bool), `auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `litter_type` (0–3, see
+below), `reset_deodorant` (no value), `refresh` (no value).
+
+### Litter type (gate 5)
+
+`01 05 00 01 <id>` with the ids the vendor app's setup wizard and settings screen use: **0** Pawbby Natural (plant-based,
+"recommended"), **1** Tofu, **2** Bentonite, **3** Mixed. The firmware uses the litter density for its remaining-litter
+estimate ("if you change the cat litter, remember to update it"). Reported back in DP 103 data byte 15.
 
 **Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it from
 the SDK's cache). `refresh` re-pushes the account time zone (gate 9) — a harmless write that should make the box emit a new
