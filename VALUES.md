@@ -45,7 +45,7 @@
 | 112 | debug_data_02     | 调试数据02     | ro     | value  | filtered weight in grams (e.g. 5636)                    |
 | 113 | debug_data_03     | 调试数据03     | ro     | value  | live cat weight during a visit; also numeric payload of DP 115 ACKs (tz offset, deodorant days) |
 | 114 | data_flag_01      | 数据标志01     | ro     | enum   | event flag: `motor_ok`, `deodorant_reset` (NOT only motor health!) |
-| 115 | data_flag_02      | 数据标志02     | ro     | enum   | settings ACK enum: `nodisturb_time`, `nodisturb_mode_enable/disable`, `stool_mode_*`, `auto_screen_*`, `child_lock_*`, `time_zone`, `deodorant_days` |
+| 115 | data_flag_02      | 数据标志02     | ro     | enum   | settings ACK enum: `auto_clean_*`, `nodisturb_time`, `nodisturb_mode_*`, `stool_mode_*`, `auto_screen_*`, `child_lock_*`, `cat_litter_*`, `time_zone`, `deodorant_days` |
 | 116 | data_flag_03      | 数据标志03     | ro     | enum   | device state machine (READ-ONLY!)                       |
 | 117 | motor_data        | 电机相关数据   | ro     | string | motor debug string                                       |
 
@@ -139,7 +139,9 @@ Frame: `01 <gate> <len:2 BE> <data>` (base64 on the wire). Full details, payload
 | 0A | Weight unit | `01 0A 00 01 0x` | kg `AQoAAQA=` / lb `AQoAAQE=` |
 
 Each write is acknowledged with an enum on DP 115 (and `deodorant_reset` on DP 114 for gate 08), the numeric payload
-on DP 113, and a fresh DP 103 snapshot. ⚠️ The earlier "modes 01–03 on DP 105" sweep payloads were valid settings writes
+on DP 113, and a fresh DP 103 snapshot. Gate 08 always resets to 60 days (a `<days>` payload byte is ignored). Gate 09
+sets only the UTC offset (whole hours); the clock itself comes from Tuya (the `t` epoch field in local packets is the
+box's own, correct UTC time), so the quiet period runs on Tuya time + this offset. ⚠️ The earlier "modes 01–03 on DP 105" sweep payloads were valid settings writes
 that switched soft clumps / quiet period / auto screen-off **off**.
 
 #### DP 106 — Main command trigger (工作状态 / "Work status")
@@ -312,7 +314,7 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 |-------------|---------------------------------------------------------------------|
 | DPs 1–66    | ALL work_idle — fully ruled out (`sweep_low_dps.py`)               |
 | DPs 67–99   | NOT YET TESTED — resume `sweep_low_dps.py` from DP 67              |
-| DPs 100–105 | NOT YET TESTED — run `find_mclean2.py` Section B                   |
+| DPs 100–105 | 101–104 untested as triggers; **105 = settings DP, fully mapped** (see DP 105 section) |
 | DP 106      | Fully mapped (see above)                                            |
 | DPs 107–110 | bool/int values tested — no effect (except DP 107 True = work_smooth)|
 | DPs 111–117 | Sensor/status DPs (read-only)                                       |
@@ -456,6 +458,7 @@ Special thanks to **[@managementboy](https://github.com/managementboy/pawbby)** 
 **DP 105 (device_control)** — confirmed RW from schema, NEVER TRIED before:
 - ✗ All modes 01–03 as base64 payload → work_idle or ?
 - ✗ bool True, int 1 → work_idle
+- ✏️ 2026-10-07: expected — DP 105 is the **settings** DP, not a clean trigger. Those three payloads switched soft clumps / quiet period / auto screen-off OFF (see DP 105 section).
 
 **DP 106 extended (modes 13–30):**
 - ✗ All returned work_idle

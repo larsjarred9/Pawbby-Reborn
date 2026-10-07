@@ -267,7 +267,7 @@ rest_command:
           Pawbby Reborn features a built-in MQTT bridge that connects directly to your broker (e.g. Mosquitto). Configure your broker credentials under <NuxtLink to="/settings" class="text-pawbby-primary underline">Settings &gt; MQTT Broker</NuxtLink>.
         </p>
         <p class="text-sm text-pawbby-muted mb-4">
-          Once connected, Pawbby automatically announces all litter boxes, cats, sensors, buttons, and the new <strong>Event entity</strong> to Home Assistant via MQTT Discovery (<code class="bg-white/10 px-1 rounded text-white/90">homeassistant/#</code>). <strong>No YAML configuration required!</strong>
+          Once connected, Pawbby automatically announces all litter boxes, cats, sensors, buttons, the device settings (switches, auto-clean delay number, litter type select) and the new <strong>Event entity</strong> to Home Assistant via MQTT Discovery (<code class="bg-white/10 px-1 rounded text-white/90">homeassistant/#</code>). <strong>No YAML configuration required!</strong>
         </p>
 
         <h3 class="font-bold text-sm mb-2 text-white/80">🏠 Home Assistant Event Entity (<code class="font-mono text-xs">event.pawbby_&lt;name&gt;_event</code>)</h3>

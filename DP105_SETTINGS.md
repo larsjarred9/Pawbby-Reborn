@@ -5,7 +5,9 @@
 > Copyright note: no app source is reproduced here; only the protocol derived from it.
 
 This covers the two features Pawbby-Reborn was missing — **auto-clean delay** ("Auto-clean delay" in the app)
-and **quiet period** ("Sleep Mode" / "Do Not Disturb at Night") — plus the other switches that live on the same DP.
+and **quiet period** ("Sleep Mode" / "Do Not Disturb at Night") — plus everything else that lives on the same DP:
+auto-clean on/off, soft clumps mode, auto screen-off, child lock, litter type, deodorant counter reset, time zone and
+weight unit. Everything below is confirmed on hardware (section 5) except where marked.
 
 ---
 
@@ -123,7 +125,7 @@ The "Kitten mode" in the app is purely app-side: it just sends `AutoClear = 0` (
 
 ## 3. DP 103 — `deviceStatus` blob: reading the current settings back
 
-Every DP 103 broadcast (every ~10 min and on each state change) carries the full settings snapshot. Decode base64 → bytes;
+Every DP 103 broadcast (every ~10 min, on each state change, and after every DP 105 write) carries the full settings snapshot. Decode base64 → bytes;
 skip the 4-byte header `01 00 00 15` (len 0x15 = 21 data bytes). Offsets below are **data-byte indices** (the app indexes
 the hex string, so app offset = 2 × index):
 
@@ -172,13 +174,15 @@ This matches DP 115 = `nodisturb_mode_disable` and the observed ~1-minute auto-c
 | Settings read-back (latest DP 103 → `settings`, `settingsUpdatedAt`) | `web/server/utils/deviceState.ts` → `/api/devices`, `/api/external/state`, MQTT state payload |
 | Dashboard endpoint (session auth) | `POST /api/device-settings` `{ deviceId, setting, value }` |
 | External endpoint (API key) | `POST /api/external/settings` (documented in the in-app API docs page) |
-| Home Assistant (MQTT discovery) | `switch` × 5 (auto-clean, sleep mode, soft clumps, auto screen-off, screen lock), `number` auto-clean delay, sensors for the sleep window; commands on `<base>/<deviceId>/set/<setting>` |
-| UI | Litter box page → **Settings** tab → "Litter Box Settings" card (toggles, litter type, delay picker, quiet-period toggle that expands into the time window). The firmware's deodorant counter/reset row is present but hidden (`SHOW_DEVICE_DEODORANT_RESET = false` in `litter-box.vue`) because it is fixed at 60 days — Pawbby Reborn's own 30/60-day pod tracker is used instead; `reset_deodorant` remains available through the API/MQTT. |
-| Account sync | The box's **weight unit** and **time zone** mirror the dashboard account (`user.weightUnit` / `user.timezone`): the daemon pushes the time zone on every connect, corrects the unit whenever a DP 103 snapshot disagrees (10-min cooldown), and both are re-pushed when they change in Settings. |
+| Home Assistant (MQTT discovery) | `switch` × 5 (Auto-Clean, Quiet Period, Soft Clumps Mode, Auto Screen-Off, Screen Lock), `number` Auto-Clean Delay, `select` Litter Type, sensors Quiet Period Start/End; commands on `<base>/<deviceId>/set/<setting>` (`ON`/`OFF`, a number, a litter type name, or `22:00-08:30`) |
+| UI | Litter box page → **Settings** tab → "Litter Box Settings" card (toggles, delay picker, quiet-period toggle that expands into the time window, litter type). The firmware's deodorant counter/reset row is present but hidden (`SHOW_DEVICE_DEODORANT_RESET = false` in `litter-box.vue`) because it is fixed at 60 days — Pawbby Reborn's own 30/60-day pod tracker is used instead; `reset_deodorant` remains available through the API/MQTT. |
+| Account sync | The box's **weight unit** and **time zone** mirror the dashboard account (`user.weightUnit` / `user.timezone`) and are not user-facing device settings: the daemon pushes the time zone (DST-aware whole-hour UTC offset) 3 s after every connect, corrects the unit whenever a DP 103 snapshot disagrees (10-min cooldown), and both are re-pushed when they change in Settings (`tuya:sync-account` hook). |
+| Status fix | DP 114 is an event flag, not pure motor health: `deviceState.ts` now treats `motor_ok` / `deodorant_reset` as benign and only flags fault-looking values, otherwise a pod reset locked the controls ("Motor Error") until the next clean. |
 
 Setting keys accepted by the API/MQTT: `auto_clean`, `sleep_mode` (quiet period), `soft_clumps`, `auto_off_screen`,
-`child_lock` (bool), `auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `litter_type` (0–3, see
-below), `reset_deodorant` (no value), `refresh` (no value).
+`child_lock` (bool), `auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `litter_type` (0–3 or a
+name, see below), `reset_deodorant` (no value — always 60 days), `refresh` (no value — returns `cached` without touching
+the device when a DP 103 snapshot exists, otherwise pushes the time zone to obtain a first one).
 
 ### Litter type (gate 5)
 
@@ -210,6 +214,18 @@ AQAAFQAAAAAXAAAACQABAAEBAQAUAgA8AA==
 ```
 
 Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s. Tuya `DP_REFRESH` (0x12) for DP 103 does **not** work on this firmware.
+
+Later in the same session, all four litter types (byte 15 echoed 0/1/2/3 within a second), auto-clean on/off, and the
+deodorant reset with a `<days>` payload (ignored: firmware answered `deodorant_days` 60) were tested as well.
+
+### How time works on the box
+
+Gate 9 sets only the **UTC offset** (one byte, whole hours; the daemon derives it DST-aware from the account time zone).
+The clock itself is not settable locally: the box gets UTC epoch time from the Tuya cloud connection — the `t` field in
+local packets (e.g. `1791376422` = 12:33:42 UTC at capture time) is its own, correct clock. The quiet period is evaluated
+on Tuya time + offset, which is why the vendor app re-pushed the offset on every connect rather than any clock value.
+Consequences: half-hour time zones cannot be represented, and after a DST change the offset is only corrected on the
+next daemon connect / Settings save.
 
 ### Bonus: DP 114 / DP 115 are the firmware's ACK channel
 
