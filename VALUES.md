@@ -1,5 +1,5 @@
 # PAWBBY SMART LITTER BOX — FULL RESEARCH NOTES
-*Last updated: 2026-05-31 (evening)*
+*Last updated: 2026-10-07 — settings protocol (DP 105 / DP 103 / DP 113–115) fully decoded and hardware-confirmed; see [`DP105_SETTINGS.md`](DP105_SETTINGS.md) for the detailed write-up.*
 
 > **Note:** The app source code itself cannot be shared due to copyright restrictions. All findings documented here were derived from independent reverse-engineering and protocol analysis.
 
@@ -33,9 +33,9 @@
 |-----|-------------------|---------------|--------|--------|----------------------------------------------------------|
 | 101 | work_state        | 工作状态       | RW ✏️  | raw    | ❓ NEVER TRIED — current: AQAAAQQ= (01 00 00 01 04)     |
 | 102 | fault_code        | 故障码         | RW ✏️  | raw    | clean result code: AQAACwAAAAAAAAAAAAAA (0x0B status code, not counter) |
-| 103 | device_state      | 设备状态       | RW ✏️  | raw    | composite status blob (changes with every state)         |
+| 103 | device_state      | 设备状态       | RW ✏️  | raw    | ✅ FULLY DECODED — settings + live-status snapshot (see DP 103 section / `DP105_SETTINGS.md`) |
 | 104 | cat_info          | 猫咪信息       | RW ✏️  | raw    | cat profile data (empty in practice)                     |
-| 105 | device_control    | 设备控制       | RW ✏️  | raw    | ❓ NEVER TRIED — general device control                  |
+| 105 | device_control    | 设备控制       | RW ✏️  | raw    | ✅ CONFIRMED — SETTINGS (`deviceGate`): auto-clean, delay, quiet period, soft clumps, screen, litter type, deodorant reset, time zone, unit |
 | 106 | clean_control     | 清理控制       | RW ✏️  | raw    | CLEAN / FLATTEN / EMPTY commands (all confirmed working ✅) |
 | 107 | toilet_data       | 如厕数据       | RW ✏️  | raw    | cat visit summary (01 00 00 05 [weight WW WW in g] 00 [xx] 00) |
 | 108 | device_info       | 设备信息       | RW ✏️  | raw    | AQAAEk1HUzEwNDA0MjUwNDE4MDA0NA==                       |
@@ -43,15 +43,16 @@
 | 110 | calibrat_result   | 校准结果       | RW ✏️  | raw    | calibration result: AQEAAQA=                            |
 | 111 | debug_data_01     | 调试数据01     | ro     | value  | raw weight ADC (e.g. 4116)                              |
 | 112 | debug_data_02     | 调试数据02     | ro     | value  | filtered weight in grams (e.g. 5636)                    |
-| 113 | debug_data_03     | 调试数据03     | ro     | value  | resets to 0 on cat_near_leave                           |
-| 114 | data_flag_01      | 数据标志01     | ro     | enum   | motor/sensor status (e.g. motor_ok)                     |
-| 115 | data_flag_02      | 数据标志02     | ro     | enum   | settings flags (e.g. deodorant_days)                    |
+| 113 | debug_data_03     | 调试数据03     | ro     | value  | live cat weight during a visit; also numeric payload of DP 115 ACKs (tz offset, deodorant days) |
+| 114 | data_flag_01      | 数据标志01     | ro     | enum   | event flag: `motor_ok`, `deodorant_reset` (NOT only motor health!) |
+| 115 | data_flag_02      | 数据标志02     | ro     | enum   | settings ACK enum: `nodisturb_time`, `nodisturb_mode_enable/disable`, `stool_mode_*`, `auto_screen_*`, `child_lock_*`, `time_zone`, `deodorant_days` |
 | 116 | data_flag_03      | 数据标志03     | ro     | enum   | device state machine (READ-ONLY!)                       |
 | 117 | motor_data        | 电机相关数据   | ro     | string | motor debug string                                       |
 
 > ⚠️ **IMPORTANT:** DP 116 (`data_flag_03`) is **READ-ONLY** — writing to it always fails
 > ⚠️ DP 115 (`data_flag_02`) exists! Was missing from `status()` response before.
 > ⚠️ DP 101 is the REAL 工作状态 DP — we were sending commands to DP 106 all along!
+> ✅ **2026-10-07:** DP 105 is the settings DP. Every option of the original app (auto-clean delay, quiet period, …) is now writable locally — see `DP105_SETTINGS.md`.
 
 ---
 
@@ -76,12 +77,13 @@
 - Byte[3] = `0x0B` = 11: **Clean result status code**, NOT a counter. Tested across consecutive manual and auto clean cycles by @managementboy; the value remains static `0x0B`.
 - Status: Read-only result DP (device writes it after clean)
 
-#### DP 103 — Composite binary device status blob (设备状态 / "Device status")
+#### DP 103 — Settings + status snapshot (设备状态 / "Device status") ✅ FULLY DECODED
 > NOTE: Was previously guessed as DP 115 — CORRECTED, it is DP 103
+> Decoded 2026-10-07 from the vendor app's `analysisStatus` / `RefreshInfo` parsers; validated on hardware.
 
-- Broadcasts every ~10 min at idle AND on every state change
-- Format: base64-encoded binary packet (26 bytes)
-- State-dependent values observed:
+- Broadcasts every ~10 min at idle, on every state change, and **after every DP 105 settings write** (this is how settings are read back — there is no read command for DP 103; pushing the time zone on DP 105 is a harmless way to force a fresh snapshot)
+- Format: `01 00 00 15` header (len = 0x15 = 21 data bytes) + 21 data bytes, base64 on the wire
+- Sample values:
 
 | State       | Value                                          |
 |-------------|------------------------------------------------|
@@ -90,11 +92,55 @@
 | cat_enter   | `AQAAFQAAAAAWAAABCB4BAAAAAAABAgA7AA==`         |
 | After clean | `AQAAFQAAAAAWAAAACB4BAAAAAAABAgA8AA==`         |
 
-- Key byte position: index ~7 encodes cat presence:
-  - `AAAA` (00 00) = idle / no cat
-  - `AAEB` (00 01 01) = cat_near
-  - `AAAB` (00 00 01) = cat inside / leaving
-- Status: ❓ NOT yet tested as a TRIGGER
+**Data-byte layout (index after the 4-byte header):**
+
+| Byte | Meaning | Values |
+|------|---------|--------|
+| 0  | waste bin full | 1 = full |
+| 1  | waste drawer removed | 1 = removed |
+| 2  | lid / cover open | 1 = open |
+| 3  | weight unit | 0 kg, 1 lb |
+| 4  | quiet-period start hour | 0–23 |
+| 5  | quiet-period start minute | 0–59 |
+| 6  | cat `isIn` | |
+| 7  | cat `isNear` | |
+| 8  | quiet-period stop hour | |
+| 9  | quiet-period stop minute | |
+| 10 | auto-clean enabled | |
+| 11 | soft clumps mode enabled | |
+| 12 | quiet period (sleep mode) enabled | |
+| 13 | auto screen-off enabled | |
+| 14 | child lock enabled | |
+| 15 | litter type | 0 Pawbby Natural, 1 Tofu, 2 Bentonite, 3 Mixed |
+| 16 | auto-clean delay (minutes) | 1–60 (factory 1) |
+| 17 | litter level | 0 empty, 1 low, 2 enough |
+| 18 | (not used by the app) | |
+| 19 | deodorant pod days left | e.g. 0x3b = 59 |
+| 20 | cat inside for a long time | 1 = warning |
+
+Example: idle sample above → bin ok, kg, quiet period 22:00–08:30 **disabled**, auto-clean on, delay 1 min, litter type 0, litter level 2, deodorant 59 days.
+
+#### DP 105 — Settings (设备控制 / `deviceGate`) ✅ CONFIRMED ON HARDWARE (2026-10-07)
+Frame: `01 <gate> <len:2 BE> <data>` (base64 on the wire). Full details, payload tables and ACK behaviour in
+[`DP105_SETTINGS.md`](DP105_SETTINGS.md).
+
+| Gate | Setting | Payload | Example |
+|------|---------|---------|---------|
+| 00 | Auto-clean on/off | `01 00 00 01 0x` | on `AQAAAQE=` / off `AQAAAQA=` |
+| 01 | Soft clumps mode | `01 01 00 01 0x` | on `AQEAAQE=` |
+| 02 | Quiet period / sleep mode on/off | `01 02 00 01 0x` | on `AQIAAQE=` |
+| 03 | Auto screen-off | `01 03 00 01 0x` | on `AQMAAQE=` |
+| 04 | Child lock | `01 04 00 01 0x` | on `AQQAAQE=` |
+| 05 | Litter type (0–3) | `01 05 00 01 id` | bentonite `AQUAAQI=` |
+| 06 | **Auto-clean delay** (1–60 min) | `01 06 00 01 mm` | 5 min `AQYAAQU=` |
+| 07 | **Quiet period window** | `01 07 00 04 sh sm eh em` | 22:00–08:30 `AQcABBYACB4=` |
+| 08 | Reset deodorant counter | `01 08 00 00` | `AQgAAA==` |
+| 09 | Time zone (UTC offset, hours) | `01 09 00 01 tz` | UTC+2 `AQkAAQI=` |
+| 0A | Weight unit | `01 0A 00 01 0x` | kg `AQoAAQA=` / lb `AQoAAQE=` |
+
+Each write is acknowledged with an enum on DP 115 (and `deodorant_reset` on DP 114 for gate 08), the numeric payload
+on DP 113, and a fresh DP 103 snapshot. ⚠️ The earlier "modes 01–03 on DP 105" sweep payloads were valid settings writes
+that switched soft clumps / quiet period / auto screen-off **off**.
 
 #### DP 106 — Main command trigger (工作状态 / "Work status")
 - Payload format: 4 or 5 bytes
@@ -182,13 +228,26 @@
 - At idle: same value as DP 111 (e.g. 4049, raw ADC tare offset)
 - During an active cat visit (`cat_enter` → `cat_leave`): **reports the live cat weight in grams** directly calculated by firmware (e.g. 4248g)
 - Resets to 0 when cat leaves (`cat_near_leave` event)
+- Also carries the numeric payload of DP 115 settings ACKs (e.g. `2` after a time-zone push, `60` after a deodorant reset) — ignore those samples for weight tracking.
 
-#### DP 114 — Motor status
-- Values: `"motor_ok"`
+#### DP 114 — Event flag 1 (`data_flag_01`)
+- Values seen: `"motor_ok"`, `"deodorant_reset"` (echoed after a DP 105 gate-08 deodorant reset)
+- ⚠️ Not a pure motor-health field — treat only fault-looking values as motor errors (Pawbby Reborn used to lock the controls on anything ≠ `motor_ok`; fixed 2026-10-07).
 
-#### DP 115 — Deodorant Cartridge Life (`deodorant_days`)
-- Confirmed by @managementboy (`DATAPOINTS.md`)
-- Reports remaining deodorant pod lifetime in days (e.g. `30` down to `0`).
+#### DP 115 — Settings ACK enum (`data_flag_02`)
+- Echoes which setting was just changed on DP 105; the numeric payload (if any) arrives on **DP 113** at the same time:
+
+| DP 115 value | Triggered by | DP 113 |
+|--------------|--------------|--------|
+| `nodisturb_time` | quiet-period window (gate 07) | — |
+| `nodisturb_mode_enable` / `nodisturb_mode_disable` | quiet period on/off (gate 02) | — |
+| `stool_mode_enable` / `stool_mode_disable` | soft clumps (gate 01) | — |
+| `auto_screen_enable` / `auto_screen_disable` | auto screen-off (gate 03) | — |
+| `child_lock_enable` / `child_lock_disable` | child lock (gate 04) | — |
+| `time_zone` | time-zone push (gate 09) | UTC offset (e.g. `2`) |
+| `deodorant_days` | deodorant reset (gate 08) | days left (`60`) |
+
+- Earlier note "DP 115 reports the deodorant days as a number" was a misread: DP 115 is the label, the number is on DP 113. The persistent days counter lives in DP 103 byte 19.
 
 #### DP 116 — Device state machine (数据标志03 / "Data flag 03")
 - **READ-ONLY** reporting DP
@@ -235,7 +294,7 @@
 
 ---
 
-### Unknown DP (number not confirmed)
+### ~~Unknown DP (number not confirmed)~~ → resolved: this is DP 107
 
 **如厕数据 ("Toilet / litter use data")**
 - Reported after cat visit ends (before `work_aclean`)
@@ -264,7 +323,8 @@
 
 ### 1. Command Encoding (`createValue`)
 From APK decompilation (credit: @managementboy), command bytes follow the structure:
-`createValue(version, cmd, flag, data)` = `[ver (1B)][cmd (1B)][flag (2B)][data (optional)]`
+`createValue(version, len, cmd, data)` = `[ver (1B)][cmd (1B)][len (2B, big-endian = number of data bytes)][data]`
+> ✏️ **Correction (2026-10-07):** the 2-byte field previously called "flag" is the **payload length** (`parseValueToObj` reads it back as `len`). That is why `01 01 00 01 00` (len 1, data `00`) and `01 01 00 00` (len 0) both mean "startFP".
 - **Clean Now** (`startClear`): `(1, 0, 0)` → `01 00 00 00` (`AQAAAA==`) on DP 106
 - **Tare / Zero Scale** (`resetWeight`): `(1, 1, 0)` → `01 01 00 00` (`AQEAAA==`) on DP 109
 - **Cancel Clean** (`cancelClear`): `(1, 3, 0)` → `01 03 00 00` (`AQMAAA==`) on DP 106 (from APK decompilation)
@@ -421,6 +481,8 @@ TARE:     device.set_value('109', 'AQEAAA==')  → zero scale / tare ✅ (credit
 CANCEL:   device.set_value('106', 'AQMAAA==')  → cancel clean cycle
 FLATTEN:  device.set_value('106', 'AQEAAQA=')  → work_smooth
 EMPTY:    device.set_value('106', 'AQIAAQA=')  → work_empty  ⚠️ clears everything
+SETTINGS: device.set_value('105', 'AQYAAQU=')  → auto-clean delay 5 min ✅ (all gates, see DP 105 section)
+QUIET:    device.set_value('105', 'AQcABBYACB4=') + 'AQIAAQE='  → quiet period 22:00–08:30, enabled ✅
 STATUS:   device.status()                       → DP 111–117
 MONITOR:  listen_button.py                      → all broadcasts in real-time
 ```
@@ -526,7 +588,8 @@ This blocks simple `run-as` or `adb backup` extraction. Use one of these:
 > Source: `/sdcard/Android/data/pawbbyoverseas.mmgg.fun/files/fetjzvf6o6dihnhq/bundles/fetjzvf6o6dihnhq.bundle`
 > Pulled: 2026-06-01 (3,490,251 bytes = ~3.49 MB)
 
-### STOMP Topic / Command Number Mapping (`LitterBoxCommand` enum)
+### Command Number Mapping (`LitterBoxCommand` enum) — these ARE the Tuya DP ids
+> ✏️ **Correction (2026-10-07):** `publishCommand()` in the bundle calls the native `TYManager.publishCommand`, which does `ITuyaDevice.publishDps('{"<number>": "<hex>"}')`. The Tuya SDK converts the hex string to bytes and base64 for raw DPs (`DevUtil.encodeRaw`) and the reverse on receive. So 101–118 are the local Tuya DP numbers, not a separate STOMP numbering, and every "STOMP body" below maps 1:1 onto `device.set({ dps, set: base64(hex) })`.
 
 | Number | Code            | Description                  |
 |--------|-----------------|------------------------------|
@@ -561,12 +624,12 @@ Headers (for both):
 { "heart-beat": "10000,10000", "x-access-token": "<userinfo.token>" }
 ```
 
-### Payload Format — `createValue(ver, flag, commandWord, data)`
+### Payload Format — `createValue(ver, len, commandWord, data)`
 
 ```
-Payload = formatNum(ver,2) + formatNum(commandWord,2) + formatNum(flag,4) + data
+Payload = formatNum(ver,2) + formatNum(commandWord,2) + formatNum(len,4) + data
 ```
-(All numbers converted to hex, zero-padded to specified digit count)
+(All numbers converted to hex, zero-padded to specified digit count; `len` = number of data bytes)
 
 ### Cleaning Commands — topic 106 (`clearControl`)
 
@@ -576,15 +639,21 @@ Payload = formatNum(ver,2) + formatNum(commandWord,2) + formatNum(flag,4) + data
 | startFP      | FIXED POINT / SPOT CLEAN  | `"01010000"` | `{"clearControl": "01010000"}`     |
 | cancelClear  | CANCEL/STOP CLEAN         | `"01030000"` | `{"clearControl": "01030000"}`     |
 
-### Other Commands (topic 105 = `deviceGate`)
+### Settings — DP 105 (`deviceGate`)
 
 ```js
-syncTimeZone(uuid, cb):
-  Payload: createValue(1, 1, SyncTimeZone, formatNum(utcOffset.toString(16), 2))
+DeviceGateType = { AutoClear:0, RBCompatible:1 /* soft clumps */, Disturb:2 /* quiet period */, AutoOffScreen:3,
+                   ChildLock:4, LitterType:5, SetAutoClearTime:6, SetDisturbTime:7, ResetDeodorant:8,
+                   SyncTimeZone:9, SetWeightUnit:'0A' }
 
-setWeightUnit(uuid, unit, cb):
-  Payload: createValue(1, 1, SetWeightUnit, formatNum(unit, 2))
+setGateValue(uuid, gate, value):  value === '-' ? createValue(1, 0, gate, '') : createValue(1, 1, gate, hex2(value))
+setSleepTime(uuid, sh, sm, eh, em): "01" + "07" + "0004" + hex2(sh) + hex2(sm) + hex2(eh) + hex2(em)
+setAutoTime(uuid, minutes):        setGateValue(uuid, SetAutoClearTime, minutes)   // picker 1..60
+syncTimeZone(uuid):                createValue(1, 1, SyncTimeZone, hex2(-getTimezoneOffset()/60))  // app sends on every connect
+setWeightUnit(uuid, unit):         createValue(1, 1, SetWeightUnit, hex2(unit))     // 0 kg, 1 lb; app auto-corrects from DP 103 byte 3
 ```
+UI strings: "Auto-clean delay — How long should the litter box wait to auto-clean after your cat exits",
+"Sleep mode — The device will pause auto-clean during the set time period" (hint: window of 1–12 h), defaults 22:00–08:30.
 
 ### Weight Calibration (topic 109 = `weightCal`)
 
@@ -932,7 +1001,8 @@ Connected directly via LAN — NO cloud needed!
 | Dev ID   | `[REDACTED]`|
 | LocalKey | `[REDACTED]`|
 
-> **IMPORTANT:** Local DPS are 111–117, NOT the STOMP topic numbers (101–118). They are different numbering systems!
+> ~~**IMPORTANT:** Local DPS are 111–117, NOT the STOMP topic numbers (101–118). They are different numbering systems!~~
+> ✏️ **Corrected 2026-10-07:** they are the same numbering. 101–110 are raw/push DPs that simply don't appear in `status()`; 111–117 are the only ones `DP_QUERY` returns.
 
 **LIVE DPS snapshot (device was IDLE at time of capture):**
 

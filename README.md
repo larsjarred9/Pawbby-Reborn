@@ -55,7 +55,7 @@ To share your logs safely without exposing your Wi-Fi device keys:
 This is a collaborative community rescue mission. Whether you are an experienced packet-sniffer, a frontend developer ready to tackle the UI, or just a frustrated Pawbby owner who wants to help test commands, we need your help.
 
 - 💬 **Communication & Development:** [Join our Discord Server](https://discord.gg/Tw43AKZkge) to talk strategy, share logs, and coordinate the software build in real-time.
-- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local network commands and authentication extraction strategies.
+- 📂 **Technical Specifications:** Read through `VALUES.md` for our updated matrix of local network commands and authentication extraction strategies, and `DP105_SETTINGS.md` for the device-settings protocol (auto-clean delay, quiet period, litter type, …).
 
 ---
 
