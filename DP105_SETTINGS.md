@@ -248,5 +248,12 @@ event flag rather than a pure motor-health status; code that treated anything ot
 (Pawbby-Reborn did) locks out the controls after a pod reset. Fixed in `deviceState.ts` to flag only fault-looking values.
 The flag is sticky: it kept reporting `deodorant_reset` for ~15 min until a clean cycle completed, which reset it to `motor_ok`.
 
-Remaining uncertainty: negative UTC offsets for the time-zone push (we send the two's-complement byte; the vendor app
-itself produced malformed hex for those).
+**Negative UTC offsets** (tested 2026-10-07 with `America/Los_Angeles`, UTC-7 → `01 09 00 01 F9`, `AQkAAfk=`): the
+firmware accepted the frame and acknowledged `time_zone` with DP 113 = **249** (0xF9 echoed as an unsigned byte; UTC+2
+was echoed as 2). So the write is not rejected, but the ACK alone cannot tell whether the firmware interprets the byte
+as a signed int8 (−7, correct) or as +249. Still to be verified by behaviour — e.g. the clock on the box's display, or
+whether a quiet window that is active only in the negative zone actually pauses an auto-clean. The vendor app itself
+produced malformed hex (`"-7"`) for negative offsets, so Americas users may never have had a working time zone.
+
+Also seen in the same capture: the quiet-window ACK `nodisturb_time` is followed by the four window bytes on DP 113 in
+sequence (`15, 0, 3, 0` for 15:00–03:00), i.e. DP 113 streams the whole payload of multi-byte writes.

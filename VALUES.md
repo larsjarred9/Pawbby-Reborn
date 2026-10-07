@@ -242,13 +242,13 @@ that switched soft clumps / quiet period / auto screen-off **off**.
 
 | DP 115 value | Triggered by | DP 113 |
 |--------------|--------------|--------|
-| `nodisturb_time` | quiet-period window (gate 07) | — |
+| `nodisturb_time` | quiet-period window (gate 07) | the 4 window bytes streamed one after another (`15,0,3,0`) |
 | `auto_clean_enable` / `auto_clean_disable` | auto-clean on/off (gate 00) | — |
 | `nodisturb_mode_enable` / `nodisturb_mode_disable` | quiet period on/off (gate 02) | — |
 | `stool_mode_enable` / `stool_mode_disable` | soft clumps (gate 01) | — |
 | `auto_screen_enable` / `auto_screen_disable` | auto screen-off (gate 03) | — |
 | `child_lock_enable` / `child_lock_disable` | child lock (gate 04) | — |
-| `time_zone` | time-zone push (gate 09) | UTC offset (e.g. `2`) |
+| `time_zone` | time-zone push (gate 09) | UTC offset byte, unsigned (e.g. `2`; `249` for 0xF9 = UTC−7, interpretation as signed unverified) |
 | `deodorant_days` | deodorant reset (gate 08) | days left (`60`) |
 | `cat_litter_pawbby` / `cat_litter_tofe` (sic) / `cat_litter_bentonite` / `cat_litter_mix` | litter type (gate 05) ids 0 / 1 / 2 / 3 | — |
 
