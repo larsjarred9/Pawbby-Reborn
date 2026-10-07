@@ -7,11 +7,13 @@ export interface DeviceLiveState {
   lidOpen: boolean
   binRemoved: boolean
   drumRemoved: boolean
+  cleaning: boolean
   todayToileted: number
   lastHeartbeat: Date | null
   latestWeight: number | null // kg, from the most recent completed visit
   lastVisitPet: string | null // pet name, or null if unidentified/none
   lastVisitAt: Date | null
+  lastCleanedAt: Date | null
   deodorizerActive: boolean
   deodorizerDaysLeft: number | null
 }
@@ -257,6 +259,30 @@ export async function computeDeviceState(device: {
     } catch (e) {}
   }
 
+  // Check if actively cleaning via DP 116
+  let cleaning = false
+  if (latestDP116Event?.rawData) {
+    try {
+      const parsed = JSON.parse(latestDP116Event.rawData)
+      if (parsed?.dps?.['116']) {
+        const dp116 = String(parsed.dps['116'])
+        if (dp116 === 'work_aclean' || dp116 === 'work_mclean') {
+          cleaning = true
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Most recent cleaning cycle
+  const lastCleanEvent = await prisma.litterEvent.findFirst({
+    where: {
+      deviceId,
+      type: { in: ['auto-clean', 'manual-clean', 'manual-clean-app', 'clean-completed'] },
+    },
+    orderBy: { timestamp: 'desc' },
+  })
+  const lastCleanedAt = lastCleanEvent?.timestamp ?? null
+
   return {
     status,
     wasteBin,
@@ -264,11 +290,13 @@ export async function computeDeviceState(device: {
     lidOpen,
     binRemoved,
     drumRemoved,
+    cleaning,
     todayToileted,
     lastHeartbeat: latestRaw ? latestRaw.timestamp : null,
     latestWeight: lastVisit?.weight ?? null,
     lastVisitPet,
     lastVisitAt: lastVisit?.timestamp ?? null,
+    lastCleanedAt,
     deodorizerActive,
     deodorizerDaysLeft,
   }

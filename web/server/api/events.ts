@@ -73,7 +73,9 @@ export default defineEventHandler(async (event) => {
     } else if (e.type === 'manual-clean-app') {
       description = 'Manual cleaning cycle started via Pawbby App.'
     } else if (e.type === 'auto-clean') {
-      description = 'Automatic cleaning cycle completed.'
+      description = 'Automatic cleaning cycle started.'
+    } else if (e.type === 'clean-completed') {
+      description = 'Cleaning cycle completed successfully.'
     } else if (e.type === 'flatten') {
       description = 'Litter flattening cycle was physically triggered on the device.'
     } else if (e.type === 'flatten-app') {

@@ -29,11 +29,13 @@ export default defineNitroPlugin((nitroApp) => {
     { key: 'visits_today', name: 'Visits Today', tpl: '{{ value_json.todayToileted }}', unit: 'visits', state_class: 'total_increasing', icon: 'mdi:cat' },
     { key: 'last_weight', name: 'Last Visit Weight', tpl: '{{ value_json.latestWeight }}', unit: 'kg', device_class: 'weight', state_class: 'measurement' },
     { key: 'last_pet', name: 'Last Visit Pet', tpl: '{{ value_json.lastVisitPet }}', icon: 'mdi:paw' },
+    { key: 'last_cleaned', name: 'Last Cleaned', tpl: '{{ value_json.lastCleanedAt }}', device_class: 'timestamp', icon: 'mdi:clock-check-outline' },
     { key: 'deodorizer_days', name: 'Deodorizer Days Left', tpl: '{{ value_json.deodorizerDaysLeft }}', unit: 'days', icon: 'mdi:air-filter' },
   ] as const
 
   const BINARY = [
     { key: 'online', name: 'Online', tpl: "{{ 'on' if value_json.online else 'off' }}", device_class: 'connectivity' },
+    { key: 'cleaning', name: 'Cleaning', tpl: "{{ 'on' if value_json.cleaning else 'off' }}", device_class: 'running' },
     { key: 'lid_open', name: 'Lid Open', tpl: "{{ 'on' if value_json.lidOpen else 'off' }}", device_class: 'opening' },
     { key: 'bin_full', name: 'Waste Bin Full', tpl: "{{ 'on' if value_json.wasteBin == 'Full' else 'off' }}", device_class: 'problem' },
     { key: 'bin_removed', name: 'Bin Removed', tpl: "{{ 'on' if value_json.binRemoved else 'off' }}", device_class: 'problem' },
@@ -84,6 +86,8 @@ export default defineNitroPlugin((nitroApp) => {
       lidOpen: state.lidOpen,
       binRemoved: state.binRemoved,
       drumRemoved: state.drumRemoved,
+      cleaning: state.cleaning,
+      lastCleanedAt: state.lastCleanedAt ? state.lastCleanedAt.toISOString() : '',
       todayToileted: state.todayToileted,
       latestWeight: state.latestWeight,
       lastVisitPet: state.lastVisitPet,
@@ -178,6 +182,7 @@ export default defineNitroPlugin((nitroApp) => {
           'auto-clean',
           'manual-clean',
           'manual-clean-app',
+          'clean-completed',
           'flatten',
           'flatten-app',
           'auto-flatten',

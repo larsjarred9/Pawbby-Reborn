@@ -18,6 +18,7 @@ export default defineNitroPlugin((nitroApp) => {
     lidOpenedDuringVisit?: boolean;
     lastVisitEndedAt?: number;
     lastVisitEndWeight?: number;
+    lastCleanCompletedAt?: number;
   }
 
   const VISIT_STATUSES = new Set([
@@ -277,6 +278,22 @@ export default defineNitroPlugin((nitroApp) => {
           const state = deviceStates.get(config.id)!;
           let stateChanged = false;
 
+          // 0. Clean Cycle Completed (DP 102 - clean cycle result reporter)
+          if (dps["102"]) {
+            if (!state.lastCleanCompletedAt || now - state.lastCleanCompletedAt > 30000) {
+              state.lastCleanCompletedAt = now;
+              console.log(`[Tuya] Cleaning cycle completed on ${config.name} (DP 102 broadcast)`);
+              await recordEvent({
+                type: "clean-completed",
+                deviceId: config.id,
+                rawData: typeof dps["102"] === "string" ? dps["102"] : JSON.stringify(dps["102"]),
+              });
+              const user = await prisma.user.findFirst();
+              if (user) await dispatchWebhook(user, "✨ Cleaning cycle completed successfully.", "auto-clean");
+              stateChanged = true;
+            }
+          }
+
           // 1. Confirm Completed Visit (DP 107 - toilet_data) FIRST
           if (dps["107"]) {
             let durationSecs = 60; // Fallback to 1 minute if we missed the entry event
@@ -402,6 +419,23 @@ export default defineNitroPlugin((nitroApp) => {
                 if (user) await dispatchWebhook(user, "🧹 Manual cleaning cycle started.", "manual-clean");
               }
             }
+
+            if (
+              (state.currentStatus === "work_aclean" || state.currentStatus === "work_mclean") &&
+              (newStatus === "work_idle" || newStatus === "collect_normal")
+            ) {
+              if (!state.lastCleanCompletedAt || now - state.lastCleanCompletedAt > 30000) {
+                state.lastCleanCompletedAt = now;
+                console.log(`[Tuya] Cleaning cycle finished on ${config.name} (DP 116 return to idle)`);
+                await recordEvent({
+                  type: "clean-completed",
+                  deviceId: config.id,
+                });
+                const user = await prisma.user.findFirst();
+                if (user) await dispatchWebhook(user, "✨ Cleaning cycle completed successfully.", "auto-clean");
+              }
+            }
+
             if (newStatus === "cat_leave" || newStatus === "cat_near_leave") {
               state.lastCatLeaveTime = now;
             }
