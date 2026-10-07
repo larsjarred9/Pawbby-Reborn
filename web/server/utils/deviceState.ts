@@ -100,7 +100,11 @@ export async function computeDeviceState(device: {
     }
   }
 
-  // Check DP 114 for motor/sensor errors
+  // Check DP 114 for motor/sensor errors.
+  // DP 114 (`data_flag_01`) is a general event enum, not a pure motor status: the
+  // firmware also echoes non-error events on it (e.g. `deodorant_reset` after the
+  // pod counter is reset via DP 105). Only flag values that actually look like a
+  // fault, otherwise a harmless echo would lock out the device controls.
   const latestDP114Event = await prisma.litterEvent.findFirst({
     where: { deviceId, type: 'tuya-raw-data', rawData: { contains: '"114"' } },
     orderBy: { timestamp: 'desc' },
@@ -111,7 +115,10 @@ export async function computeDeviceState(device: {
       const parsed = JSON.parse(latestDP114Event.rawData)
       if (parsed?.dps?.['114']) {
         const dp114 = String(parsed.dps['114']).toLowerCase()
-        if (dp114 !== 'motor_ok') isMotorError = true
+        const BENIGN_DP114 = new Set(['motor_ok', 'deodorant_reset'])
+        if (!BENIGN_DP114.has(dp114) && /motor|err|fault|fail|stall|stuck|block|over|timeout/.test(dp114)) {
+          isMotorError = true
+        }
       }
     } catch (e) {}
   }

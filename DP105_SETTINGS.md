@@ -190,12 +190,37 @@ not treated as confirmation.
 
 ---
 
-## 5. Status: codec verified against captures, DP 105 writes UNTESTED on hardware
+## 5. Status: CONFIRMED on hardware (2026-10-07)
 
-The decoder is unit-tested against the three real DP 103 captures above; every encoder output matches the vendor
-app's `createValue` byte-for-byte. No DP 105 write has been sent to a real box yet. Suggested first test (safe,
-reversible): set the auto-clean delay to 5 min from the dashboard, wait for the "Reported by the device" footer to
-refresh and confirm it reads 5 min, then set it back to 1.
+Live test from the dashboard against a real box: sleep window `23:00–09:00` (`AQcABBcACQA=`), quiet period on/off,
+soft clumps, auto screen-off, child lock, auto-clean delay 20 min (`AQYAARQ=`), deodorant reset and time-zone pushes
+were all accepted, and the next DP 103 snapshot echoed every value:
 
-Known uncertainty: negative UTC offsets for `sync_timezone` (the vendor app itself produced malformed hex for those; we
-send the two's-complement byte).
+```
+AQAAFQAAAAAXAAAACQABAAEBAQAUAgA8AA==
+→ 01 00 00 15 | 00 00 00 00 17 00 00 00 09 00 01 00 01 01 01 00 14 02 00 3c 00
+   sleep 23:00–09:00, autoClean=1, soft=0, sleep=1, autoScreen=1, childLock=1, delay=20, litter=2, deodorant=60
+```
+
+Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s, so the `refresh` mechanism works.
+
+### Bonus: DP 114 / DP 115 are the firmware's ACK channel
+
+Each DP 105 write is echoed as an enum on **DP 115** (`data_flag_02`), with the numeric payload on **DP 113**:
+
+| Write | DP 115 echo | DP 113 |
+|-------|-------------|--------|
+| sleep window (gate 7) | `nodisturb_time` | — |
+| quiet period on/off (gate 2) | `nodisturb_mode_enable` / `nodisturb_mode_disable` | — |
+| soft clumps (gate 1) | `stool_mode_enable` / `stool_mode_disable` | — |
+| auto screen-off (gate 3) | `auto_screen_enable` / `auto_screen_disable` | — |
+| child lock (gate 4) | `child_lock_enable` / `child_lock_disable` | — |
+| time zone (gate 9) | `time_zone` | offset (e.g. `2`) |
+| deodorant reset (gate 8) | `deodorant_days` | days left (`60`) |
+
+The deodorant reset is **also** echoed on **DP 114** (`data_flag_01`) as `deodorant_reset`. DP 114 is therefore an
+event flag rather than a pure motor-health status; code that treated anything other than `motor_ok` as a motor error
+(Pawbby-Reborn did) locks out the controls after a pod reset. Fixed in `deviceState.ts` to flag only fault-looking values.
+
+Remaining uncertainty: negative UTC offsets for the time-zone push (we send the two's-complement byte; the vendor app
+itself produced malformed hex for those).
