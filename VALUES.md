@@ -129,14 +129,28 @@
 - Fires just before auto-clean (`work_aclean`) is triggered
 - Timing: broadcasts ~at `cat_near_leave`, then `work_aclean` fires ~70s later
 - NOT triggered for quick `cat_near`-only visits (cat just sniffs, doesn't enter)
-- Value format: base64 string decoding to `01 00 00 05 [WW WW] 00 [xx] 00`
+- Value format: base64 string decoding to `01 00 00 05 [WW WW] 00 [xx] 00` (length 9 bytes)
   - Bytes 0–3: `01 00 00 05`
-  - Bytes 4–5: Big-endian 16-bit uint = **Cat's weight in grams** (credit: hypothesis by @managementboy, confirmed by known samples):
-    - `'AQAABRCYAAsA'` -> `10 98` = **4248g**
-    - `'AQAABRBQABUA'` -> `10 50` = **4176g**
-    - `'AQAABQ/RACIA'` -> `0f d1` = **4049g** (matches DP 111/113 status values)
+  - Bytes 4–5: Big-endian 16-bit uint = **Cat's weight in grams** (credit: discovered & verified by @managementboy)
   - Byte 6: `00`
-  - Byte 7: `xx` (e.g. `11`, `21`, `34` in samples) — likely visit duration in seconds or internal status/confidence flag
+  - Byte 7: `xx` = **Visit duration in seconds** (credit: @managementboy, confirmed across real-world visits)
+  - Byte 8: `00`
+
+**Validation Dataset (from @managementboy, 2 cats across 24h):**
+
+| Time (local) | Payload        | Bytes                       | Weight | Byte 7 (XX) | Duration | Cat     |
+|--------------|----------------|-----------------------------|--------|-------------|----------|---------|
+| 17.09 15:44  | `AQAABRKJACIA` | 01 00 00 05 12 89 00 22 00  | 4745 g | `0x22` = 34 | 34s      | (heavy) |
+| 17.09 19:00  | `AQAABRKyADgA` | 01 00 00 05 12 b2 00 38 00  | 4786 g | `0x38` = 56 | 56s      | (heavy) |
+| 17.09 20:30  | `AQAABRKaACsA` | 01 00 00 05 12 9a 00 2b 00  | 4762 g | `0x2b` = 43 | 43s      | (heavy) |
+| 17.09 21:41  | `AQAABQ/7AAsA` | 01 00 00 05 0f fb 00 0b 00  | 4091 g | `0x0b` = 11 | 11s      | (light) |
+| 18.09 05:54  | `AQAABRASABsA` | 01 00 00 05 10 12 00 1b 00  | 4114 g | `0x1b` = 27 | 27s      | (light) |
+| 18.09 06:08  | `AQAABRATAAsA` | 01 00 00 05 10 13 00 0b 00  | 4115 g | `0x0b` = 11 | 11s      | (light) |
+| 18.09 06:13  | `AQAABRJ2AAwA` | 01 00 00 05 12 76 00 0c 00  | 4726 g | `0x0c` = 12 | 12s      | (heavy) |
+
+**Key Observations:**
+- **Grams Hypothesis Solidified:** Weights fall into two razor-sharp clusters (~4.73 kg vs ~4.11 kg) with within-cluster spread < 70 g and ~610 g between them. Also precisely matches physical scale-peak readings (e.g. 4786 g DP 107 vs ~4769 g physical scale).
+- **Byte 7 (XX) = Duration:** The spread of values (11, 12, 27, 34, 43, 56) tracks elapsed visit presence time in seconds, reflecting how long the cat dwelled inside the drum.
 
 #### DP 109 — Weight calibration / Tare (称重校准 / "Weight cal")
 - Payload: `AQEAAA==` (bytes: `01 01 00 00`, matching `resetWeight = createValue(1, 0, 1)`)
@@ -299,7 +313,10 @@ During an active cat visit (`cat_enter` → `cat_leave`), **DP 113 directly repo
 ---
 
 ## Acknowledgements & Community Contributions
-Special thanks to **[@managementboy](https://github.com/managementboy/pawbby)** for reverse-engineering and field-testing the KNX / LogicMachine local Tuya v3.4 implementation, discovering the remote clean (`01 00 00 00`) & tare (`01 01 00 00`) payloads, decoding the DP 107 byte structure, clarifying DP 102 / DP 115 / DP 116 states, and documenting firmware quirks.
+Special thanks to **[@managementboy](https://github.com/managementboy/pawbby)** for reverse-engineering and field-testing the KNX / LogicMachine local Tuya v3.4 implementation, discovering the remote clean (`01 00 00 00`) & tare (`01 01 00 00`) payloads, decoding the DP 107 byte structure (weight in grams + dwell duration in seconds), clarifying DP 102 / DP 115 / DP 116 states, and documenting firmware quirks.
+- Upstream Repository: [managementboy/pawbby](https://github.com/managementboy/pawbby)
+- Data Points Reference: [docs/DATAPOINTS.md](https://github.com/managementboy/pawbby/blob/main/docs/DATAPOINTS.md)
+- Resident Script: [`src/pawbby_resident.lua`](https://github.com/managementboy/pawbby/blob/main/src/pawbby_resident.lua)
 
 ---
 
@@ -399,6 +416,9 @@ Special thanks to **[@managementboy](https://github.com/managementboy/pawbby)** 
 ## ✅ What Works Remotely (confirmed)
 
 ```python
+CLEAN:    device.set_value('106', 'AQAAAA==')  → work_mclean ✅ (credit: @managementboy)
+TARE:     device.set_value('109', 'AQEAAA==')  → zero scale / tare ✅ (credit: @managementboy)
+CANCEL:   device.set_value('106', 'AQMAAA==')  → cancel clean cycle
 FLATTEN:  device.set_value('106', 'AQEAAQA=')  → work_smooth
 EMPTY:    device.set_value('106', 'AQIAAQA=')  → work_empty  ⚠️ clears everything
 STATUS:   device.status()                       → DP 111–117
@@ -407,27 +427,9 @@ MONITOR:  listen_button.py                      → all broadcasts in real-time
 
 ---
 
-## ❌ Final Conclusion: `work_mclean`
+## ℹ️ Historical Note: `work_mclean` Discovery
 
-> **`work_mclean` CANNOT be triggered remotely by any known method.**
-
-**Evidence:**
-- Physical button press triggers ONLY DP 116 broadcast (no command DP)
-- All RW DPs (101–110) tested — none trigger `work_mclean`
-- All DP 106 modes 01–30 tested — only 01 and 02 have effects
-- All Tuya Cloud API endpoints fail for biz_type 18 devices
-- DPs 1–66 and 118–150 swept — nothing responds
-
-**Root cause:**
-The physical button triggers a firmware GPIO interrupt that drives the motor directly. No Tuya DP is written as the trigger command. The Pawbby app likely used a **PROPRIETARY backend** (not standard Tuya Cloud) to send this command — which is now broken/discontinued.
-
-**Alternative:**
-For daily use, flatten (`work_smooth`) + auto-clean (`work_aclean`, self-triggered by device after cat visits) covers 95% of needs. The deep manual clean (`work_mclean`) requires the physical button.
-
-**Unexplored (low priority):**
-- DP 109 (`weight_cal`): may allow taring/calibrating the weight sensor
-- DPs 67–99: never finished sweep (stopped at DP 66)
-- Proprietary Pawbby backend API (would require traffic analysis)
+> ⚠️ **HISTORICAL NOTE (SUPERSEDED):** Early sweeps tested modes 01–30 on DP 106 and concluded `work_mclean` could not be triggered. However, @managementboy decompiled the Android bundle and discovered `startClear` (`01 00 00 00` = `AQAAAA==`), which uses command word `00`. Remote manual cleaning is **100% functional** and integrated into Pawbby Reborn! Tare / zero scale was similarly unlocked via DP 109 `AQEAAA==` (`01 01 00 00`).
 
 ---
 

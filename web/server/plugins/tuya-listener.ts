@@ -289,19 +289,19 @@ export default defineNitroPlugin((nitroApp) => {
               weightInKg = state.peakWeight / 1000;
             }
 
-            // Fallback: parse firmware-reported cat weight directly from DP 107
-            // Format: 01 00 00 05 [WW WW] 00 [xx] 00 (bytes 4-5 = weight in grams)
+            // Authoritative firmware-reported cat visit summary from DP 107 (toilet_data)
+            // Format: 01 00 00 05 [WW WW] 00 [XX] 00
+            // Bytes 4-5: Cat weight in grams (big-endian uint16, verified by @managementboy)
+            // Byte 7: Cat visit dwell duration in seconds (verified by @managementboy)
             if (typeof dps["107"] === "string") {
               try {
                 const buf = Buffer.from(dps["107"], "base64");
                 if (buf.length >= 6 && buf[0] === 0x01 && buf[3] === 0x05) {
                   const fwWeightGrams = buf.readUInt16BE(4);
                   if (fwWeightGrams > 500 && fwWeightGrams < 25000) {
-                    if (weightInKg === 0) {
-                      weightInKg = fwWeightGrams / 1000;
-                    }
+                    weightInKg = fwWeightGrams / 1000;
                   }
-                  if (buf.length >= 8 && buf[7] > 0 && durationSecs === 60) {
+                  if (buf.length >= 8 && buf[7] > 0) {
                     durationSecs = buf[7];
                   }
                 }
@@ -356,7 +356,7 @@ export default defineNitroPlugin((nitroApp) => {
 
             // Reset visit state
             state.lastVisitEndedAt = Date.now();
-            state.lastVisitEndWeight = state.peakWeight;
+            state.lastVisitEndWeight = weightInKg > 0 ? Math.round(weightInKg * 1000) : state.peakWeight;
             state.catEnteredAt = null;
             state.peakWeight = 0;
             state.lidOpenedDuringVisit = false;
@@ -402,7 +402,7 @@ export default defineNitroPlugin((nitroApp) => {
                 if (user) await dispatchWebhook(user, "🧹 Manual cleaning cycle started.", "manual-clean");
               }
             }
-            if (newStatus === "cat_leave") {
+            if (newStatus === "cat_leave" || newStatus === "cat_near_leave") {
               state.lastCatLeaveTime = now;
             }
 
