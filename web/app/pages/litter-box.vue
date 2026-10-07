@@ -613,8 +613,8 @@
             </div>
           </div>
 
-          <!-- Litter type -->
-          <div class="flex items-center justify-between p-5">
+          <!-- Litter type Row (Opens Modal) -->
+          <div class="flex items-center justify-between p-5 hover:bg-white/[0.02] cursor-pointer transition-colors" @click="showLitterModal = true">
             <div class="flex items-center space-x-4 min-w-0">
               <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -623,15 +623,18 @@
               </div>
               <div class="text-left min-w-0">
                 <h4 class="text-white font-semibold">Litter type</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">The box uses the litter's density to estimate how much is left — update it when you switch litter</p>
+                <p class="text-pawbby-muted text-xs mt-0.5">Calibrates the drum scale for your litter density</p>
               </div>
             </div>
-            <select :value="effectiveSettings.litterType" :disabled="settingBusy.litter_type"
-              @change="setLitterType(($event.target as HTMLSelectElement).value)"
-              class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50 max-w-[11rem]">
-              <option v-for="t in LITTER_TYPES" :key="t.id" :value="t.id">{{ t.name }}</option>
-              <option v-if="!LITTER_TYPES.some(t => t.id === effectiveSettings!.litterType)" :value="effectiveSettings.litterType">Unknown ({{ effectiveSettings.litterType }})</option>
-            </select>
+            <div class="flex items-center gap-2 shrink-0 ml-4">
+              <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-medium text-sm flex items-center gap-2 border border-white/5 hover:border-white/20 transition-all">
+                <span class="w-2 h-2 rounded-full bg-pawbby-primary"></span>
+                {{ currentLitterName }}
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
           </div>
 
           <!-- Deodorizer pod counter on the device.
@@ -900,6 +903,117 @@
       </div>
     </div>
 
+    <!-- Litter Type Modal -->
+    <div v-if="showLitterModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-lg border border-white/10 relative overflow-hidden max-h-[90vh] flex flex-col shadow-2xl">
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-4 pb-3 border-b border-white/10">
+          <div>
+            <h3 class="text-xl font-bold text-white">Select Litter Type</h3>
+            <p class="text-pawbby-muted text-xs mt-1">
+              Current value: <span class="text-pawbby-primary font-semibold">{{ currentLitterName }}</span>
+            </p>
+          </div>
+          <button @click="showLitterModal = false" class="text-white/50 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-white/70 mb-4">
+          Tap the picture matching the cat litter you pour into your box:
+        </p>
+
+        <!-- 2x2 Visual Grid of Real Pictures -->
+        <div class="grid grid-cols-2 gap-3.5 overflow-y-auto pr-1">
+          <button
+            v-for="litter in LITTER_CARDS"
+            :key="litter.id"
+            type="button"
+            @click="selectLitter(litter.id)"
+            :disabled="settingBusy.litter_type"
+            :class="[
+              effectiveSettings?.litterType === litter.id
+                ? 'border-pawbby-primary bg-pawbby-primary/10 shadow-lg shadow-pawbby-primary/10 ring-2 ring-pawbby-primary'
+                : 'border-white/10 bg-black/30 hover:border-white/30 hover:bg-black/40',
+              settingBusy.litter_type ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+              'relative rounded-2xl border p-3 text-left transition-all duration-200 flex flex-col group overflow-hidden'
+            ]"
+          >
+            <!-- Litter Photo with Badge & Active Check -->
+            <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/40 border border-white/10">
+              <img :src="litter.image" :alt="litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              
+              <!-- Active Checkmark Overlay -->
+              <div v-if="effectiveSettings?.litterType === litter.id" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pawbby-primary flex items-center justify-center text-black shadow-lg">
+                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+
+              <!-- Badge -->
+              <span v-if="litter.badge" :class="[litter.badgeClass, 'absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md shadow']">
+                {{ litter.badge }}
+              </span>
+            </div>
+
+            <!-- Name & Simple Label -->
+            <div class="flex items-center justify-between">
+              <span class="text-white font-bold text-sm leading-tight">{{ litter.name }}</span>
+              <span v-if="effectiveSettings?.litterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Active</span>
+            </div>
+            <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+          </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+          <span class="text-xs text-pawbby-mutedDark">Updates box level sensor calibration</span>
+          <button @click="showLitterModal = false" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-colors">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen Lock Liability Warning Modal -->
+    <div v-if="showScreenLockModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden text-center shadow-2xl">
+        <div class="w-16 h-16 bg-[#D84C4C]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#D84C4C]/50 text-[#D84C4C]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2">Screen Lock Warning</h2>
+        <div class="text-pawbby-muted text-sm mb-6 leading-relaxed text-left bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
+          <p class="text-white/90 font-medium">
+            ⚠️ <strong>Potentially dangerous action:</strong>
+          </p>
+          <p class="text-xs text-white/80">
+            Locking the screen disables all physical button presses on the box to prevent accidental presses by children or pets.
+          </p>
+          <p class="text-xs text-white/80">
+            If Pawbby Reborn loses connection, your Wi-Fi changes, or the daemon goes offline while locked, you may be completely locked out from controlling or unlocking the machine from its physical controls.
+          </p>
+          <p class="text-[#D84C4C] text-[11px] font-semibold pt-1 border-t border-white/10">
+            Pawbby Reborn and its developers take NO liability in case this locks out or bricks your machine. Proceed at your own risk.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <button @click="confirmScreenLock"
+            class="w-full py-3 bg-[#D84C4C] text-white font-bold rounded-2xl hover:bg-[#D84C4C]/80 transition-colors shadow-lg shadow-[#D84C4C]/20">
+            I Understand the Risk, Lock Buttons
+          </button>
+          <button @click="showScreenLockModal = false"
+            class="w-full py-2.5 text-pawbby-muted text-sm hover:text-white transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 <script setup lang="ts">
@@ -936,6 +1050,8 @@ const showLiabilityModal = ref(false)
 const showEmptyModal = ref(false)
 const showTareModal = ref(false)
 const showAssignPetModal = ref(false)
+const showLitterModal = ref(false)
+const showScreenLockModal = ref(false)
 const eventToAssign = ref<DeviceLog | null>(null)
 const pendingAction = ref<'clean' | 'flatten'>('flatten')
 
@@ -1297,6 +1413,41 @@ const settingToggles: { key: ToggleKey; field: keyof DeviceSettings; title: stri
   },
 ]
 
+const LITTER_CARDS = [
+  {
+    id: 0,
+    name: 'Pawbby Natural',
+    simpleLabel: 'Plant-based starch pellets',
+    badge: 'Recommended',
+    badgeClass: 'bg-emerald-500/80 text-white',
+    image: '/litter_natural.jpg',
+  },
+  {
+    id: 1,
+    name: 'Tofu Litter',
+    simpleLabel: 'Flushable cylindrical rods',
+    badge: 'Tofu Pellets',
+    badgeClass: 'bg-amber-500/80 text-white',
+    image: '/litter_tofu.jpg',
+  },
+  {
+    id: 2,
+    name: 'Bentonite Clay',
+    simpleLabel: 'Classic clumping sand',
+    badge: 'Clay Sand',
+    badgeClass: 'bg-sky-500/80 text-white',
+    image: '/litter_bentonite.jpg',
+  },
+  {
+    id: 3,
+    name: 'Mixed Blend',
+    simpleLabel: 'Tofu rods + clay granules',
+    badge: 'Composite Mix',
+    badgeClass: 'bg-purple-500/80 text-white',
+    image: '/litter_mixed.jpg',
+  },
+]
+
 const settingBusy = ref<Record<string, boolean>>({})
 const settingError = ref('')
 // Optimistic overrides until the box pushes a newer DP 103 snapshot
@@ -1315,6 +1466,23 @@ const effectiveSettings = computed<DeviceSettings | null>(() => {
   }
   return merged
 })
+
+const selectedLitter = computed(() => {
+  if (!effectiveSettings.value) return null
+  return LITTER_CARDS.find(c => c.id === effectiveSettings.value?.litterType) || null
+})
+
+const currentLitterName = computed(() => {
+  const id = effectiveSettings.value?.litterType
+  const found = LITTER_CARDS.find(c => c.id === id)
+  if (found) return found.name
+  if (id !== undefined) return `Type ${id}`
+  return 'Select litter'
+})
+
+const selectLitter = (id: number) => {
+  setLitterType(id)
+}
 
 const settingsAge = computed(() => {
   const at = device.value?.settingsUpdatedAt
@@ -1371,10 +1539,21 @@ const applySetting = async (key: SettingKey, value: any, optimistic?: Partial<De
   }
 }
 
+const confirmScreenLock = () => {
+  showScreenLockModal.value = false
+  applySetting('child_lock', true, { childLock: true })
+}
+
 const setToggle = (key: ToggleKey, field: keyof DeviceSettings) => {
   const s = effectiveSettings.value
   if (!s) return
   const next = !s[field]
+
+  if (key === 'child_lock' && next === true) {
+    showScreenLockModal.value = true
+    return
+  }
+
   applySetting(key, next, { [field]: next } as Partial<DeviceSettings>)
 }
 
@@ -1384,7 +1563,7 @@ const setDelay = (val: string) => {
   applySetting('auto_clean_delay', minutes, { autoCleanDelayMin: minutes })
 }
 
-const setLitterType = (val: string) => {
+const setLitterType = (val: string | number) => {
   const id = Number(val)
   if (!Number.isInteger(id)) return
   applySetting('litter_type', id, { litterType: id })

@@ -49,6 +49,50 @@ export interface DeviceSettings {
   raw: string
 }
 
+export interface LitterCard {
+  id: number
+  name: string
+  simpleLabel: string
+  badge: string
+  badgeClass: string
+  image: string
+}
+
+export const LITTER_CARDS: LitterCard[] = [
+  {
+    id: 0,
+    name: 'Pawbby Natural',
+    simpleLabel: 'Plant-based starch pellets',
+    badge: 'Recommended',
+    badgeClass: 'bg-emerald-500/80 text-white',
+    image: '/litter_natural.jpg',
+  },
+  {
+    id: 1,
+    name: 'Tofu Litter',
+    simpleLabel: 'Flushable cylindrical rods',
+    badge: 'Tofu Pellets',
+    badgeClass: 'bg-amber-500/80 text-white',
+    image: '/litter_tofu.jpg',
+  },
+  {
+    id: 2,
+    name: 'Bentonite Clay',
+    simpleLabel: 'Classic clumping sand',
+    badge: 'Clay Sand',
+    badgeClass: 'bg-sky-500/80 text-white',
+    image: '/litter_bentonite.jpg',
+  },
+  {
+    id: 3,
+    name: 'Mixed Blend',
+    simpleLabel: 'Tofu rods + clay granules',
+    badge: 'Composite Mix',
+    badgeClass: 'bg-purple-500/80 text-white',
+    image: '/litter_mixed.jpg',
+  },
+]
+
 /** Litter types known by the firmware (index = value stored on the box). Keep in sync with server/utils/deviceSettings.ts */
 export const LITTER_TYPES = [
   { id: 0, name: 'Pawbby Natural Cat Litter', hint: 'Plant-based (recommended by the vendor)' },

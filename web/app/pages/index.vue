@@ -79,7 +79,7 @@
         <!-- Progress Bar -->
         <div class="absolute top-0 left-0 w-full h-1 bg-white/5 z-10">
           <div class="h-full bg-gradient-to-r from-[#3D7A41] to-[#5BC266] transition-all duration-500"
-               :style="{ width: (currentStep / 7) * 100 + '%' }"></div>
+               :style="{ width: (currentStep / 9) * 100 + '%' }"></div>
         </div>
 
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1 mt-1">
@@ -91,7 +91,9 @@
               <span v-if="currentStep === 4">Add to Network 🌐</span>
               <span v-if="currentStep === 5">Find the Box 🔍</span>
               <span v-if="currentStep === 6">The Secret Handshake 🤝</span>
-              <span v-if="currentStep === 7">All Done! 🎉</span>
+              <span v-if="currentStep === 7">Select Litter 🐱</span>
+              <span v-if="currentStep === 8">Cycle Delay ⏱️</span>
+              <span v-if="currentStep === 9">All Done! 🎉</span>
             </h2>
             <button @click="closeModal" class="text-white/40 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -382,8 +384,151 @@
             </div>
           </div>
 
-          <!-- STEP 7: Success -->
+          <!-- STEP 7: Litter Selection -->
           <div v-if="currentStep === 7" class="space-y-6">
+            <div>
+              <p class="text-pawbby-muted text-sm leading-relaxed">
+                Select the cat litter you pour into your box. This calibrates the drum's weight sensor and algorithm for the correct density.
+              </p>
+            </div>
+
+            <!-- 2x2 Visual Grid of Real Pictures -->
+            <div class="grid grid-cols-2 gap-3.5 max-h-[52vh] overflow-y-auto pr-1">
+              <button
+                v-for="litter in LITTER_CARDS"
+                :key="litter.id"
+                type="button"
+                @click="setupLitterType = litter.id"
+                :class="[
+                  setupLitterType === litter.id
+                    ? 'border-pawbby-primary bg-pawbby-primary/10 shadow-lg shadow-pawbby-primary/10 ring-2 ring-pawbby-primary'
+                    : 'border-white/10 bg-black/30 hover:border-white/30 hover:bg-black/40',
+                  'relative rounded-2xl border p-3 text-left transition-all duration-200 flex flex-col group overflow-hidden cursor-pointer'
+                ]"
+              >
+                <!-- Litter Photo with Badge & Active Check -->
+                <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/40 border border-white/10">
+                  <img :src="litter.image" :alt="litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  
+                  <!-- Active Checkmark Overlay -->
+                  <div v-if="setupLitterType === litter.id" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pawbby-primary flex items-center justify-center text-black shadow-lg">
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+
+                  <!-- Badge -->
+                  <span v-if="litter.badge" :class="[litter.badgeClass, 'absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md shadow']">
+                    {{ litter.badge }}
+                  </span>
+                </div>
+
+                <!-- Name & Simple Label -->
+                <div class="flex items-center justify-between">
+                  <span class="text-white font-bold text-sm leading-tight">{{ litter.name }}</span>
+                  <span v-if="setupLitterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Selected</span>
+                </div>
+                <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+              </button>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button @click="currentStep--" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+                Back
+              </button>
+              <button @click="saveSetupLitter" :disabled="isSavingSetting"
+                class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-50 flex justify-center items-center">
+                <svg v-if="isSavingSetting" class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Continue</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 8: Auto-Clean Delay (Time to cycle) -->
+          <div v-if="currentStep === 8" class="space-y-6">
+            <div>
+              <p class="text-pawbby-muted text-sm leading-relaxed">
+                How long should the box wait after your cat leaves before cycling? Letting clumps settle for a few minutes prevents sticky residue and keeps the drum clean.
+              </p>
+            </div>
+
+            <!-- Delay Presets Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                v-for="preset in DELAY_PRESETS"
+                :key="preset.minutes"
+                type="button"
+                @click="setupDelay = preset.minutes"
+                :class="[
+                  setupDelay === preset.minutes
+                    ? 'border-pawbby-primary bg-pawbby-primary/10 shadow-lg shadow-pawbby-primary/10 ring-2 ring-pawbby-primary'
+                    : 'border-white/10 bg-black/30 hover:border-white/30 hover:bg-black/40',
+                  'relative rounded-2xl border p-4 text-left transition-all duration-200 flex flex-col cursor-pointer group'
+                ]"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-lg font-extrabold text-white flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pawbby-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ preset.badge }}
+                  </span>
+                  <span v-if="preset.recommended" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/80 text-white">
+                    Recommended
+                  </span>
+                  <span v-else-if="setupDelay === preset.minutes" class="text-pawbby-primary text-[11px] font-semibold">
+                    Selected
+                  </span>
+                </div>
+                <span class="text-white font-semibold text-sm">{{ preset.label }}</span>
+                <span class="text-pawbby-muted text-xs mt-0.5 leading-snug">{{ preset.desc }}</span>
+              </button>
+            </div>
+
+            <!-- Custom minute picker -->
+            <div class="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h4 class="text-white font-medium text-sm">Custom wait time</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">Select any delay between 1 and 60 minutes</p>
+              </div>
+              <select
+                v-model.number="setupDelay"
+                class="bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white font-bold text-sm focus:outline-none focus:border-pawbby-primary"
+              >
+                <option v-for="m in 60" :key="m" :value="m" class="bg-[#1e1e1e] text-white">
+                  {{ m }} min{{ m === 10 ? ' (Default)' : '' }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Active summary badge -->
+            <div class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-3.5 flex items-center gap-3">
+              <span class="text-xl">⏳</span>
+              <p class="text-xs text-white/90 leading-relaxed">
+                Auto-clean cycle will trigger <strong>{{ setupDelay }} minutes</strong> after your cat leaves the box.
+              </p>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button @click="currentStep--" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+                Back
+              </button>
+              <button @click="saveSetupDelay" :disabled="isSavingSetting"
+                class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-50 flex justify-center items-center">
+                <svg v-if="isSavingSetting" class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Continue</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 9: Success -->
+          <div v-if="currentStep === 9" class="space-y-6">
             <div class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-6 text-center">
               <div class="text-4xl mb-4">🥳</div>
               <h3 class="text-xl font-bold text-white mb-2">Connection Successful!</h3>
@@ -424,6 +569,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAuthState } from '~/composables/useAuthState'
+import { LITTER_CARDS } from '~/composables/useApi'
 
 const { isAdmin } = useAuthState()
 const api = useApi()
@@ -451,6 +597,49 @@ const manualMode = ref(false)
 const guideSlide = ref(0)
 const expandedImage = ref<string | null>(null)
 
+const createdDeviceId = ref<string | null>(null)
+const setupLitterType = ref<number>(0)
+const setupDelay = ref<number>(10)
+const isSavingSetting = ref(false)
+
+const DELAY_PRESETS = [
+  {
+    minutes: 5,
+    label: 'Quick Clump',
+    desc: 'Rapid clumping & odor reduction',
+    badge: '5 min',
+    recommended: false,
+  },
+  {
+    minutes: 10,
+    label: 'Standard Clump',
+    desc: 'Best balance of cleanliness & clump cohesion',
+    badge: '10 min',
+    recommended: true,
+  },
+  {
+    minutes: 15,
+    label: 'Firm Clumps',
+    desc: 'Ideal for plant pellets & tofu litters',
+    badge: '15 min',
+    recommended: false,
+  },
+  {
+    minutes: 20,
+    label: 'Deep Clumping',
+    desc: 'Allows complete moisture absorption',
+    badge: '20 min',
+    recommended: false,
+  },
+  {
+    minutes: 30,
+    label: 'Multi-Cat',
+    desc: 'Longer pause for homes with several cats',
+    badge: '30 min',
+    recommended: false,
+  },
+]
+
 const scanNetwork = async () => {
   isScanning.value = true
   try {
@@ -474,7 +663,7 @@ const nextStep = () => {
   if (currentStep.value === 4) {
     scanNetwork()
   }
-  if (currentStep.value < 7) currentStep.value++
+  if (currentStep.value < 9) currentStep.value++
 }
 
 const closeModal = () => {
@@ -483,20 +672,28 @@ const closeModal = () => {
   hasSmartLife.value = false
   manualMode.value = false
   guideSlide.value = 0
+  createdDeviceId.value = null
+  setupLitterType.value = 0
+  setupDelay.value = 10
 }
 
 const handleAddDevice = async () => {
+  if (createdDeviceId.value) {
+    currentStep.value = 7
+    return
+  }
   if (!newDevice.value.deviceId) {
     alert("Device ID is required.")
     return
   }
   isSaving.value = true
   try {
-    await api.createDevice(newDevice.value)
+    const created = await api.createDevice(newDevice.value)
+    createdDeviceId.value = created?.id || null
     // Refresh devices
     await loadDevices()
     
-    // Move to step 7 for success message
+    // Move to step 7 for litter selection
     currentStep.value = 7
     // reset form (done on actual close)
     newDevice.value = {
@@ -511,6 +708,34 @@ const handleAddDevice = async () => {
   } finally {
     isSaving.value = false
   }
+}
+
+const saveSetupLitter = async () => {
+  if (createdDeviceId.value) {
+    isSavingSetting.value = true
+    try {
+      await api.updateDeviceSetting(createdDeviceId.value, 'litter_type', setupLitterType.value)
+    } catch (e) {
+      console.warn('Could not set litter type immediately:', e)
+    } finally {
+      isSavingSetting.value = false
+    }
+  }
+  currentStep.value = 8
+}
+
+const saveSetupDelay = async () => {
+  if (createdDeviceId.value) {
+    isSavingSetting.value = true
+    try {
+      await api.updateDeviceSetting(createdDeviceId.value, 'auto_clean_delay', setupDelay.value)
+    } catch (e) {
+      console.warn('Could not set delay immediately:', e)
+    } finally {
+      isSavingSetting.value = false
+    }
+  }
+  currentStep.value = 9
 }
 
 const isDeviceOnline = (device: any) => {
