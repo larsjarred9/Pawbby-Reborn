@@ -639,18 +639,11 @@
                 <p class="text-pawbby-muted text-xs mt-0.5">Firmware reports <span class="text-white/80">{{ effectiveSettings.deodorantDays }} days</span> left — reset after inserting a new pod</p>
               </div>
             </div>
-            <div class="ml-4 flex items-center gap-2 shrink-0">
-              <select v-model.number="deodorantResetDays" :disabled="settingBusy.reset_deodorant"
-                title="Experimental: the original app always reset to 60 days; the firmware may ignore other values"
-                class="bg-black/30 border border-white/10 rounded-xl px-2 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50">
-                <option v-for="d in [30, 45, 60, 90]" :key="d" :value="d">{{ d }} d</option>
-              </select>
-              <button @click="resetDeviceDeodorant" :disabled="settingBusy.reset_deodorant"
-                class="px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm">
-                <span v-if="settingBusy.reset_deodorant">Resetting…</span>
-                <span v-else>Reset</span>
-              </button>
-            </div>
+            <button @click="resetDeviceDeodorant" :disabled="settingBusy.reset_deodorant"
+              class="ml-4 px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm shrink-0">
+              <span v-if="settingBusy.reset_deodorant">Resetting…</span>
+              <span v-else>Reset</span>
+            </button>
           </div>
 
           <div class="px-5 py-3 flex items-center justify-between text-xs text-pawbby-mutedDark bg-black/10">
@@ -1422,13 +1415,9 @@ watch(() => device.value?.id, (id) => {
   if (id && activeTab.value === 'control') refreshSettings()
 })
 
-// 60 days = what the vendor app did (payload-less reset). Other values send an
-// experimental one-byte payload; the DP 103 echo will show whether the firmware honours it.
-const deodorantResetDays = ref(60)
 const resetDeviceDeodorant = () => {
-  const days = deodorantResetDays.value
-  if (!confirm(`Reset the deodorizing pod counter on the litter box to ${days} days? Do this after inserting a new pod.`)) return
-  applySetting('reset_deodorant', days === 60 ? undefined : days, { deodorantDays: days })
+  if (!confirm('Reset the deodorizing pod counter on the litter box? Do this after inserting a new pod.')) return
+  applySetting('reset_deodorant', undefined, { deodorantDays: 60 })
 }
 </script>
 
