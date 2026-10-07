@@ -130,6 +130,12 @@
           <div :class="[activeTab === 'control' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
+        <div @click="activeTab = 'settings'" class="flex flex-col items-center space-y-1 cursor-pointer">
+          <span
+            :class="[activeTab === 'settings' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Settings</span>
+          <div :class="[activeTab === 'settings' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
+          </div>
+        </div>
       </div>
 
       <!-- Record Content -->
@@ -503,9 +509,12 @@
             </svg>
           </button>
         </div>
+      </div>
 
+      <!-- Settings Content -->
+      <div v-if="activeTab === 'settings'" class="space-y-6 animate-fade-in py-4">
         <!-- Hardware Settings (DP 105 / DP 103) -->
-        <h3 class="text-white/90 font-semibold text-lg text-center mb-2 mt-10">Device Settings</h3>
+        <h3 class="text-white/90 font-semibold text-lg text-center mb-2">Litter Box Settings</h3>
 
         <div v-if="!effectiveSettings"
           class="bg-pawbby-card border border-white/10 p-5 rounded-2xl text-center text-pawbby-muted text-sm">
@@ -1390,6 +1399,7 @@ const saveSleepWindow = () => {
 // DP 103 is pushed by the box on every change and every ~10 min, so the cached
 // snapshot is normally current. Only when nothing is cached yet (fresh install) do we
 // ask the daemon, which then pushes the account time zone to trigger a first snapshot.
+// Done whenever the Settings tab is opened.
 let lastSettingsRefresh = 0
 const refreshSettings = async () => {
   if (settingBusy.value.refresh) return
@@ -1411,10 +1421,10 @@ const refreshSettings = async () => {
 }
 
 watch(activeTab, (tab) => {
-  if (tab === 'control') refreshSettings()
+  if (tab === 'settings') refreshSettings()
 })
 watch(() => device.value?.id, (id) => {
-  if (id && activeTab.value === 'control') refreshSettings()
+  if (id && activeTab.value === 'settings') refreshSettings()
 })
 
 // Hidden in the UI: Pawbby Reborn keeps its own pod counter (see the deodorizer modal).
