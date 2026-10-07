@@ -208,6 +208,90 @@ rest_command:
         <p class="text-xs text-pawbby-muted">Call the commands from an automation or a <code class="text-white/80">script</code> via <code class="text-white/80">service: rest_command.pawbby_clean</code>. Home Assistant must be able to reach Pawbby over your local network. <code class="text-white/80">WEBHOOK_STRICT_MODE</code> only affects outbound webhooks, not this inbound API.</p>
         <p class="text-xs text-pawbby-primary/90 mt-2">✨ All actions (<code class="text-white/80">clean</code>, <code class="text-white/80">flatten</code>, <code class="text-white/80">empty</code>, <code class="text-white/80">tare</code>, and <code class="text-white/80">cancel_clean</code>) are fully supported via local LAN control and protected by safety interlocks.</p>
       </section>
+
+      <section class="bg-black/20 rounded-2xl p-6 border border-white/5">
+        <h2 class="text-lg font-bold mb-4 text-pawbby-primary">📡 MQTT & Home Assistant Auto-Discovery</h2>
+        <p class="text-sm text-pawbby-muted mb-4">
+          Pawbby Reborn features a built-in MQTT bridge that connects directly to your broker (e.g. Mosquitto). Configure your broker credentials under <NuxtLink to="/settings" class="text-pawbby-primary underline">Settings &gt; MQTT Broker</NuxtLink>.
+        </p>
+        <p class="text-sm text-pawbby-muted mb-4">
+          Once connected, Pawbby automatically announces all litter boxes, cats, sensors, buttons, and the new <strong>Event entity</strong> to Home Assistant via MQTT Discovery (<code class="bg-white/10 px-1 rounded text-white/90">homeassistant/#</code>). <strong>No YAML configuration required!</strong>
+        </p>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">🏠 Home Assistant Event Entity (<code class="font-mono text-xs">event.pawbby_&lt;name&gt;_event</code>)</h3>
+        <p class="text-sm text-pawbby-muted mb-3">
+          Instead of polling or relying on state changes, every lifecycle event is published instantaneously as a native Home Assistant Event entity. Perfect for instant notifications and triggering automations!
+        </p>
+        <div class="bg-black/40 rounded-xl p-4 text-xs font-mono text-white/80 mb-4 overflow-x-auto">
+          <p class="font-bold text-pawbby-primary mb-2">Supported event_types:</p>
+          <ul class="list-disc pl-5 space-y-1 text-white/70">
+            <li><code class="text-white">toileted</code> &mdash; Cat finished visiting (includes <code class="text-white">pet</code>, <code class="text-white">weight</code> in kg, and <code class="text-white">duration</code> in seconds)</li>
+            <li><code class="text-white">quick-visit</code> &mdash; Cat stepped inside briefly and hopped out</li>
+            <li><code class="text-white">auto-clean</code> / <code class="text-white">manual-clean</code> &mdash; Cleaning cycle started</li>
+            <li><code class="text-white">clean-completed</code> &mdash; Cleaning cycle finished successfully</li>
+            <li><code class="text-white">flatten</code> / <code class="text-white">auto-flatten</code> &mdash; Litter bed flattened</li>
+            <li><code class="text-white">empty</code> &mdash; Drum emptying cycle</li>
+            <li><code class="text-white">bin-full</code> / <code class="text-white">bin-normal</code> &mdash; Waste bin full / emptied</li>
+            <li><code class="text-white">bin-removed</code> / <code class="text-white">bin-replaced</code> &mdash; Waste drawer detached / re-inserted</li>
+            <li><code class="text-white">lid-removed</code> / <code class="text-white">lid-replaced</code> &mdash; Top cover removed / re-attached</li>
+            <li><code class="text-white">drum-removed</code> / <code class="text-white">drum-installed</code> &mdash; Main drum removed / installed</li>
+            <li><code class="text-white">litter-low</code> / <code class="text-white">litter-sufficient</code> &mdash; Litter level warning / normal</li>
+          </ul>
+        </div>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">Example Home Assistant Automation (Instant Visit Notification)</h3>
+        <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto mb-4 whitespace-pre" v-pre>
+alias: "Pawbby: Cat Visit Alert"
+trigger:
+  - platform: state
+    entity_id: event.pawbby_litter_box_event
+    attribute: event_type
+    to: "toileted"
+action:
+  - service: notify.notify
+    data:
+      title: "🐾 Litter Box Visit"
+      message: >-
+        {{ state_attr('event.pawbby_litter_box_event', 'pet') or 'A cat' }}
+        used the box ({{ state_attr('event.pawbby_litter_box_event', 'weight') }} kg,
+        {{ state_attr('event.pawbby_litter_box_event', 'duration') }}s).
+        </div>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">MQTT Topics Reference</h3>
+        <div class="bg-black/50 rounded-xl p-4 text-xs font-mono text-white/80 overflow-x-auto mb-4 space-y-3">
+          <div>
+            <span class="text-pawbby-primary font-bold">Live Event Stream:</span>
+            <p class="text-white/70"><code>pawbby/&lt;deviceId&gt;/event</code> (device-specific) and <code>pawbby/events</code> (global stream)</p>
+            <p class="text-white/50 text-[11px] mt-1">Payload: <code>{"event_type": "toileted", "deviceId": "...", "deviceName": "...", "pet": "Milo", "weight": 4.15, "duration": 95, "timestamp": "..."}</code></p>
+          </div>
+          <div>
+            <span class="text-pawbby-primary font-bold">Live State:</span>
+            <p class="text-white/70"><code>pawbby/&lt;deviceId&gt;/state</code> (retained JSON with status, wasteBin, litterLevel, cleaning, etc.)</p>
+          </div>
+          <div>
+            <span class="text-pawbby-primary font-bold">Cat Telemetry:</span>
+            <p class="text-white/70"><code>pawbby/pet/&lt;petId&gt;/state</code> (retained JSON with latestWeight, lastDuration, visitsToday, lastUsedAt)</p>
+          </div>
+          <div>
+            <span class="text-pawbby-primary font-bold">Availability (LWT):</span>
+            <p class="text-white/70"><code>pawbby/status</code> &rarr; <code>online</code> / <code>offline</code></p>
+          </div>
+          <div>
+            <span class="text-pawbby-primary font-bold">Action Control:</span>
+            <p class="text-white/70"><code>pawbby/&lt;deviceId&gt;/command/&lt;action&gt;</code> &mdash; Actions: <code>clean</code>, <code>flatten</code>, <code>empty</code>, <code>tare</code>, <code>cancel_clean</code></p>
+            <p class="text-white/50 text-[11px] mt-1">Payload: <code>PRESS</code> or any payload triggers the action.</p>
+          </div>
+        </div>
+
+        <h3 class="font-bold text-sm mb-2 text-white/80">Entities Created in Home Assistant Automatically</h3>
+        <ul class="list-disc pl-5 text-sm text-pawbby-muted space-y-1 mb-2">
+          <li><strong>Event Entity:</strong> <code class="text-white/80">event.pawbby_&lt;device&gt;_event</code></li>
+          <li><strong>Sensors:</strong> Status, Waste Bin, Litter Level, Last Cleaned (<code class="text-white/80">timestamp</code>), Today's Visits, Last Visit Pet, Last Visit Weight, Deodorizer Days Left</li>
+          <li><strong>Binary Sensors:</strong> Online (<code class="text-white/80">connectivity</code>), Cleaning (<code class="text-white/80">running</code>), Bin Full (<code class="text-white/80">problem</code>), Bin Removed (<code class="text-white/80">problem</code>), Drum Removed (<code class="text-white/80">problem</code>), Litter Low (<code class="text-white/80">problem</code>), Lid Open (<code class="text-white/80">opening</code>)</li>
+          <li><strong>Action Buttons:</strong> Clean, Flatten, Empty, Zero Scale (Tare), Cancel Clean</li>
+          <li><strong>Per-Cat Devices:</strong> Each pet is added as a dedicated Home Assistant device with weight measurement (<code class="text-white/80">state_class: measurement</code>), visit duration, visits today, and last used timestamp.</li>
+        </ul>
+      </section>
     </div>
   </div>
 </template>
