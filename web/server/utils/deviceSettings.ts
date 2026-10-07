@@ -168,7 +168,18 @@ export function encodeSleepWindow(start: string, stop: string): string {
   return encodeGateFrame(DeviceGate.SetDisturbTime, [s.h, s.m, e.h, e.m])
 }
 
-export const encodeResetDeodorant = () => encodeGateFrame(DeviceGate.ResetDeodorant, [])
+/**
+ * Reset the deodorant pod counter. The vendor app sends no payload and the firmware
+ * resets to 60 days. EXPERIMENTAL: with `days` we append a one-byte payload
+ * (`01 08 00 01 <days>`) to see whether the firmware honours a custom duration.
+ */
+export function encodeResetDeodorant(days?: number): string {
+  if (days === undefined || days === null) return encodeGateFrame(DeviceGate.ResetDeodorant, [])
+  if (!Number.isInteger(days) || days < 1 || days > 255) {
+    throw new Error('Deodorant days must be an integer between 1 and 255')
+  }
+  return encodeGateFrame(DeviceGate.ResetDeodorant, [days])
+}
 
 export function encodeWeightUnit(unit: 'kg' | 'lb'): string {
   if (unit !== 'kg' && unit !== 'lb') throw new Error('Weight unit must be "kg" or "lb"')
@@ -308,8 +319,13 @@ export function buildSettingCommand(key: string, value: unknown): SettingCommand
       const t = LITTER_TYPES.find((x) => x.id === id)
       return { key: 'litter_type', payload: encodeLitterType(id), description: `Litter type set to ${t?.name ?? id}` }
     }
-    case 'reset_deodorant':
-      return { key: 'reset_deodorant', payload: encodeResetDeodorant(), description: 'Deodorant pod counter reset on device' }
+    case 'reset_deodorant': {
+      if (value === undefined || value === null || value === '') {
+        return { key: 'reset_deodorant', payload: encodeResetDeodorant(), description: 'Deodorant pod counter reset on device' }
+      }
+      const days = Number(value)
+      return { key: 'reset_deodorant', payload: encodeResetDeodorant(days), description: `Deodorant pod counter reset on device to ${days} days (experimental)` }
+    }
     case 'weight_unit': {
       const unit = String(value).toLowerCase() as 'kg' | 'lb'
       return { key: 'weight_unit', payload: encodeWeightUnit(unit), description: `Device weight unit set to ${unit}` }
