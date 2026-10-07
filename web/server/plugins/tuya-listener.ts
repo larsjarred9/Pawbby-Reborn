@@ -24,8 +24,6 @@ export default defineNitroPlugin((nitroApp) => {
     lastSettingsRaw?: string;
     lastSettingsAt?: number;
     lastWeightUnitSyncAt?: number;
-    /** undefined = untested, true/false = whether the box answers DP_REFRESH (cmd 0x12) for DP 103 */
-    dpRefreshWorks?: boolean;
   }
 
   const VISIT_STATUSES = new Set([
@@ -1011,15 +1009,14 @@ export default defineNitroPlugin((nitroApp) => {
   );
 
   /**
-   * Ask the box to re-report its settings snapshot (DP 103).
+   * Make sure we have a settings snapshot (DP 103) for a device.
    *
-   * DP 103 is not part of the DP_QUERY status set, but Tuya has a dedicated
-   * "re-report these DPs" command (0x12 DP_REFRESH / UPDATEDPS) meant exactly for
-   * such push-only datapoints. We try that first — it is a pure read with no side
-   * effects. If the firmware ignores it (no DP 103 within ~3 s) we fall back to the
-   * vendor-app trick of re-pushing the account time zone, which is a harmless write
-   * that always triggers a snapshot. The outcome is remembered per device so the
-   * futile attempt is not repeated.
+   * DP 103 is push-only: it is not part of the DP_QUERY status set and the box ignores
+   * Tuya's DP_REFRESH (0x12) for it. The box does push it on every settings/state
+   * change, every ~10 min, and after any DP 105 write, so the cached snapshot is
+   * normally current and nothing needs to be sent. Only when we have no snapshot at
+   * all (fresh install / database reset) do we re-push the account time zone — a
+   * harmless write that is confirmed to trigger a DP 103 within ~1 s.
    */
   const waitForSnapshot = (deviceId: string, since: number, timeoutMs: number) =>
     new Promise<boolean>((resolve) => {
@@ -1033,36 +1030,27 @@ export default defineNitroPlugin((nitroApp) => {
       tick();
     });
 
-  const refreshSettings = async (deviceId: string): Promise<"dp_refresh" | "timezone"> => {
+  const ensureSettingsSnapshot = async (deviceId: string): Promise<"cached" | "timezone"> => {
     const device = activeDevices.get(deviceId);
     const state = deviceStates.get(deviceId);
     if (!device || !state) throw new Error(`Device ${deviceId} is not connected.`);
 
-    if (state.dpRefreshWorks !== false) {
-      const t0 = Date.now();
-      try {
-        console.log(`[Tuya Setting] Requesting DP 103 via DP_REFRESH (0x12) from ${deviceId}`);
-        device.refresh({ requestedDPS: [103] }).catch(() => {});
-      } catch (e) {}
-      if (await waitForSnapshot(deviceId, t0, 3000)) {
-        if (state.dpRefreshWorks !== true) console.log("[Tuya Setting] DP_REFRESH works for DP 103 — using it for settings refreshes.");
-        state.dpRefreshWorks = true;
-        return "dp_refresh";
-      }
-      if (state.dpRefreshWorks === undefined) {
-        console.log("[Tuya Setting] No DP 103 after DP_REFRESH — falling back to time-zone push for refreshes.");
-      }
-      state.dpRefreshWorks = false;
-    }
+    if (state.lastSettingsRaw) return "cached";
+
+    const cached = await prisma.litterEvent.findFirst({
+      where: { deviceId, type: "tuya-raw-data", rawData: { contains: '"103"' } },
+      orderBy: { timestamp: "desc" },
+    });
+    if (cached) return "cached";
 
     const user = await prisma.user.findFirst();
-    const t1 = Date.now();
+    const t0 = Date.now();
     await sendSetting(deviceId, {
       ...buildSettingCommand("sync_timezone", accountUtcOffset(user)),
-      description: "Requested a settings refresh from the device (time-zone push)",
+      description: "Requested the first settings snapshot from the device (time-zone push)",
       logEvent: false,
     });
-    await waitForSnapshot(deviceId, t1, 3000);
+    await waitForSnapshot(deviceId, t0, 3000);
     return "timezone";
   };
 
@@ -1070,7 +1058,7 @@ export default defineNitroPlugin((nitroApp) => {
     "tuya:refresh-settings" as any,
     async ({ deviceId, result }: { deviceId: string; result?: { ok: boolean; error?: string; method?: string } }) => {
       try {
-        const method = await refreshSettings(deviceId);
+        const method = await ensureSettingsSnapshot(deviceId);
         if (result) {
           result.ok = true;
           result.method = method;

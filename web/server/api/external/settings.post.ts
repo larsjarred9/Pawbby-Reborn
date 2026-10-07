@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
   if (!device) throw createError({ statusCode: 404, statusMessage: `Device '${deviceId}' not found` })
 
   if (setting === 'refresh') {
-    // Pure read: ask the daemon to make the box re-report its DP 103 snapshot.
+    // Make sure a DP 103 settings snapshot exists; only writes (time-zone push) when none is cached.
     const r: { ok: boolean; error?: string; method?: string } = { ok: false }
     await useNitroApp().hooks.callHook('tuya:refresh-settings' as any, { deviceId: device.id, result: r })
     if (!r.ok) throw createError({ statusCode: 503, statusMessage: r.error || 'Device is not reachable' })

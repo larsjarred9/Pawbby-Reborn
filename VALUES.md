@@ -81,7 +81,7 @@
 > NOTE: Was previously guessed as DP 115 — CORRECTED, it is DP 103
 > Decoded 2026-10-07 from the vendor app's `analysisStatus` / `RefreshInfo` parsers; validated on hardware.
 
-- Broadcasts every ~10 min at idle, on every state change, and **after every DP 105 settings write** (this is how settings are read back). Not returned by `DP_QUERY`; to force a snapshot try Tuya `DP_REFRESH` (cmd `0x12`, `{"dpId":[103]}`) first and, if the firmware ignores it, re-push the time zone on DP 105 (harmless write, confirmed to trigger a snapshot within ~1 s).
+- Broadcasts every ~10 min at idle, on every state change, and **after every DP 105 settings write** (this is how settings are read back). Not returned by `DP_QUERY`, and the firmware ignores Tuya `DP_REFRESH` (cmd `0x12`, `{"dpId":[103]}`) for it (tested 2026-10-07). The only way to force a snapshot is a DP 105 write — re-pushing the time zone is the harmless one (confirmed to trigger a snapshot within ~1 s).
 - Format: `01 00 00 15` header (len = 0x15 = 21 data bytes) + 21 data bytes, base64 on the wire
 - Sample values:
 

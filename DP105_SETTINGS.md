@@ -188,19 +188,14 @@ estimate ("if you change the cat litter, remember to update it"). Reported back 
 All four ids confirmed on hardware (2026-10-07): each write was echoed in byte 15 within a second, with the DP 115 ACK
 `cat_litter_pawbby` / `cat_litter_tofe` / `cat_litter_bentonite` / `cat_litter_mix`.
 
-**Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it
-from the SDK's cache). Two ways to get a fresh snapshot, tried in this order by the daemon's `tuya:refresh-settings` hook:
+**Reading settings on demand:** DP 103 is push-only — it is not returned by `DP_QUERY`, the vendor app only ever read
+it from the SDK's cache, and **the firmware ignores Tuya's `DP_REFRESH` (0x12 / `UPDATEDPS`) for it** (tested
+2026-10-07: no snapshot after `{"dpId":[103]}`). The only way to force a snapshot is a DP 105 write; re-pushing the
+account time zone (gate 9) is the harmless choice and is confirmed to trigger DP 103 within ~1 s.
 
-1. **Tuya `DP_REFRESH` (command `0x12`, a.k.a. `UPDATEDPS` / `LAN_QUERY_DP`)** with `{"dpId":[103]}` — Tuya's purpose-built
-   "please re-report these DPs" request for exactly this kind of push-only datapoint; a pure read with no side effects
-   (`tuyapi`: `device.refresh({ requestedDPS: [103] })`). Whether this firmware honours it for DP 103 is auto-detected:
-   if no snapshot arrives within 3 s the result is remembered and the fallback is used from then on.
-2. **Fallback: re-push the account time zone (gate 9)** — a harmless write that is confirmed to make the box emit DP 103
-   within ~1 s. This is what the vendor app effectively did on every connect.
-
-In practice a refresh is rarely needed: the box pushes DP 103 on every setting/state change and every ~10 min, the
-daemon pushes the time zone on connect anyway, and the dashboard caches the latest snapshot. The Control tab only asks the
-device when the cached snapshot is older than 30 s.
+In practice that is rarely necessary: the box pushes DP 103 on every setting/state change and every ~10 min, the daemon
+pushes the time zone on connect anyway, and the dashboard caches the latest snapshot. Pawbby-Reborn therefore never
+"refreshes" a cached snapshot; it only pushes the time zone when no snapshot exists at all (fresh install).
 
 ## 5. Status: CONFIRMED on hardware (2026-10-07)
 
@@ -214,7 +209,7 @@ AQAAFQAAAAAXAAAACQABAAEBAQAUAgA8AA==
    sleep 23:00–09:00, autoClean=1, soft=0, sleep=1, autoScreen=1, childLock=1, delay=20, litter=2, deodorant=60
 ```
 
-Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s, so the fallback `refresh` mechanism works. Whether `DP_REFRESH` (0x12) works for DP 103 is auto-detected at first use — check the daemon log for "DP_REFRESH works for DP 103" or "falling back to time-zone push".
+Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s. Tuya `DP_REFRESH` (0x12) for DP 103 does **not** work on this firmware.
 
 ### Bonus: DP 114 / DP 115 are the firmware's ACK channel
 

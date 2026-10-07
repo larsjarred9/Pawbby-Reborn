@@ -220,8 +220,8 @@ export function utcOffsetHoursFor(timeZone: string, at: Date = new Date()): numb
  * Settings a user may change directly (dashboard, REST, MQTT).
  * `weight_unit` and `sync_timezone` are deliberately NOT here: they mirror the
  * dashboard account (user.weightUnit / user.timezone) and are pushed to the box
- * automatically by the daemon. `refresh` asks the box to re-report DP 103 (Tuya
- * DP_REFRESH first, time-zone push as fallback — see tuya-listener).
+ * automatically by the daemon. `refresh` makes sure a DP 103 snapshot is cached
+ * (time-zone push only when none exists — see tuya-listener).
  */
 export const SETTING_KEYS = [
   'auto_clean',
@@ -320,8 +320,7 @@ export function buildSettingCommand(key: string, value: unknown): SettingCommand
       return { key: 'sync_timezone', payload: encodeTimeZone(offset), description: `Device time zone set to UTC${sign}${offset}` }
     }
     case 'refresh':
-      // Handled by the daemon's `tuya:refresh-settings` hook (DP_REFRESH 0x12 first,
-      // time-zone push as fallback) — never reaches the payload builder.
+      // Handled by the daemon's `tuya:refresh-settings` hook — never reaches the payload builder.
       throw new Error('refresh is dispatched through tuya:refresh-settings, not as a DP 105 payload')
     default:
       throw new Error(`Unknown setting "${key}". Allowed: ${SETTING_KEYS.join(', ')}`)

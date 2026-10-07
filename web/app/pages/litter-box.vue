@@ -515,7 +515,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Waiting for the litter box to report its settings.<br />
-          <span class="text-xs text-pawbby-mutedDark">A refresh was requested; the box answers within a few seconds when it is online.</span>
+          <span class="text-xs text-pawbby-mutedDark">A first snapshot was requested; the box answers within a few seconds when it is online.</span>
         </div>
 
         <div v-else class="bg-pawbby-card border border-white/10 rounded-2xl divide-y divide-white/5 overflow-hidden">
@@ -651,9 +651,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Refreshing from the device…
+              Waiting for the device…
             </span>
-            <span v-else>Reported by the device {{ settingsAge }} · <button @click="refreshSettings(true)" class="underline hover:text-pawbby-muted">refresh</button></span>
+            <span v-else>Reported by the device {{ settingsAge }}</span>
             <span v-if="settingError" class="text-[#D84C4C]">{{ settingError }}</span>
           </div>
         </div>
@@ -1385,16 +1385,14 @@ const saveSleepWindow = () => {
   applySetting('sleep_window', { start, stop }, { sleepStart: start, sleepStop: stop })
 }
 
-// Ask the daemon to make the box re-report DP 103 (Tuya DP_REFRESH, or a harmless
-// time-zone push if the firmware ignores it). Done whenever the Control tab is opened.
+// DP 103 is pushed by the box on every change and every ~10 min, so the cached
+// snapshot is normally current. Only when nothing is cached yet (fresh install) do we
+// ask the daemon, which then pushes the account time zone to trigger a first snapshot.
 let lastSettingsRefresh = 0
-const refreshSettings = async (force = false) => {
+const refreshSettings = async () => {
   if (settingBusy.value.refresh) return
   if (Date.now() - lastSettingsRefresh < 5000) return
-  // The box pushes DP 103 on every change and every ~10 min, so a snapshot that just
-  // arrived is already current — only ask the device when it is older than 30 s.
-  const at = device.value?.settingsUpdatedAt ? new Date(device.value.settingsUpdatedAt).getTime() : 0
-  if (!force && Date.now() - at < 30000) return
+  if (device.value?.settings) return
   lastSettingsRefresh = Date.now()
   settingBusy.value = { ...settingBusy.value, refresh: true }
   try {
@@ -1413,8 +1411,8 @@ const refreshSettings = async (force = false) => {
 watch(activeTab, (tab) => {
   if (tab === 'control') refreshSettings()
 })
-onMounted(() => {
-  if (activeTab.value === 'control') refreshSettings()
+watch(() => device.value?.id, (id) => {
+  if (id && activeTab.value === 'control') refreshSettings()
 })
 
 const resetDeviceDeodorant = () => {

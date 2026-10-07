@@ -9,8 +9,8 @@ import { buildSettingCommand, SETTING_KEYS } from '../utils/deviceSettings'
  *   auto_clean_delay   → 1..60 (minutes)
  *   sleep_window       → { start: "HH:MM", stop: "HH:MM" }
  *   reset_deodorant    → (no value)
- *   refresh            → (no value) ask the box to re-report its DP 103 snapshot (Tuya
- *                        DP_REFRESH, falling back to a time-zone push if the firmware ignores it)
+ *   refresh            → (no value) ensure a DP 103 settings snapshot exists; the daemon only
+ *                        pushes the account time zone when nothing is cached yet
  *
  * Weight unit and time zone are not settable here: they mirror the dashboard account
  * (user.weightUnit / user.timezone) and are synced to the box by the daemon.
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   if (!device) throw createError({ statusCode: 404, statusMessage: 'Device not found' })
 
   if (setting === 'refresh') {
-    // Pure read: ask the daemon to make the box re-report its DP 103 snapshot.
+    // Make sure a DP 103 settings snapshot exists; only writes (time-zone push) when none is cached.
     const r: { ok: boolean; error?: string; method?: string } = { ok: false }
     await useNitroApp().hooks.callHook('tuya:refresh-settings' as any, { deviceId: device.id, result: r })
     if (!r.ok) throw createError({ statusCode: 503, statusMessage: r.error || 'Device is not reachable' })
