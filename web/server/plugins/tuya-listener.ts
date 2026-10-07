@@ -1,5 +1,7 @@
 import TuyaDevice from "tuyapi";
 import prisma from "../utils/prisma";
+import { decodeDeviceStatus, buildSettingCommand, utcOffsetHoursFor } from "../utils/deviceSettings";
+import type { SettingCommand } from "../utils/deviceSettings";
 
 export default defineNitroPlugin((nitroApp) => {
   interface DeviceState {
@@ -19,6 +21,9 @@ export default defineNitroPlugin((nitroApp) => {
     lastVisitEndedAt?: number;
     lastVisitEndWeight?: number;
     lastCleanCompletedAt?: number;
+    lastSettingsRaw?: string;
+    lastSettingsAt?: number;
+    lastWeightUnitSyncAt?: number;
   }
 
   const VISIT_STATUSES = new Set([
@@ -50,6 +55,71 @@ export default defineNitroPlugin((nitroApp) => {
   const pingIntervals = new Map<string, any>();
   const deviceStates = new Map<string, DeviceState>();
   const appTriggeredActions = new Map<string, number>();
+
+  /**
+   * Send a pre-built DP 105 settings command to a connected device.
+   * Shared by the `tuya:setting` hook, the account sync and the refresh ping.
+   */
+  const sendSetting = async (deviceId: string, command: SettingCommand) => {
+    const device = activeDevices.get(deviceId);
+    if (!device) throw new Error(`Device ${deviceId} is not connected.`);
+    console.log(
+      `[Tuya Setting] ${command.description} → DP 105 = ${command.payload} (${deviceId})`,
+    );
+    await device.set({ dps: 105, set: command.payload });
+    if (command.logEvent !== false) {
+      await prisma.litterEvent.create({
+        data: {
+          type: "settings-changed",
+          deviceId,
+          rawData: JSON.stringify({
+            setting: command.key,
+            description: command.description,
+            payload: command.payload,
+          }),
+        },
+      });
+    }
+  };
+
+  const accountUtcOffset = (user: { timezone?: string | null } | null) => {
+    try {
+      return utcOffsetHoursFor(user?.timezone || "UTC");
+    } catch {
+      return 0;
+    }
+  };
+
+  /**
+   * The box's time zone and weight unit mirror the dashboard account, like the
+   * vendor app did (it pushed the time zone on every connect and corrected the unit
+   * whenever the status blob disagreed). Pushing the time zone also makes the box
+   * emit a fresh DP 103 snapshot, which is how we "fetch" settings on connect.
+   */
+  const syncAccountSettings = async (
+    deviceId: string,
+    opts: { timezone?: boolean; weightUnit?: boolean } = { timezone: true, weightUnit: true },
+  ) => {
+    if (!activeDevices.has(deviceId)) return;
+    const user = await prisma.user.findFirst();
+    if (!user) return;
+    try {
+      if (opts.timezone) {
+        await sendSetting(
+          deviceId,
+          buildSettingCommand("sync_timezone", accountUtcOffset(user)),
+        );
+      }
+      if (opts.weightUnit) {
+        const unit = user.weightUnit === "lb" ? "lb" : "kg";
+        await sendSetting(deviceId, buildSettingCommand("weight_unit", unit));
+        const st = deviceStates.get(deviceId);
+        if (st) st.lastWeightUnitSyncAt = Date.now();
+      }
+    } catch (e: any) {
+      console.error(`[Tuya Setting] Account sync failed for ${deviceId}:`, e?.message || e);
+    }
+  };
 
   const dispatchWebhook = async (user: any, message: string, eventType: string) => {
     if (!user?.webhookUrl) return;
@@ -378,6 +448,38 @@ export default defineNitroPlugin((nitroApp) => {
             state.peakWeight = 0;
             state.lidOpenedDuringVisit = false;
             stateChanged = true;
+          }
+
+          // 1b. Settings / status snapshot (DP 103 - deviceStatus)
+          // Carries every user setting (auto-clean, soft clumps, sleep window, delay...).
+          // Decoding it here lets integrations refresh immediately after a settings write.
+          if (typeof dps["103"] === "string") {
+            const decoded = decodeDeviceStatus(dps["103"]);
+            if (decoded) {
+              const prev = state.lastSettingsRaw;
+              state.lastSettingsRaw = dps["103"];
+              state.lastSettingsAt = Date.now();
+              if (prev !== dps["103"]) stateChanged = true;
+
+              // Keep the box's weight unit aligned with the dashboard account.
+              // Cooldown guards against ping-pong if the firmware ever rejects the write.
+              const sinceSync = Date.now() - (state.lastWeightUnitSyncAt || 0);
+              if (sinceSync > 10 * 60 * 1000) {
+                try {
+                  const user = await prisma.user.findFirst();
+                  const wanted = user?.weightUnit === "lb" ? "lb" : "kg";
+                  if (user && decoded.weightUnit !== wanted) {
+                    console.log(
+                      `[Tuya Setting] Device reports ${decoded.weightUnit}, account uses ${wanted} — syncing.`,
+                    );
+                    state.lastWeightUnitSyncAt = Date.now();
+                    await sendSetting(config.id, buildSettingCommand("weight_unit", wanted));
+                  }
+                } catch (e: any) {
+                  console.error("[Tuya Setting] Weight unit sync failed:", e?.message || e);
+                }
+              }
+            }
           }
 
           // 2. Update State Machine Flag (DP 116)
@@ -713,6 +815,12 @@ export default defineNitroPlugin((nitroApp) => {
             currentDevice.get({ schema: true }).catch(() => {});
           } catch (e) {}
 
+          // Mirror the account time zone to the box (as the vendor app did on every
+          // connect). DP 103 is push-only, so this also yields a fresh settings snapshot.
+          setTimeout(() => {
+            syncAccountSettings(config.id, { timezone: true }).catch(() => {});
+          }, 3000);
+
           if (!pingIntervals.has(config.id)) {
             const interval = setInterval(
               () => {
@@ -876,6 +984,104 @@ export default defineNitroPlugin((nitroApp) => {
           `[Tuya Action] Failed to send action ${action} to ${deviceId}`,
           e,
         );
+      }
+    },
+  );
+
+  // Hardware settings (DP 105 "deviceGate"): auto-clean on/off, soft clumps, sleep mode +
+  // window, auto-clean delay, screen options, deodorant reset, weight unit, time zone.
+  // The payload is pre-validated/encoded by server/utils/deviceSettings.ts; the device
+  // acknowledges by pushing a fresh DP 103 snapshot, which is what the UI reads back.
+  nitroApp.hooks.hook(
+    "tuya:setting" as any,
+    async ({ deviceId, command, result }: { deviceId: string; command: SettingCommand; result?: { ok: boolean; error?: string } }) => {
+      try {
+        await sendSetting(deviceId, command);
+        if (result) result.ok = true;
+      } catch (e: any) {
+        console.error(`[Tuya Setting] Failed to send ${command.key} to ${deviceId}`, e?.message || e);
+        if (result) {
+          result.ok = false;
+          result.error = e?.message || "Failed to send setting to device";
+        }
+      }
+    },
+  );
+
+  /**
+   * Make sure we have a settings snapshot (DP 103) for a device.
+   *
+   * DP 103 is push-only: it is not part of the DP_QUERY status set and the box ignores
+   * Tuya's DP_REFRESH (0x12) for it. The box does push it on every settings/state
+   * change, every ~10 min, and after any DP 105 write, so the cached snapshot is
+   * normally current and nothing needs to be sent. Only when we have no snapshot at
+   * all (fresh install / database reset) do we re-push the account time zone — a
+   * harmless write that is confirmed to trigger a DP 103 within ~1 s.
+   */
+  const waitForSnapshot = (deviceId: string, since: number, timeoutMs: number) =>
+    new Promise<boolean>((resolve) => {
+      const started = Date.now();
+      const tick = () => {
+        const st = deviceStates.get(deviceId);
+        if (st?.lastSettingsAt && st.lastSettingsAt > since) return resolve(true);
+        if (Date.now() - started > timeoutMs) return resolve(false);
+        setTimeout(tick, 150);
+      };
+      tick();
+    });
+
+  const ensureSettingsSnapshot = async (deviceId: string): Promise<"cached" | "timezone"> => {
+    const device = activeDevices.get(deviceId);
+    const state = deviceStates.get(deviceId);
+    if (!device || !state) throw new Error(`Device ${deviceId} is not connected.`);
+
+    if (state.lastSettingsRaw) return "cached";
+
+    const cached = await prisma.litterEvent.findFirst({
+      where: { deviceId, type: "tuya-raw-data", rawData: { contains: '"103"' } },
+      orderBy: { timestamp: "desc" },
+    });
+    if (cached) return "cached";
+
+    const user = await prisma.user.findFirst();
+    const t0 = Date.now();
+    await sendSetting(deviceId, {
+      ...buildSettingCommand("sync_timezone", accountUtcOffset(user)),
+      description: "Requested the first settings snapshot from the device (time-zone push)",
+      logEvent: false,
+    });
+    await waitForSnapshot(deviceId, t0, 3000);
+    return "timezone";
+  };
+
+  nitroApp.hooks.hook(
+    "tuya:refresh-settings" as any,
+    async ({ deviceId, result }: { deviceId: string; result?: { ok: boolean; error?: string; method?: string } }) => {
+      try {
+        const method = await ensureSettingsSnapshot(deviceId);
+        if (result) {
+          result.ok = true;
+          result.method = method;
+        }
+      } catch (e: any) {
+        if (result) {
+          result.ok = false;
+          result.error = e?.message || "Failed to refresh settings";
+        }
+      }
+    },
+  );
+
+  // Account-level settings (weight unit / time zone) changed in the dashboard →
+  // push them to every connected box.
+  nitroApp.hooks.hook(
+    "tuya:sync-account" as any,
+    async ({ timezone, weightUnit }: { timezone?: boolean; weightUnit?: boolean } = {}) => {
+      for (const deviceId of activeDevices.keys()) {
+        await syncAccountSettings(deviceId, {
+          timezone: timezone !== false,
+          weightUnit: weightUnit !== false,
+        });
       }
     },
   );

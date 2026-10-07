@@ -27,6 +27,84 @@ export interface Pet {
   imageBase64?: string
 }
 
+export interface DeviceSettings {
+  autoClean: boolean
+  softClumps: boolean
+  sleepEnabled: boolean
+  sleepStart: string // "HH:MM" device local time
+  sleepStop: string
+  autoOffScreen: boolean
+  childLock: boolean
+  autoCleanDelayMin: number
+  litterType: number
+  weightUnit: 'kg' | 'lb'
+  litterLevelRaw: number
+  deodorantDays: number
+  binFull: boolean
+  binRemoved: boolean
+  lidOpen: boolean
+  catIn: boolean
+  catNear: boolean
+  catInLongTime: boolean
+  raw: string
+}
+
+export interface LitterCard {
+  id: number
+  name: string
+  simpleLabel: string
+  badge: string
+  badgeClass: string
+  image: string
+}
+
+export const LITTER_CARDS: LitterCard[] = [
+  {
+    id: 0,
+    name: 'Pawbby Natural',
+    simpleLabel: 'Plant-based starch pellets',
+    badge: 'Recommended',
+    badgeClass: 'bg-emerald-500/80 text-white',
+    image: '/litter_natural.jpg',
+  },
+  {
+    id: 1,
+    name: 'Tofu Litter',
+    simpleLabel: 'Flushable cylindrical rods',
+    badge: 'Tofu Pellets',
+    badgeClass: 'bg-amber-500/80 text-white',
+    image: '/litter_tofu.jpg',
+  },
+  {
+    id: 2,
+    name: 'Bentonite Clay',
+    simpleLabel: 'Classic clumping sand',
+    badge: 'Clay Sand',
+    badgeClass: 'bg-sky-500/80 text-white',
+    image: '/litter_bentonite.jpg',
+  },
+  {
+    id: 3,
+    name: 'Mixed Blend',
+    simpleLabel: 'Tofu rods + clay granules',
+    badge: 'Composite Mix',
+    badgeClass: 'bg-purple-500/80 text-white',
+    image: '/litter_mixed.jpg',
+  },
+]
+
+/** Litter types known by the firmware (index = value stored on the box). Keep in sync with server/utils/deviceSettings.ts */
+export const LITTER_TYPES = [
+  { id: 0, name: 'Pawbby Natural Cat Litter', hint: 'Plant-based (recommended by the vendor)' },
+  { id: 1, name: 'Tofu cat litter', hint: '' },
+  { id: 2, name: 'Bentonite cat litter', hint: 'Clay' },
+  { id: 3, name: 'Mixed cat litter', hint: 'Tofu + bentonite blend' },
+] as const
+
+export type DeviceSettingKey =
+  | 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
+  | 'auto_clean_delay' | 'sleep_window' | 'litter_type' | 'reset_deodorant' | 'refresh'
+
 export interface Device {
   id: string
   name: string
@@ -46,6 +124,10 @@ export interface Device {
   litterLevel: string
   wasteBin: string
   daysLeft: number
+  lidOpen?: boolean
+  binRemoved?: boolean
+  settings?: DeviceSettings | null
+  settingsUpdatedAt?: string | null
 }
 
 export interface DeviceLog {
@@ -171,6 +253,10 @@ export const useApi = () => {
   const triggerCancelClean = async (deviceId: string) => {
     await $fetch('/api/action', { method: 'POST', body: { deviceId, action: 'cancel_clean' } })
   }
+  /** Change a hardware setting on the box (DP 105). See server/utils/deviceSettings.ts for keys/values. */
+  const updateDeviceSetting = async (deviceId: string, setting: DeviceSettingKey, value?: any) => {
+    return await $fetch('/api/device-settings', { method: 'POST', body: { deviceId, setting, value } }) as any
+  }
 
   const resizeImage = (file: File, maxWidth = 400, maxHeight = 400): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -226,6 +312,7 @@ export const useApi = () => {
     triggerEmpty,
     triggerTare,
     triggerCancelClean,
+    updateDeviceSetting,
     getPets,
     addPet,
     updatePet,

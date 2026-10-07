@@ -130,6 +130,12 @@
           <div :class="[activeTab === 'control' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
+        <div @click="activeTab = 'settings'" class="flex flex-col items-center space-y-1 cursor-pointer">
+          <span
+            :class="[activeTab === 'settings' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Settings</span>
+          <div :class="[activeTab === 'settings' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
+          </div>
+        </div>
       </div>
 
       <!-- Record Content -->
@@ -505,6 +511,168 @@
         </div>
       </div>
 
+      <!-- Settings Content -->
+      <div v-if="activeTab === 'settings'" class="space-y-6 animate-fade-in py-4">
+        <!-- Hardware Settings (DP 105 / DP 103) -->
+        <h3 class="text-white/90 font-semibold text-lg text-center mb-2">Litter Box Settings</h3>
+
+        <div v-if="!effectiveSettings"
+          class="bg-pawbby-card border border-white/10 p-5 rounded-2xl text-center text-pawbby-muted text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-2 animate-spin text-pawbby-primary" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Waiting for the litter box to report its settings.<br />
+          <span class="text-xs text-pawbby-mutedDark">A first snapshot was requested; the box answers within a few seconds when it is online.</span>
+        </div>
+
+        <div v-else class="bg-pawbby-card border border-white/10 rounded-2xl divide-y divide-white/5 overflow-hidden">
+
+          <!-- Toggle rows -->
+          <div v-for="row in settingToggles" :key="row.key" class="flex items-center justify-between p-5">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div :class="[row.color, 'p-3 rounded-xl text-white shrink-0']" v-html="row.icon"></div>
+              <div class="text-left min-w-0">
+                <h4 class="text-white font-semibold">{{ row.title }}</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">{{ row.hint }}</p>
+              </div>
+            </div>
+            <button type="button" role="switch" :aria-checked="effectiveSettings[row.field] ? 'true' : 'false'"
+              :disabled="settingBusy[row.key]" @click="setToggle(row.key, row.field)"
+              :class="[effectiveSettings[row.field] ? 'bg-pawbby-primary' : 'bg-white/15', settingBusy[row.key] ? 'opacity-50' : '', 'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ml-4']">
+              <span :class="[effectiveSettings[row.field] ? 'translate-x-6' : 'translate-x-1', 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform']"></span>
+            </button>
+          </div>
+
+          <!-- Auto-clean delay -->
+          <div class="flex items-center justify-between p-5">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-[#3D7A41] p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="text-left">
+                <h4 class="text-white font-semibold">Auto-clean delay</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">How long to wait after your cat leaves before cleaning</p>
+              </div>
+            </div>
+            <select :value="effectiveSettings.autoCleanDelayMin" :disabled="settingBusy.auto_clean_delay"
+              @change="setDelay(($event.target as HTMLSelectElement).value)"
+              class="ml-4 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-pawbby-primary disabled:opacity-50">
+              <option v-for="m in 60" :key="m" :value="m">{{ m }} min</option>
+            </select>
+          </div>
+
+          <!-- Quiet period (sleep mode toggle + window) -->
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 min-w-0">
+                <div class="bg-indigo-600/80 p-3 rounded-xl text-white shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </div>
+                <div class="text-left min-w-0">
+                  <h4 class="text-white font-semibold">Quiet period</h4>
+                  <p class="text-pawbby-muted text-xs mt-0.5">
+                    <span v-if="effectiveSettings.sleepEnabled">Auto-clean pauses from {{ effectiveSettings.sleepStart }} to {{ effectiveSettings.sleepStop }}</span>
+                    <span v-else>Pause auto-clean during the night or set hours</span>
+                  </p>
+                </div>
+              </div>
+              <button type="button" role="switch" :aria-checked="effectiveSettings.sleepEnabled ? 'true' : 'false'"
+                :disabled="settingBusy.sleep_mode" @click="setToggle('sleep_mode', 'sleepEnabled')"
+                :class="[effectiveSettings.sleepEnabled ? 'bg-pawbby-primary' : 'bg-white/15', settingBusy.sleep_mode ? 'opacity-50' : '', 'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ml-4']">
+                <span :class="[effectiveSettings.sleepEnabled ? 'translate-x-6' : 'translate-x-1', 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform']"></span>
+              </button>
+            </div>
+
+            <div v-if="effectiveSettings.sleepEnabled" class="mt-4 pl-0 sm:pl-[4.5rem] animate-fade-in">
+              <div class="flex items-center gap-3 flex-wrap">
+                <label class="flex items-center gap-2 text-sm text-pawbby-muted">
+                  <span>From</span>
+                  <input type="time" v-model="sleepForm.start"
+                    class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
+                </label>
+                <label class="flex items-center gap-2 text-sm text-pawbby-muted">
+                  <span>to</span>
+                  <input type="time" v-model="sleepForm.stop"
+                    class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
+                </label>
+                <button @click="saveSleepWindow" :disabled="settingBusy.sleep_window || !sleepWindowDirty"
+                  class="ml-auto px-4 py-2 bg-pawbby-primary text-black font-semibold rounded-xl hover:bg-pawbby-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+                  <span v-if="settingBusy.sleep_window">Saving…</span>
+                  <span v-else>Save</span>
+                </button>
+              </div>
+              <p v-if="sleepWindowHours !== null && (sleepWindowHours < 1 || sleepWindowHours > 12)" class="text-xs text-amber-400/90 mt-2">
+                The original app recommended a window between 1 and 12 hours ({{ sleepWindowHours.toFixed(1) }} h selected).
+              </p>
+              <p class="text-xs text-pawbby-mutedDark mt-2">Times follow the box's clock, which is kept in sync with your account time zone ({{ user?.timezone || 'UTC' }}).</p>
+            </div>
+          </div>
+
+          <!-- Litter type Row (Opens Modal) -->
+          <div class="flex items-center justify-between p-5 hover:bg-white/[0.02] cursor-pointer transition-colors" @click="showLitterModal = true">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <div class="text-left min-w-0">
+                <h4 class="text-white font-semibold">Litter type</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">Calibrates the drum scale for your litter density</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 ml-4">
+              <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-white font-medium text-sm flex items-center gap-2 border border-white/5 hover:border-white/20 transition-all">
+                <span class="w-2 h-2 rounded-full bg-pawbby-primary"></span>
+                {{ currentLitterName }}
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Deodorizer pod counter on the device.
+               Disabled on purpose (SHOW_DEVICE_DEODORANT_RESET = false): the firmware counter is
+               fixed at 60 days, so the dashboard's own pod tracker (30/60 days, deodorizer modal)
+               is used instead. The DP 105 reset command stays available via the API. -->
+          <div v-if="SHOW_DEVICE_DEODORANT_RESET" class="p-5 flex items-center justify-between">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <div class="text-left min-w-0">
+                <h4 class="text-white font-semibold">Deodorizing pod counter</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">Firmware reports <span class="text-white/80">{{ effectiveSettings.deodorantDays }} days</span> left — reset after inserting a new pod</p>
+              </div>
+            </div>
+            <button @click="resetDeviceDeodorant" :disabled="settingBusy.reset_deodorant"
+              class="ml-4 px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm shrink-0">
+              <span v-if="settingBusy.reset_deodorant">Resetting…</span>
+              <span v-else>Reset</span>
+            </button>
+          </div>
+
+          <div class="px-5 py-3 flex items-center justify-between text-xs text-pawbby-mutedDark bg-black/10">
+            <span v-if="settingBusy.refresh" class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Waiting for the device…
+            </span>
+            <span v-else>Reported by the device {{ settingsAge }}</span>
+            <span v-if="settingError" class="text-[#D84C4C]">{{ settingError }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Settings Modal -->
@@ -735,11 +903,122 @@
       </div>
     </div>
 
+    <!-- Litter Type Modal -->
+    <div v-if="showLitterModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-lg border border-white/10 relative overflow-hidden max-h-[90vh] flex flex-col shadow-2xl">
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-4 pb-3 border-b border-white/10">
+          <div>
+            <h3 class="text-xl font-bold text-white">Select Litter Type</h3>
+            <p class="text-pawbby-muted text-xs mt-1">
+              Current value: <span class="text-pawbby-primary font-semibold">{{ currentLitterName }}</span>
+            </p>
+          </div>
+          <button @click="showLitterModal = false" class="text-white/50 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-white/70 mb-4">
+          Tap the picture matching the cat litter you pour into your box:
+        </p>
+
+        <!-- 2x2 Visual Grid of Real Pictures -->
+        <div class="grid grid-cols-2 gap-3.5 overflow-y-auto pr-1">
+          <button
+            v-for="litter in LITTER_CARDS"
+            :key="litter.id"
+            type="button"
+            @click="selectLitter(litter.id)"
+            :disabled="settingBusy.litter_type"
+            :class="[
+              effectiveSettings?.litterType === litter.id
+                ? 'border-pawbby-primary bg-pawbby-primary/10 shadow-lg shadow-pawbby-primary/10 ring-2 ring-pawbby-primary'
+                : 'border-white/10 bg-black/30 hover:border-white/30 hover:bg-black/40',
+              settingBusy.litter_type ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+              'relative rounded-2xl border p-3 text-left transition-all duration-200 flex flex-col group overflow-hidden'
+            ]"
+          >
+            <!-- Litter Photo with Badge & Active Check -->
+            <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/40 border border-white/10">
+              <img :src="litter.image" :alt="litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              
+              <!-- Active Checkmark Overlay -->
+              <div v-if="effectiveSettings?.litterType === litter.id" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pawbby-primary flex items-center justify-center text-black shadow-lg">
+                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+
+              <!-- Badge -->
+              <span v-if="litter.badge" :class="[litter.badgeClass, 'absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md shadow']">
+                {{ litter.badge }}
+              </span>
+            </div>
+
+            <!-- Name & Simple Label -->
+            <div class="flex items-center justify-between">
+              <span class="text-white font-bold text-sm leading-tight">{{ litter.name }}</span>
+              <span v-if="effectiveSettings?.litterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Active</span>
+            </div>
+            <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+          </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+          <span class="text-xs text-pawbby-mutedDark">Updates box level sensor calibration</span>
+          <button @click="showLitterModal = false" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-colors">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen Lock Liability Warning Modal -->
+    <div v-if="showScreenLockModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden text-center shadow-2xl">
+        <div class="w-16 h-16 bg-[#D84C4C]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#D84C4C]/50 text-[#D84C4C]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2">Screen Lock Warning</h2>
+        <div class="text-pawbby-muted text-sm mb-6 leading-relaxed text-left bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
+          <p class="text-white/90 font-medium">
+            ⚠️ <strong>Potentially dangerous action:</strong>
+          </p>
+          <p class="text-xs text-white/80">
+            Locking the screen disables all physical button presses on the box to prevent accidental presses by children or pets.
+          </p>
+          <p class="text-xs text-white/80">
+            If Pawbby Reborn loses connection, your Wi-Fi changes, or the daemon goes offline while locked, you may be completely locked out from controlling or unlocking the machine from its physical controls.
+          </p>
+          <p class="text-[#D84C4C] text-[11px] font-semibold pt-1 border-t border-white/10">
+            Pawbby Reborn and its developers take NO liability in case this locks out or bricks your machine. Proceed at your own risk.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <button @click="confirmScreenLock"
+            class="w-full py-3 bg-[#D84C4C] text-white font-bold rounded-2xl hover:bg-[#D84C4C]/80 transition-colors shadow-lg shadow-[#D84C4C]/20">
+            I Understand the Risk, Lock Buttons
+          </button>
+          <button @click="showScreenLockModal = false"
+            class="w-full py-2.5 text-pawbby-muted text-sm hover:text-white transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useApi, type Device, type Pet, type DeviceLog, type User } from '~/composables/useApi'
+import { useApi, LITTER_TYPES, type Device, type Pet, type DeviceLog, type User, type DeviceSettings } from '~/composables/useApi'
 import { Bar, Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js'
 
@@ -771,6 +1050,8 @@ const showLiabilityModal = ref(false)
 const showEmptyModal = ref(false)
 const showTareModal = ref(false)
 const showAssignPetModal = ref(false)
+const showLitterModal = ref(false)
+const showScreenLockModal = ref(false)
 const eventToAssign = ref<DeviceLog | null>(null)
 const pendingAction = ref<'clean' | 'flatten'>('flatten')
 
@@ -1097,6 +1378,241 @@ const doEmpty = async () => {
   activeTab.value = 'record'
   setTimeout(loadData, 2000)
   setTimeout(loadData, 5000)
+}
+
+/* ------------------------------------------------------------------ */
+/* Hardware settings (DP 105 writes, DP 103 read-back)                 */
+/* ------------------------------------------------------------------ */
+
+type ToggleKey = 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
+type SettingKey = ToggleKey | 'auto_clean_delay' | 'sleep_window' | 'litter_type' | 'reset_deodorant' | 'refresh'
+
+const svgIcon = (path: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="${path}" /></svg>`
+
+const settingToggles: { key: ToggleKey; field: keyof DeviceSettings; title: string; hint: string; color: string; icon: string }[] = [
+  {
+    key: 'auto_clean', field: 'autoClean', title: 'Auto-clean', color: 'bg-[#3D7A41]',
+    hint: 'Clean automatically after each visit',
+    icon: svgIcon('M5 13l4 4L19 7'),
+  },
+  {
+    key: 'soft_clumps', field: 'softClumps', title: 'Soft Clumps Mode', color: 'bg-[#2A6372]',
+    hint: 'Shake the drum 2–4 times before cleaning to bury soft stool',
+    icon: svgIcon('M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'),
+  },
+  {
+    key: 'auto_off_screen', field: 'autoOffScreen', title: 'Auto screen-off', color: 'bg-pawbby-brown',
+    hint: 'Turn the screen off after 5 minutes idle',
+    icon: svgIcon('M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'),
+  },
+  {
+    key: 'child_lock', field: 'childLock', title: 'Screen lock', color: 'bg-pawbby-brown',
+    hint: 'Lock the buttons on the box to prevent accidental presses',
+    icon: svgIcon('M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'),
+  },
+]
+
+const LITTER_CARDS = [
+  {
+    id: 0,
+    name: 'Pawbby Natural',
+    simpleLabel: 'Plant-based starch pellets',
+    badge: 'Recommended',
+    badgeClass: 'bg-emerald-500/80 text-white',
+    image: '/litter_natural.jpg',
+  },
+  {
+    id: 1,
+    name: 'Tofu Litter',
+    simpleLabel: 'Flushable cylindrical rods',
+    badge: 'Tofu Pellets',
+    badgeClass: 'bg-amber-500/80 text-white',
+    image: '/litter_tofu.jpg',
+  },
+  {
+    id: 2,
+    name: 'Bentonite Clay',
+    simpleLabel: 'Classic clumping sand',
+    badge: 'Clay Sand',
+    badgeClass: 'bg-sky-500/80 text-white',
+    image: '/litter_bentonite.jpg',
+  },
+  {
+    id: 3,
+    name: 'Mixed Blend',
+    simpleLabel: 'Tofu rods + clay granules',
+    badge: 'Composite Mix',
+    badgeClass: 'bg-purple-500/80 text-white',
+    image: '/litter_mixed.jpg',
+  },
+]
+
+const settingBusy = ref<Record<string, boolean>>({})
+const settingError = ref('')
+// Optimistic overrides until the box pushes a newer DP 103 snapshot
+const pendingSettings = ref<Record<string, { value: any; at: number }>>({})
+
+const effectiveSettings = computed<DeviceSettings | null>(() => {
+  const base = device.value?.settings
+  if (!base) return null
+  const reportedAt = device.value?.settingsUpdatedAt ? new Date(device.value.settingsUpdatedAt).getTime() : 0
+  const merged: DeviceSettings = { ...base }
+  for (const [field, p] of Object.entries(pendingSettings.value)) {
+    // Keep the optimistic value for up to 60s or until the device reports something newer
+    if (p.at > reportedAt && Date.now() - p.at < 60000) {
+      ;(merged as any)[field] = p.value
+    }
+  }
+  return merged
+})
+
+const selectedLitter = computed(() => {
+  if (!effectiveSettings.value) return null
+  return LITTER_CARDS.find(c => c.id === effectiveSettings.value?.litterType) || null
+})
+
+const currentLitterName = computed(() => {
+  const id = effectiveSettings.value?.litterType
+  const found = LITTER_CARDS.find(c => c.id === id)
+  if (found) return found.name
+  if (id !== undefined) return `Type ${id}`
+  return 'Select litter'
+})
+
+const selectLitter = (id: number) => {
+  setLitterType(id)
+}
+
+const settingsAge = computed(() => {
+  const at = device.value?.settingsUpdatedAt
+  if (!at) return 'never'
+  const secs = Math.max(0, Math.round((Date.now() - new Date(at).getTime()) / 1000))
+  if (secs < 60) return `${secs}s ago`
+  if (secs < 3600) return `${Math.round(secs / 60)} min ago`
+  return `${Math.round(secs / 3600)} h ago`
+})
+
+const sleepForm = ref({ start: '22:00', stop: '08:30' })
+let sleepFormSeeded = false
+watch(effectiveSettings, (s) => {
+  if (s && !sleepFormSeeded) {
+    sleepForm.value = { start: s.sleepStart, stop: s.sleepStop }
+    sleepFormSeeded = true
+  }
+}, { immediate: true })
+
+const sleepWindowDirty = computed(() => {
+  const s = effectiveSettings.value
+  if (!s) return false
+  return sleepForm.value.start !== s.sleepStart || sleepForm.value.stop !== s.sleepStop
+})
+
+const sleepWindowHours = computed(() => {
+  const m = (t: string) => {
+    const [h, mm] = t.split(':').map(Number)
+    return (h ?? 0) * 60 + (mm ?? 0)
+  }
+  if (!sleepForm.value.start || !sleepForm.value.stop) return null
+  let diff = m(sleepForm.value.stop) - m(sleepForm.value.start)
+  if (diff <= 0) diff += 24 * 60
+  return diff / 60
+})
+
+const applySetting = async (key: SettingKey, value: any, optimistic?: Partial<DeviceSettings>) => {
+  settingBusy.value = { ...settingBusy.value, [key]: true }
+  settingError.value = ''
+  try {
+    await api.updateDeviceSetting(deviceId, key, value)
+    if (optimistic) {
+      const now = Date.now()
+      const next = { ...pendingSettings.value }
+      for (const [f, v] of Object.entries(optimistic)) next[f] = { value: v, at: now }
+      pendingSettings.value = next
+    }
+    setTimeout(loadData, 1500)
+    setTimeout(loadData, 4000)
+  } catch (e: any) {
+    settingError.value = e?.data?.statusMessage || e?.statusMessage || e?.message || 'Failed to update setting'
+  } finally {
+    settingBusy.value = { ...settingBusy.value, [key]: false }
+  }
+}
+
+const confirmScreenLock = () => {
+  showScreenLockModal.value = false
+  applySetting('child_lock', true, { childLock: true })
+}
+
+const setToggle = (key: ToggleKey, field: keyof DeviceSettings) => {
+  const s = effectiveSettings.value
+  if (!s) return
+  const next = !s[field]
+
+  if (key === 'child_lock' && next === true) {
+    showScreenLockModal.value = true
+    return
+  }
+
+  applySetting(key, next, { [field]: next } as Partial<DeviceSettings>)
+}
+
+const setDelay = (val: string) => {
+  const minutes = Number(val)
+  if (!minutes) return
+  applySetting('auto_clean_delay', minutes, { autoCleanDelayMin: minutes })
+}
+
+const setLitterType = (val: string | number) => {
+  const id = Number(val)
+  if (!Number.isInteger(id)) return
+  applySetting('litter_type', id, { litterType: id })
+}
+
+const saveSleepWindow = () => {
+  const { start, stop } = sleepForm.value
+  if (!start || !stop) return
+  applySetting('sleep_window', { start, stop }, { sleepStart: start, sleepStop: stop })
+}
+
+// DP 103 is pushed by the box on every change and every ~10 min, so the cached
+// snapshot is normally current. Only when nothing is cached yet (fresh install) do we
+// ask the daemon, which then pushes the account time zone to trigger a first snapshot.
+// Done whenever the Settings tab is opened.
+let lastSettingsRefresh = 0
+const refreshSettings = async () => {
+  if (settingBusy.value.refresh) return
+  if (Date.now() - lastSettingsRefresh < 5000) return
+  if (device.value?.settings) return
+  lastSettingsRefresh = Date.now()
+  settingBusy.value = { ...settingBusy.value, refresh: true }
+  try {
+    await api.updateDeviceSetting(deviceId, 'refresh')
+    setTimeout(loadData, 1500)
+    setTimeout(loadData, 4000)
+  } catch (e: any) {
+    settingError.value = e?.data?.statusMessage || e?.statusMessage || e?.message || 'Could not reach the device'
+  } finally {
+    setTimeout(() => {
+      settingBusy.value = { ...settingBusy.value, refresh: false }
+    }, 4000)
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'settings') refreshSettings()
+})
+watch(() => device.value?.id, (id) => {
+  if (id && activeTab.value === 'settings') refreshSettings()
+})
+
+// Hidden in the UI: Pawbby Reborn keeps its own pod counter (see the deodorizer modal).
+// Flip to true to expose the firmware's 60-day counter + reset in the Device Settings card.
+const SHOW_DEVICE_DEODORANT_RESET = false
+
+const resetDeviceDeodorant = () => {
+  if (!confirm('Reset the deodorizing pod counter on the litter box? Do this after inserting a new pod.')) return
+  applySetting('reset_deodorant', undefined, { deodorantDays: 60 })
 }
 </script>
 

@@ -68,6 +68,14 @@ export default defineEventHandler(async (event) => {
         const parsed = JSON.parse(e.rawData)
         description = `Deodorizing pod reset for ${parsed.duration} days.`
       } catch (err) {}
+    } else if (e.type === 'settings-changed') {
+      description = 'Device setting changed via Pawbby Reborn.'
+      if (e.rawData) {
+        try {
+          const parsed = JSON.parse(e.rawData)
+          if (parsed.description) description = `${parsed.description} (via Pawbby Reborn).`
+        } catch (err) {}
+      }
     } else if (e.type === 'manual-clean') {
       description = 'Manual cleaning cycle was physically triggered on the device.'
     } else if (e.type === 'manual-clean-app') {
