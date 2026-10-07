@@ -3,6 +3,7 @@ import type { MqttClient } from 'mqtt'
 import prisma from '../utils/prisma'
 import { computeDeviceState } from '../utils/deviceState'
 import { computePetStates } from '../utils/petState'
+import { buildSettingCommand, LITTER_TYPES } from '../utils/deviceSettings'
 
 // Bridges Pawbby Reborn to Home Assistant over MQTT using HA's discovery protocol.
 // When enabled, entities (sensors, binary sensors, action buttons) appear in Home
@@ -20,6 +21,7 @@ export default defineNitroPlugin((nitroApp) => {
   const stateTopic = (id: string) => `${baseTopic}/${id}/state`
   const eventTopic = (id: string) => `${baseTopic}/${id}/event`
   const commandTopic = (id: string, action: string) => `${baseTopic}/${id}/command/${action}`
+  const settingTopic = (id: string, setting: string) => `${baseTopic}/${id}/set/${setting}`
   const petStateTopic = (id: string) => `${baseTopic}/pet/${id}/state`
 
   const SENSORS = [
@@ -49,6 +51,22 @@ export default defineNitroPlugin((nitroApp) => {
     { key: 'empty', name: 'Empty', action: 'empty', icon: 'mdi:delete-empty' },
     { key: 'tare', name: 'Zero Scale', action: 'tare', icon: 'mdi:scale' },
     { key: 'cancel_clean', name: 'Cancel Clean', action: 'cancel_clean', icon: 'mdi:stop-circle' },
+  ] as const
+
+  // Hardware settings stored on the box (DP 105 writes / DP 103 read-back). Each
+  // switch publishes to <base>/<id>/set/<setting> with ON/OFF; HA reads the current
+  // value back from the retained state payload (value_json.settings.*).
+  const SETTING_SWITCHES = [
+    { key: 'auto_clean', name: 'Auto-Clean', field: 'autoClean', icon: 'mdi:robot-vacuum' },
+    { key: 'sleep_mode', name: 'Quiet Period', field: 'sleepEnabled', icon: 'mdi:sleep' },
+    { key: 'soft_clumps', name: 'Soft Clumps Mode', field: 'softClumps', icon: 'mdi:shaker-outline' },
+    { key: 'auto_off_screen', name: 'Auto Screen-Off', field: 'autoOffScreen', icon: 'mdi:monitor-off' },
+    { key: 'child_lock', name: 'Screen Lock', field: 'childLock', icon: 'mdi:lock-outline' },
+  ] as const
+
+  const SETTING_SENSORS = [
+    { key: 'sleep_start', name: 'Quiet Period Start', tpl: '{{ value_json.settings.sleepStart if value_json.settings else none }}', icon: 'mdi:weather-night' },
+    { key: 'sleep_stop', name: 'Quiet Period End', tpl: '{{ value_json.settings.sleepStop if value_json.settings else none }}', icon: 'mdi:weather-sunset-up' },
   ] as const
 
   // Per-cat sensors — each cat becomes its own Home Assistant device. Only raw
@@ -95,6 +113,22 @@ export default defineNitroPlugin((nitroApp) => {
       deodorizerActive: state.deodorizerActive,
       deodorizerDaysLeft: state.deodorizerDaysLeft,
       lastHeartbeat: state.lastHeartbeat,
+      settings: state.settings
+        ? {
+            autoClean: state.settings.autoClean,
+            softClumps: state.settings.softClumps,
+            sleepEnabled: state.settings.sleepEnabled,
+            sleepStart: state.settings.sleepStart,
+            sleepStop: state.settings.sleepStop,
+            autoCleanDelayMin: state.settings.autoCleanDelayMin,
+            litterType: state.settings.litterType,
+            autoOffScreen: state.settings.autoOffScreen,
+            childLock: state.settings.childLock,
+            weightUnit: state.settings.weightUnit,
+            deodorantDays: state.settings.deodorantDays,
+          }
+        : null,
+      settingsUpdatedAt: state.settingsUpdatedAt,
     }
   }
 
@@ -209,6 +243,96 @@ export default defineNitroPlugin((nitroApp) => {
         JSON.stringify(eventCfg),
         { retain: true },
       )
+
+      for (const sw of SETTING_SWITCHES) {
+        const cfg: any = {
+          name: sw.name,
+          unique_id: `pawbby_${device.id}_set_${sw.key}`,
+          object_id: `pawbby_${device.name}_${sw.key}`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+          state_topic: stateTopic(device.id),
+          value_template: `{{ 'ON' if value_json.settings and value_json.settings.${sw.field} else 'OFF' }}`,
+          command_topic: settingTopic(device.id, sw.key),
+          payload_on: 'ON',
+          payload_off: 'OFF',
+          icon: sw.icon,
+          entity_category: 'config',
+          device: dev,
+          ...avail,
+        }
+        client.publish(
+          `${DISCOVERY_PREFIX}/switch/pawbby_${device.id}/${sw.key}/config`,
+          JSON.stringify(cfg),
+          { retain: true },
+        )
+      }
+
+      {
+        const cfg: any = {
+          name: 'Auto-Clean Delay',
+          unique_id: `pawbby_${device.id}_set_auto_clean_delay`,
+          object_id: `pawbby_${device.name}_auto_clean_delay`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+          state_topic: stateTopic(device.id),
+          value_template: '{{ value_json.settings.autoCleanDelayMin if value_json.settings else none }}',
+          command_topic: settingTopic(device.id, 'auto_clean_delay'),
+          min: 1,
+          max: 60,
+          step: 1,
+          unit_of_measurement: 'min',
+          mode: 'slider',
+          icon: 'mdi:timer-outline',
+          entity_category: 'config',
+          device: dev,
+          ...avail,
+        }
+        client.publish(
+          `${DISCOVERY_PREFIX}/number/pawbby_${device.id}/auto_clean_delay/config`,
+          JSON.stringify(cfg),
+          { retain: true },
+        )
+      }
+
+      {
+        // Litter type: HA "select" with the human names; the command handler maps names → id.
+        const cfg: any = {
+          name: 'Litter Type',
+          unique_id: `pawbby_${device.id}_set_litter_type`,
+          object_id: `pawbby_${device.name}_litter_type`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+          state_topic: stateTopic(device.id),
+          value_template:
+            '{% set names = ' + JSON.stringify(LITTER_TYPES.map((t) => t.name)) + ' %}' +
+            '{{ names[value_json.settings.litterType] if value_json.settings and value_json.settings.litterType < names | length else none }}',
+          command_topic: settingTopic(device.id, 'litter_type'),
+          options: LITTER_TYPES.map((t) => t.name),
+          icon: 'mdi:grain',
+          entity_category: 'config',
+          device: dev,
+          ...avail,
+        }
+        client.publish(
+          `${DISCOVERY_PREFIX}/select/pawbby_${device.id}/litter_type/config`,
+          JSON.stringify(cfg),
+          { retain: true },
+        )
+      }
+
+      for (const s of SETTING_SENSORS) {
+        const cfg: any = {
+          name: s.name,
+          unique_id: `pawbby_${device.id}_${s.key}`,
+          object_id: `pawbby_${device.name}_${s.key}`.toLowerCase().replace(/[^a-z0-9_]+/g, '_'),
+          state_topic: stateTopic(device.id),
+          value_template: s.tpl,
+          icon: s.icon,
+          entity_category: 'diagnostic',
+          device: dev,
+          ...avail,
+        }
+        client.publish(
+          `${DISCOVERY_PREFIX}/sensor/pawbby_${device.id}/${s.key}/config`,
+          JSON.stringify(cfg),
+          { retain: true },
+        )
+      }
     }
   }
 
@@ -268,11 +392,40 @@ export default defineNitroPlugin((nitroApp) => {
     }
   }
 
+  const handleSetting = async (deviceId: string, setting: string, payload: Buffer) => {
+    const raw = payload.toString().trim()
+    let value: any = raw
+    if (setting === 'sleep_window') {
+      // Accept JSON {"start":"22:00","stop":"08:30"} or "22:00-08:30"
+      try {
+        value = JSON.parse(raw)
+      } catch {
+        const m = /^(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})$/.exec(raw)
+        if (m) value = { start: m[1], stop: m[2] }
+      }
+    }
+    let command
+    try {
+      command = buildSettingCommand(setting, value)
+    } catch (e: any) {
+      console.warn(`[MQTT] Ignoring invalid setting '${setting}' = '${raw}': ${e?.message}`)
+      return
+    }
+    console.log(`[MQTT] Setting received: ${command.description} -> device ${deviceId}`)
+    const result: { ok: boolean; error?: string } = { ok: false }
+    await nitroApp.hooks.callHook('tuya:setting' as any, { deviceId, command, result })
+    if (!result.ok) console.warn(`[MQTT] Setting '${setting}' not applied: ${result.error}`)
+  }
+
   const handleCommand = async (topic: string, payload: Buffer) => {
-    // Expected: <baseTopic>/<deviceId>/command/<action>
+    // Expected: <baseTopic>/<deviceId>/command/<action>  or  <baseTopic>/<deviceId>/set/<setting>
     const prefix = `${baseTopic}/`
     if (!topic.startsWith(prefix)) return
     const parts = topic.slice(prefix.length).split('/')
+    if (parts.length === 3 && parts[1] === 'set' && parts[0] && parts[2]) {
+      await handleSetting(parts[0], parts[2], payload)
+      return
+    }
     if (parts.length !== 3 || parts[1] !== 'command') return
     const [deviceId, , action] = parts
     if (!ALLOWED_ACTIONS.includes(action)) {
@@ -329,6 +482,7 @@ export default defineNitroPlugin((nitroApp) => {
       console.log('[MQTT] Connected to broker.')
       client!.publish(availabilityTopic(), 'online', { retain: true })
       client!.subscribe(`${baseTopic}/+/command/+`)
+      client!.subscribe(`${baseTopic}/+/set/+`)
       try {
         await publishDiscovery()
         await publishPetDiscovery()

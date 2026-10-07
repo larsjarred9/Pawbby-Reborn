@@ -46,6 +46,18 @@ export default defineEventHandler(async (event) => {
         const nitro = useNitroApp()
         await nitro.hooks.callHook('mqtt:restart' as any)
       }
+
+      // The litter box mirrors the account's weight unit and time zone (DP 105);
+      // push them to every connected device when they change.
+      if ('weightUnit' in body.user || 'timezone' in body.user) {
+        const nitro = useNitroApp()
+        nitro.hooks
+          .callHook('tuya:sync-account' as any, {
+            weightUnit: 'weightUnit' in body.user,
+            timezone: 'timezone' in body.user,
+          })
+          .catch((e: any) => console.error('[Settings] Device account sync failed:', e?.message))
+      }
     }
     return { success: true }
   }

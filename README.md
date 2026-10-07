@@ -15,6 +15,7 @@ Say goodbye to slow app loading times, server outages, and data privacy concerns
 
 - **100% Local & Private:** Your cat's data never leaves your house. The dashboard talks directly to the litter box over your local Wi-Fi, completely bypassing the Tuya/Pawbby cloud.
 - **Beautiful Dashboard:** Monitor your litter box's status, waste bin capacity, and litter levels in real-time through a stunning, mobile-friendly web app.
+- **Full Device Settings:** Everything the original app could configure, now local: auto-clean on/off and delay, quiet period, soft clumps mode, screen auto-off and lock, deodorizer counter reset — from the dashboard, the REST API or Home Assistant. The box's weight unit and time zone follow your account settings automatically.
 - **Multi-Cat Tracking:** Automatically identifies which cat used the box based on their weight and tracks their bathroom habits and weight trends over time.
 - **Push Notifications:** Easily integrate with Home Assistant, Discord, Slack, or Ntfy to receive instant alerts when a cat uses the box or when the waste bin is full.
 - **Built-In Setup Wizard:** No more scary packet sniffing! Pawbby Reborn features a beautifully illustrated, step-by-step setup wizard that guides you through connecting your device securely in under 5 minutes.
@@ -54,7 +55,7 @@ To share your logs safely without exposing your Wi-Fi device keys:
 This is a collaborative community rescue mission. Whether you are an experienced packet-sniffer, a frontend developer ready to tackle the UI, or just a frustrated Pawbby owner who wants to help test commands, we need your help.
 
 - 💬 **Communication & Development:** [Join our Discord Server](https://discord.gg/Tw43AKZkge) to talk strategy, share logs, and coordinate the software build in real-time.
-- 📂 **Technical Specifications:** Read through `values.md` for our updated matrix of local network commands and authentication extraction strategies.
+- 📂 **Technical Specifications:** Read through `VALUES.md` for our updated matrix of local network commands and authentication extraction strategies, and `DP105_SETTINGS.md` for the device-settings protocol (auto-clean delay, quiet period, litter type, …).
 
 ---
 
