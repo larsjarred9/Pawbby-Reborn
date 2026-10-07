@@ -9,8 +9,11 @@ import { buildSettingCommand, SETTING_KEYS, utcOffsetHoursFor } from '../utils/d
  *   auto_clean_delay   → 1..60 (minutes)
  *   sleep_window       → { start: "HH:MM", stop: "HH:MM" }
  *   reset_deodorant    → (no value)
- *   weight_unit        → "kg" | "lb"
- *   sync_timezone      → UTC offset in whole hours (optional; defaults to the user's time zone)
+ *   refresh            → (no value) re-push the account time zone so the box emits a fresh
+ *                        DP 103 snapshot (there is no read command for it)
+ *
+ * Weight unit and time zone are not settable here: they mirror the dashboard account
+ * (user.weightUnit / user.timezone) and are synced to the box by the daemon.
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -27,10 +30,9 @@ export default defineEventHandler(async (event) => {
   const device = await prisma.device.findUnique({ where: { id: String(deviceId) } })
   if (!device) throw createError({ statusCode: 404, statusMessage: 'Device not found' })
 
-  if (setting === 'sync_timezone' && (value === undefined || value === null || value === '')) {
-    const user = event.context.userId
-      ? await prisma.user.findUnique({ where: { id: event.context.userId } })
-      : await prisma.user.findFirst()
+  if (setting === 'refresh') {
+    // The box mirrors the primary account's time zone (same account the daemon syncs).
+    const user = await prisma.user.findFirst()
     try {
       value = utcOffsetHoursFor(user?.timezone || 'UTC')
     } catch {

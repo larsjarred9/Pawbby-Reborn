@@ -194,6 +194,13 @@ export function utcOffsetHoursFor(timeZone: string, at: Date = new Date()): numb
 /* High-level "setting" API used by the HTTP endpoints, MQTT and the UI */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Settings a user may change directly (dashboard, REST, MQTT).
+ * `weight_unit` and `sync_timezone` are deliberately NOT here: they mirror the
+ * dashboard account (user.weightUnit / user.timezone) and are pushed to the box
+ * automatically by the daemon. `refresh` re-pushes the time zone, which makes the
+ * box emit a fresh DP 103 snapshot (there is no read command for DP 103).
+ */
 export const SETTING_KEYS = [
   'auto_clean',
   'soft_clumps',
@@ -203,18 +210,22 @@ export const SETTING_KEYS = [
   'auto_clean_delay',
   'sleep_window',
   'reset_deodorant',
-  'weight_unit',
-  'sync_timezone',
+  'refresh',
 ] as const
 
 export type SettingKey = (typeof SETTING_KEYS)[number]
 
+/** Keys only the daemon uses (account sync). */
+export type InternalSettingKey = 'weight_unit' | 'sync_timezone'
+
 export interface SettingCommand {
-  key: SettingKey
+  key: SettingKey | InternalSettingKey
   /** base64 payload for DP 105 */
   payload: string
   /** human readable description for the event log */
   description: string
+  /** false → do not write a `settings-changed` event (used for refresh pings) */
+  logEvent?: boolean
 }
 
 const toBool = (v: unknown): boolean => {
@@ -233,7 +244,7 @@ const toBool = (v: unknown): boolean => {
  * into the DP 105 payload to send. Throws on invalid input.
  */
 export function buildSettingCommand(key: string, value: unknown): SettingCommand {
-  switch (key as SettingKey) {
+  switch (key as SettingKey | InternalSettingKey) {
     case 'auto_clean': {
       const on = toBool(value)
       return { key: 'auto_clean', payload: encodeToggle(DeviceGate.AutoClear, on), description: `Auto-clean turned ${on ? 'on' : 'off'}` }
@@ -273,6 +284,17 @@ export function buildSettingCommand(key: string, value: unknown): SettingCommand
       const offset = Number(value)
       const sign = offset >= 0 ? '+' : ''
       return { key: 'sync_timezone', payload: encodeTimeZone(offset), description: `Device time zone set to UTC${sign}${offset}` }
+    }
+    case 'refresh': {
+      // No read command exists for the DP 103 snapshot; re-pushing the (unchanged)
+      // time zone is a harmless write that makes the box report its status blob.
+      const offset = Number(value)
+      return {
+        key: 'refresh',
+        payload: encodeTimeZone(offset),
+        description: 'Requested a settings refresh from the device',
+        logEvent: false,
+      }
     }
     default:
       throw new Error(`Unknown setting "${key}". Allowed: ${SETTING_KEYS.join(', ')}`)

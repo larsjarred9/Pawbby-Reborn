@@ -34,9 +34,11 @@ export default defineEventHandler(async (event) => {
   const device = await prisma.device.findUnique({ where: { id: String(deviceId) } })
   if (!device) throw createError({ statusCode: 404, statusMessage: `Device '${deviceId}' not found` })
 
-  if (setting === 'sync_timezone' && (value === undefined || value === null || value === '')) {
+  if (setting === 'refresh') {
+    // The box mirrors the primary account's time zone (same account the daemon syncs).
+    const primary = await prisma.user.findFirst()
     try {
-      value = utcOffsetHoursFor(user.timezone || 'UTC')
+      value = utcOffsetHoursFor(primary?.timezone || 'UTC')
     } catch {
       value = 0
     }

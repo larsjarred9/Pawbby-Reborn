@@ -58,15 +58,15 @@ export default defineNitroPlugin((nitroApp) => {
   // value back from the retained state payload (value_json.settings.*).
   const SETTING_SWITCHES = [
     { key: 'auto_clean', name: 'Auto-Clean', field: 'autoClean', icon: 'mdi:robot-vacuum' },
-    { key: 'sleep_mode', name: 'Sleep Mode', field: 'sleepEnabled', icon: 'mdi:sleep' },
+    { key: 'sleep_mode', name: 'Quiet Period', field: 'sleepEnabled', icon: 'mdi:sleep' },
     { key: 'soft_clumps', name: 'Soft Clumps Mode', field: 'softClumps', icon: 'mdi:shaker-outline' },
     { key: 'auto_off_screen', name: 'Auto Screen-Off', field: 'autoOffScreen', icon: 'mdi:monitor-off' },
     { key: 'child_lock', name: 'Screen Lock', field: 'childLock', icon: 'mdi:lock-outline' },
   ] as const
 
   const SETTING_SENSORS = [
-    { key: 'sleep_start', name: 'Sleep Mode Start', tpl: '{{ value_json.settings.sleepStart if value_json.settings else none }}', icon: 'mdi:weather-night' },
-    { key: 'sleep_stop', name: 'Sleep Mode End', tpl: '{{ value_json.settings.sleepStop if value_json.settings else none }}', icon: 'mdi:weather-sunset-up' },
+    { key: 'sleep_start', name: 'Quiet Period Start', tpl: '{{ value_json.settings.sleepStart if value_json.settings else none }}', icon: 'mdi:weather-night' },
+    { key: 'sleep_stop', name: 'Quiet Period End', tpl: '{{ value_json.settings.sleepStop if value_json.settings else none }}', icon: 'mdi:weather-sunset-up' },
   ] as const
 
   // Per-cat sensors — each cat becomes its own Home Assistant device. Only raw

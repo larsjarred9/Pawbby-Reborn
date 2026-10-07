@@ -515,7 +515,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Waiting for the litter box to report its settings.<br />
-          <span class="text-xs text-pawbby-mutedDark">It does so every ~10 minutes and after every state change.</span>
+          <span class="text-xs text-pawbby-mutedDark">A refresh was requested; the box answers within a few seconds when it is online.</span>
         </div>
 
         <div v-else class="bg-pawbby-card border border-white/10 rounded-2xl divide-y divide-white/5 overflow-hidden">
@@ -556,85 +556,83 @@
             </select>
           </div>
 
-          <!-- Sleep window -->
+          <!-- Quiet period (sleep mode toggle + window) -->
           <div class="p-5">
-            <div class="flex items-center space-x-4 mb-4">
-              <div class="bg-indigo-600/80 p-3 rounded-xl text-white shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 min-w-0">
+                <div class="bg-indigo-600/80 p-3 rounded-xl text-white shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </div>
+                <div class="text-left min-w-0">
+                  <h4 class="text-white font-semibold">Quiet period</h4>
+                  <p class="text-pawbby-muted text-xs mt-0.5">
+                    <span v-if="effectiveSettings.sleepEnabled">Auto-clean pauses from {{ effectiveSettings.sleepStart }} to {{ effectiveSettings.sleepStop }}</span>
+                    <span v-else>Pause auto-clean during the night or set hours</span>
+                  </p>
+                </div>
               </div>
-              <div class="text-left">
-                <h4 class="text-white font-semibold">Quiet period</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">
-                  Auto-clean is paused between these times when Sleep Mode is on.
-                  <span v-if="!effectiveSettings.sleepEnabled" class="text-pawbby-primary">Sleep Mode is currently off.</span>
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3 flex-wrap">
-              <label class="flex items-center gap-2 text-sm text-pawbby-muted">
-                <span>From</span>
-                <input type="time" v-model="sleepForm.start"
-                  class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
-              </label>
-              <label class="flex items-center gap-2 text-sm text-pawbby-muted">
-                <span>to</span>
-                <input type="time" v-model="sleepForm.stop"
-                  class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
-              </label>
-              <button @click="saveSleepWindow" :disabled="settingBusy.sleep_window || !sleepWindowDirty"
-                class="ml-auto px-4 py-2 bg-pawbby-primary text-black font-semibold rounded-xl hover:bg-pawbby-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
-                <span v-if="settingBusy.sleep_window">Saving…</span>
-                <span v-else>Save</span>
+              <button type="button" role="switch" :aria-checked="effectiveSettings.sleepEnabled ? 'true' : 'false'"
+                :disabled="settingBusy.sleep_mode" @click="setToggle('sleep_mode', 'sleepEnabled')"
+                :class="[effectiveSettings.sleepEnabled ? 'bg-pawbby-primary' : 'bg-white/15', settingBusy.sleep_mode ? 'opacity-50' : '', 'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ml-4']">
+                <span :class="[effectiveSettings.sleepEnabled ? 'translate-x-6' : 'translate-x-1', 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform']"></span>
               </button>
             </div>
-            <p v-if="sleepWindowHours !== null && (sleepWindowHours < 1 || sleepWindowHours > 12)" class="text-xs text-amber-400/90 mt-2">
-              The original app recommended a window between 1 and 12 hours ({{ sleepWindowHours.toFixed(1) }} h selected).
-            </p>
-            <p class="text-xs text-pawbby-mutedDark mt-2">Device time: <span class="text-pawbby-muted">{{ effectiveSettings.sleepStart }} – {{ effectiveSettings.sleepStop }}</span>. Uses the box's own clock — sync its time zone below if it looks off.</p>
+
+            <div v-if="effectiveSettings.sleepEnabled" class="mt-4 pl-0 sm:pl-[4.5rem] animate-fade-in">
+              <div class="flex items-center gap-3 flex-wrap">
+                <label class="flex items-center gap-2 text-sm text-pawbby-muted">
+                  <span>From</span>
+                  <input type="time" v-model="sleepForm.start"
+                    class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
+                </label>
+                <label class="flex items-center gap-2 text-sm text-pawbby-muted">
+                  <span>to</span>
+                  <input type="time" v-model="sleepForm.stop"
+                    class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary [color-scheme:dark]" />
+                </label>
+                <button @click="saveSleepWindow" :disabled="settingBusy.sleep_window || !sleepWindowDirty"
+                  class="ml-auto px-4 py-2 bg-pawbby-primary text-black font-semibold rounded-xl hover:bg-pawbby-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+                  <span v-if="settingBusy.sleep_window">Saving…</span>
+                  <span v-else>Save</span>
+                </button>
+              </div>
+              <p v-if="sleepWindowHours !== null && (sleepWindowHours < 1 || sleepWindowHours > 12)" class="text-xs text-amber-400/90 mt-2">
+                The original app recommended a window between 1 and 12 hours ({{ sleepWindowHours.toFixed(1) }} h selected).
+              </p>
+              <p class="text-xs text-pawbby-mutedDark mt-2">Times follow the box's clock, which is kept in sync with your account time zone ({{ user?.timezone || 'UTC' }}).</p>
+            </div>
           </div>
 
-          <!-- Misc actions -->
-          <div class="p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <h4 class="text-white font-semibold">Device weight unit</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">Unit shown on the box's screen</p>
+          <!-- Deodorizer pod counter on the device -->
+          <div class="p-5 flex items-center justify-between">
+            <div class="flex items-center space-x-4 min-w-0">
+              <div class="bg-pawbby-brown p-3 rounded-xl text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
               </div>
-              <div class="flex bg-black/30 rounded-xl p-1 border border-white/10">
-                <button v-for="u in ['kg', 'lb']" :key="u" @click="setWeightUnit(u as 'kg' | 'lb')" :disabled="settingBusy.weight_unit"
-                  :class="[effectiveSettings.weightUnit === u ? 'bg-pawbby-primary text-black' : 'text-pawbby-muted hover:text-white', 'px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50']">{{ u }}</button>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <div>
-                <h4 class="text-white font-semibold">Time zone</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">Push your dashboard time zone ({{ user?.timezone || 'UTC' }}) to the box</p>
-              </div>
-              <button @click="syncTimeZone" :disabled="settingBusy.sync_timezone"
-                class="px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm">
-                <span v-if="settingBusy.sync_timezone">Syncing…</span>
-                <span v-else>Sync</span>
-              </button>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <div>
+              <div class="text-left min-w-0">
                 <h4 class="text-white font-semibold">Deodorizing pod counter</h4>
                 <p class="text-pawbby-muted text-xs mt-0.5">Firmware reports <span class="text-white/80">{{ effectiveSettings.deodorantDays }} days</span> left — reset after inserting a new pod</p>
               </div>
-              <button @click="resetDeviceDeodorant" :disabled="settingBusy.reset_deodorant"
-                class="px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm">
-                <span v-if="settingBusy.reset_deodorant">Resetting…</span>
-                <span v-else>Reset</span>
-              </button>
             </div>
+            <button @click="resetDeviceDeodorant" :disabled="settingBusy.reset_deodorant"
+              class="ml-4 px-4 py-2 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50 text-sm shrink-0">
+              <span v-if="settingBusy.reset_deodorant">Resetting…</span>
+              <span v-else>Reset</span>
+            </button>
           </div>
 
           <div class="px-5 py-3 flex items-center justify-between text-xs text-pawbby-mutedDark bg-black/10">
-            <span>Reported by the device {{ settingsAge }}</span>
+            <span v-if="settingBusy.refresh" class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refreshing from the device…
+            </span>
+            <span v-else>Reported by the device {{ settingsAge }} · <button @click="refreshSettings" class="underline hover:text-pawbby-muted">refresh</button></span>
             <span v-if="settingError" class="text-[#D84C4C]">{{ settingError }}</span>
           </div>
         </div>
@@ -1239,7 +1237,7 @@ const doEmpty = async () => {
 /* ------------------------------------------------------------------ */
 
 type ToggleKey = 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
-type SettingKey = ToggleKey | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'weight_unit' | 'sync_timezone'
+type SettingKey = ToggleKey | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'refresh'
 
 const svgIcon = (path: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="${path}" /></svg>`
@@ -1249,11 +1247,6 @@ const settingToggles: { key: ToggleKey; field: keyof DeviceSettings; title: stri
     key: 'auto_clean', field: 'autoClean', title: 'Auto-clean', color: 'bg-[#3D7A41]',
     hint: 'Clean automatically after each visit',
     icon: svgIcon('M5 13l4 4L19 7'),
-  },
-  {
-    key: 'sleep_mode', field: 'sleepEnabled', title: 'Sleep Mode', color: 'bg-indigo-600/80',
-    hint: 'Pause auto-clean during the quiet period below',
-    icon: svgIcon('M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z'),
   },
   {
     key: 'soft_clumps', field: 'softClumps', title: 'Soft Clumps Mode', color: 'bg-[#2A6372]',
@@ -1365,14 +1358,33 @@ const saveSleepWindow = () => {
   applySetting('sleep_window', { start, stop }, { sleepStart: start, sleepStop: stop })
 }
 
-const setWeightUnit = (unit: 'kg' | 'lb') => {
-  applySetting('weight_unit', unit, { weightUnit: unit })
+// DP 103 is push-only: asking the box to re-report means re-pushing the account
+// time zone (a harmless write). Done whenever the Control tab is opened.
+let lastSettingsRefresh = 0
+const refreshSettings = async () => {
+  if (settingBusy.value.refresh) return
+  if (Date.now() - lastSettingsRefresh < 5000) return
+  lastSettingsRefresh = Date.now()
+  settingBusy.value = { ...settingBusy.value, refresh: true }
+  try {
+    await api.updateDeviceSetting(deviceId, 'refresh')
+    setTimeout(loadData, 1500)
+    setTimeout(loadData, 4000)
+  } catch (e: any) {
+    settingError.value = e?.data?.statusMessage || e?.statusMessage || e?.message || 'Could not reach the device'
+  } finally {
+    setTimeout(() => {
+      settingBusy.value = { ...settingBusy.value, refresh: false }
+    }, 4000)
+  }
 }
 
-const syncTimeZone = () => {
-  // Server derives the UTC offset from the dashboard user's time zone
-  applySetting('sync_timezone', undefined)
-}
+watch(activeTab, (tab) => {
+  if (tab === 'control') refreshSettings()
+})
+onMounted(() => {
+  if (activeTab.value === 'control') refreshSettings()
+})
 
 const resetDeviceDeodorant = () => {
   if (!confirm('Reset the deodorizing pod counter on the litter box? Do this after inserting a new pod.')) return

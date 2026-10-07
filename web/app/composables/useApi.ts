@@ -50,7 +50,7 @@ export interface DeviceSettings {
 
 export type DeviceSettingKey =
   | 'auto_clean' | 'soft_clumps' | 'sleep_mode' | 'auto_off_screen' | 'child_lock'
-  | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'weight_unit' | 'sync_timezone'
+  | 'auto_clean_delay' | 'sleep_window' | 'reset_deodorant' | 'refresh'
 
 export interface Device {
   id: string

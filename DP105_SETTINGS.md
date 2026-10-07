@@ -173,11 +173,17 @@ This matches DP 115 = `nodisturb_mode_disable` and the observed ~1-minute auto-c
 | Dashboard endpoint (session auth) | `POST /api/device-settings` `{ deviceId, setting, value }` |
 | External endpoint (API key) | `POST /api/external/settings` (documented in the in-app API docs page) |
 | Home Assistant (MQTT discovery) | `switch` × 5 (auto-clean, sleep mode, soft clumps, auto screen-off, screen lock), `number` auto-clean delay, sensors for the sleep window; commands on `<base>/<deviceId>/set/<setting>` |
-| UI | Litter box page → **Control** tab → "Device Settings" card (toggles, delay picker, quiet-period editor, weight unit, time-zone sync, deodorant counter reset) |
+| UI | Litter box page → **Control** tab → "Device Settings" card (toggles, delay picker, quiet-period toggle that expands into the time window, deodorant counter reset). Opening the tab requests a refresh. |
+| Account sync | The box's **weight unit** and **time zone** mirror the dashboard account (`user.weightUnit` / `user.timezone`): the daemon pushes the time zone on every connect, corrects the unit whenever a DP 103 snapshot disagrees (10-min cooldown), and both are re-pushed when they change in Settings. |
 
-Setting keys accepted everywhere: `auto_clean`, `sleep_mode`, `soft_clumps`, `auto_off_screen`, `child_lock` (bool),
-`auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `weight_unit` (`kg`/`lb`), `sync_timezone`
-(UTC offset hours; omitted → derived from the dashboard user's time zone), `reset_deodorant` (no value).
+Setting keys accepted by the API/MQTT: `auto_clean`, `sleep_mode` (quiet period), `soft_clumps`, `auto_off_screen`,
+`child_lock` (bool), `auto_clean_delay` (1–60), `sleep_window` (`{start, stop}` as `HH:MM`), `reset_deodorant` (no value),
+`refresh` (no value).
+
+**Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it from
+the SDK's cache). `refresh` re-pushes the account time zone (gate 9) — a harmless write that should make the box emit a new
+snapshot; the dashboard does this each time the Control tab is opened. Whether a gate-9 write reliably triggers a DP 103
+push is still to be confirmed on hardware.
 
 The UI shows optimistic values for up to 60 s and then trusts the next DP 103 push from the box; the Tuya ACK alone is
 not treated as confirmation.

@@ -65,11 +65,11 @@ curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/action \
         <ul class="list-disc pl-5 text-sm text-pawbby-muted mb-4 space-y-2">
           <li><code class="text-white/80">auto_clean</code>, <code class="text-white/80">sleep_mode</code>, <code class="text-white/80">soft_clumps</code>, <code class="text-white/80">auto_off_screen</code>, <code class="text-white/80">child_lock</code> — <code class="text-white/80">true</code> / <code class="text-white/80">false</code></li>
           <li><code class="text-white/80">auto_clean_delay</code> — minutes to wait after the cat leaves, <code class="text-white/80">1</code>–<code class="text-white/80">60</code></li>
-          <li><code class="text-white/80">sleep_window</code> — <code class="text-white/80">{"start": "22:00", "stop": "08:30"}</code> (device local time; auto-clean pauses in this window while <code class="text-white/80">sleep_mode</code> is on)</li>
-          <li><code class="text-white/80">weight_unit</code> — <code class="text-white/80">"kg"</code> or <code class="text-white/80">"lb"</code> (unit shown on the box's screen)</li>
-          <li><code class="text-white/80">sync_timezone</code> — UTC offset in whole hours; omit <code class="text-white/80">value</code> to use your dashboard time zone</li>
+          <li><code class="text-white/80">sleep_window</code> — <code class="text-white/80">{"start": "22:00", "stop": "08:30"}</code> (device local time; auto-clean pauses in this window while <code class="text-white/80">sleep_mode</code> — the quiet period — is on)</li>
           <li><code class="text-white/80">reset_deodorant</code> — no value; resets the pod-life counter on the box</li>
+          <li><code class="text-white/80">refresh</code> — no value; asks the box to re-report its settings (there is no read command, so this re-pushes the account time zone)</li>
         </ul>
+        <p class="text-xs text-pawbby-muted mb-4">The box's weight unit and time zone are not settable here: they always mirror the dashboard account (Settings → weight unit / time zone) and are pushed to the device automatically.</p>
 
         <h3 class="font-bold text-sm mb-2 text-white/80">Example cURL</h3>
         <div class="bg-black/50 rounded-xl p-4 text-sm font-mono text-white/80 overflow-x-auto whitespace-pre" v-pre>
