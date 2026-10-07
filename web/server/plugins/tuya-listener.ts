@@ -22,7 +22,10 @@ export default defineNitroPlugin((nitroApp) => {
     lastVisitEndWeight?: number;
     lastCleanCompletedAt?: number;
     lastSettingsRaw?: string;
+    lastSettingsAt?: number;
     lastWeightUnitSyncAt?: number;
+    /** undefined = untested, true/false = whether the box answers DP_REFRESH (cmd 0x12) for DP 103 */
+    dpRefreshWorks?: boolean;
   }
 
   const VISIT_STATUSES = new Set([
@@ -457,6 +460,7 @@ export default defineNitroPlugin((nitroApp) => {
             if (decoded) {
               const prev = state.lastSettingsRaw;
               state.lastSettingsRaw = dps["103"];
+              state.lastSettingsAt = Date.now();
               if (prev !== dps["103"]) stateChanged = true;
 
               // Keep the box's weight unit aligned with the dashboard account.
@@ -1001,6 +1005,80 @@ export default defineNitroPlugin((nitroApp) => {
         if (result) {
           result.ok = false;
           result.error = e?.message || "Failed to send setting to device";
+        }
+      }
+    },
+  );
+
+  /**
+   * Ask the box to re-report its settings snapshot (DP 103).
+   *
+   * DP 103 is not part of the DP_QUERY status set, but Tuya has a dedicated
+   * "re-report these DPs" command (0x12 DP_REFRESH / UPDATEDPS) meant exactly for
+   * such push-only datapoints. We try that first — it is a pure read with no side
+   * effects. If the firmware ignores it (no DP 103 within ~3 s) we fall back to the
+   * vendor-app trick of re-pushing the account time zone, which is a harmless write
+   * that always triggers a snapshot. The outcome is remembered per device so the
+   * futile attempt is not repeated.
+   */
+  const waitForSnapshot = (deviceId: string, since: number, timeoutMs: number) =>
+    new Promise<boolean>((resolve) => {
+      const started = Date.now();
+      const tick = () => {
+        const st = deviceStates.get(deviceId);
+        if (st?.lastSettingsAt && st.lastSettingsAt > since) return resolve(true);
+        if (Date.now() - started > timeoutMs) return resolve(false);
+        setTimeout(tick, 150);
+      };
+      tick();
+    });
+
+  const refreshSettings = async (deviceId: string): Promise<"dp_refresh" | "timezone"> => {
+    const device = activeDevices.get(deviceId);
+    const state = deviceStates.get(deviceId);
+    if (!device || !state) throw new Error(`Device ${deviceId} is not connected.`);
+
+    if (state.dpRefreshWorks !== false) {
+      const t0 = Date.now();
+      try {
+        console.log(`[Tuya Setting] Requesting DP 103 via DP_REFRESH (0x12) from ${deviceId}`);
+        device.refresh({ requestedDPS: [103] }).catch(() => {});
+      } catch (e) {}
+      if (await waitForSnapshot(deviceId, t0, 3000)) {
+        if (state.dpRefreshWorks !== true) console.log("[Tuya Setting] DP_REFRESH works for DP 103 — using it for settings refreshes.");
+        state.dpRefreshWorks = true;
+        return "dp_refresh";
+      }
+      if (state.dpRefreshWorks === undefined) {
+        console.log("[Tuya Setting] No DP 103 after DP_REFRESH — falling back to time-zone push for refreshes.");
+      }
+      state.dpRefreshWorks = false;
+    }
+
+    const user = await prisma.user.findFirst();
+    const t1 = Date.now();
+    await sendSetting(deviceId, {
+      ...buildSettingCommand("sync_timezone", accountUtcOffset(user)),
+      description: "Requested a settings refresh from the device (time-zone push)",
+      logEvent: false,
+    });
+    await waitForSnapshot(deviceId, t1, 3000);
+    return "timezone";
+  };
+
+  nitroApp.hooks.hook(
+    "tuya:refresh-settings" as any,
+    async ({ deviceId, result }: { deviceId: string; result?: { ok: boolean; error?: string; method?: string } }) => {
+      try {
+        const method = await refreshSettings(deviceId);
+        if (result) {
+          result.ok = true;
+          result.method = method;
+        }
+      } catch (e: any) {
+        if (result) {
+          result.ok = false;
+          result.error = e?.message || "Failed to refresh settings";
         }
       }
     },

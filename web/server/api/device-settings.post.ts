@@ -1,5 +1,5 @@
 import prisma from '../utils/prisma'
-import { buildSettingCommand, SETTING_KEYS, utcOffsetHoursFor } from '../utils/deviceSettings'
+import { buildSettingCommand, SETTING_KEYS } from '../utils/deviceSettings'
 
 /**
  * Change a hardware setting on the litter box (DP 105 `deviceGate`).
@@ -9,8 +9,8 @@ import { buildSettingCommand, SETTING_KEYS, utcOffsetHoursFor } from '../utils/d
  *   auto_clean_delay   → 1..60 (minutes)
  *   sleep_window       → { start: "HH:MM", stop: "HH:MM" }
  *   reset_deodorant    → (no value)
- *   refresh            → (no value) re-push the account time zone so the box emits a fresh
- *                        DP 103 snapshot (there is no read command for it)
+ *   refresh            → (no value) ask the box to re-report its DP 103 snapshot (Tuya
+ *                        DP_REFRESH, falling back to a time-zone push if the firmware ignores it)
  *
  * Weight unit and time zone are not settable here: they mirror the dashboard account
  * (user.weightUnit / user.timezone) and are synced to the box by the daemon.
@@ -18,7 +18,7 @@ import { buildSettingCommand, SETTING_KEYS, utcOffsetHoursFor } from '../utils/d
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { deviceId, setting } = body ?? {}
-  let { value } = body ?? {}
+  const { value } = body ?? {}
 
   if (!deviceId || !setting) {
     throw createError({ statusCode: 400, statusMessage: 'Missing deviceId or setting' })
@@ -31,13 +31,11 @@ export default defineEventHandler(async (event) => {
   if (!device) throw createError({ statusCode: 404, statusMessage: 'Device not found' })
 
   if (setting === 'refresh') {
-    // The box mirrors the primary account's time zone (same account the daemon syncs).
-    const user = await prisma.user.findFirst()
-    try {
-      value = utcOffsetHoursFor(user?.timezone || 'UTC')
-    } catch {
-      value = 0
-    }
+    // Pure read: ask the daemon to make the box re-report its DP 103 snapshot.
+    const r: { ok: boolean; error?: string; method?: string } = { ok: false }
+    await useNitroApp().hooks.callHook('tuya:refresh-settings' as any, { deviceId: device.id, result: r })
+    if (!r.ok) throw createError({ statusCode: 503, statusMessage: r.error || 'Device is not reachable' })
+    return { success: true, setting: 'refresh', method: r.method, message: `Settings refresh requested (${r.method})` }
   }
 
   let command

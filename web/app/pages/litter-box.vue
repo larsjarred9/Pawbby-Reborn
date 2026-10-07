@@ -653,7 +653,7 @@
               </svg>
               Refreshing from the device…
             </span>
-            <span v-else>Reported by the device {{ settingsAge }} · <button @click="refreshSettings" class="underline hover:text-pawbby-muted">refresh</button></span>
+            <span v-else>Reported by the device {{ settingsAge }} · <button @click="refreshSettings(true)" class="underline hover:text-pawbby-muted">refresh</button></span>
             <span v-if="settingError" class="text-[#D84C4C]">{{ settingError }}</span>
           </div>
         </div>
@@ -1385,12 +1385,16 @@ const saveSleepWindow = () => {
   applySetting('sleep_window', { start, stop }, { sleepStart: start, sleepStop: stop })
 }
 
-// DP 103 is push-only: asking the box to re-report means re-pushing the account
-// time zone (a harmless write). Done whenever the Control tab is opened.
+// Ask the daemon to make the box re-report DP 103 (Tuya DP_REFRESH, or a harmless
+// time-zone push if the firmware ignores it). Done whenever the Control tab is opened.
 let lastSettingsRefresh = 0
-const refreshSettings = async () => {
+const refreshSettings = async (force = false) => {
   if (settingBusy.value.refresh) return
   if (Date.now() - lastSettingsRefresh < 5000) return
+  // The box pushes DP 103 on every change and every ~10 min, so a snapshot that just
+  // arrived is already current — only ask the device when it is older than 30 s.
+  const at = device.value?.settingsUpdatedAt ? new Date(device.value.settingsUpdatedAt).getTime() : 0
+  if (!force && Date.now() - at < 30000) return
   lastSettingsRefresh = Date.now()
   settingBusy.value = { ...settingBusy.value, refresh: true }
   try {

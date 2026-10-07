@@ -68,7 +68,7 @@ curl -X POST http://YOUR_PAWBBY_IP:3333/api/external/action \
           <li><code class="text-white/80">sleep_window</code> — <code class="text-white/80">{"start": "22:00", "stop": "08:30"}</code> (device local time; auto-clean pauses in this window while <code class="text-white/80">sleep_mode</code> — the quiet period — is on)</li>
           <li><code class="text-white/80">litter_type</code> — <code class="text-white/80">0</code> Pawbby Natural, <code class="text-white/80">1</code> Tofu, <code class="text-white/80">2</code> Bentonite, <code class="text-white/80">3</code> Mixed (the box uses the litter density for its litter-level estimate)</li>
           <li><code class="text-white/80">reset_deodorant</code> — no value; resets the pod-life counter on the box</li>
-          <li><code class="text-white/80">refresh</code> — no value; asks the box to re-report its settings (there is no read command, so this re-pushes the account time zone)</li>
+          <li><code class="text-white/80">refresh</code> — no value; asks the box to re-report its settings (Tuya <code class="text-white/80">DP_REFRESH</code>, falling back to a harmless time-zone push if the firmware ignores it); the response's <code class="text-white/80">method</code> tells which one was used</li>
         </ul>
         <p class="text-xs text-pawbby-muted mb-4">The box's weight unit and time zone are not settable here: they always mirror the dashboard account (Settings → weight unit / time zone) and are pushed to the device automatically.</p>
 

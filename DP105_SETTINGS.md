@@ -188,15 +188,19 @@ estimate ("if you change the cat litter, remember to update it"). Reported back 
 All four ids confirmed on hardware (2026-10-07): each write was echoed in byte 15 within a second, with the DP 115 ACK
 `cat_litter_pawbby` / `cat_litter_tofe` / `cat_litter_bentonite` / `cat_litter_mix`.
 
-**Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it from
-the SDK's cache). `refresh` re-pushes the account time zone (gate 9) — a harmless write that should make the box emit a new
-snapshot; the dashboard does this each time the Control tab is opened. Whether a gate-9 write reliably triggers a DP 103
-push is still to be confirmed on hardware.
+**Reading settings on demand:** DP 103 is push-only (not returned by `DP_QUERY`, and the vendor app only ever read it
+from the SDK's cache). Two ways to get a fresh snapshot, tried in this order by the daemon's `tuya:refresh-settings` hook:
 
-The UI shows optimistic values for up to 60 s and then trusts the next DP 103 push from the box; the Tuya ACK alone is
-not treated as confirmation.
+1. **Tuya `DP_REFRESH` (command `0x12`, a.k.a. `UPDATEDPS` / `LAN_QUERY_DP`)** with `{"dpId":[103]}` — Tuya's purpose-built
+   "please re-report these DPs" request for exactly this kind of push-only datapoint; a pure read with no side effects
+   (`tuyapi`: `device.refresh({ requestedDPS: [103] })`). Whether this firmware honours it for DP 103 is auto-detected:
+   if no snapshot arrives within 3 s the result is remembered and the fallback is used from then on.
+2. **Fallback: re-push the account time zone (gate 9)** — a harmless write that is confirmed to make the box emit DP 103
+   within ~1 s. This is what the vendor app effectively did on every connect.
 
----
+In practice a refresh is rarely needed: the box pushes DP 103 on every setting/state change and every ~10 min, the
+daemon pushes the time zone on connect anyway, and the dashboard caches the latest snapshot. The Control tab only asks the
+device when the cached snapshot is older than 30 s.
 
 ## 5. Status: CONFIRMED on hardware (2026-10-07)
 
@@ -210,7 +214,7 @@ AQAAFQAAAAAXAAAACQABAAEBAQAUAgA8AA==
    sleep 23:00–09:00, autoClean=1, soft=0, sleep=1, autoScreen=1, childLock=1, delay=20, litter=2, deodorant=60
 ```
 
-Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s, so the `refresh` mechanism works.
+Pushing the time zone (gate 9) does make the box emit a fresh DP 103 within ~1 s, so the fallback `refresh` mechanism works. Whether `DP_REFRESH` (0x12) works for DP 103 is auto-detected at first use — check the daemon log for "DP_REFRESH works for DP 103" or "falling back to time-zone push".
 
 ### Bonus: DP 114 / DP 115 are the firmware's ACK channel
 
