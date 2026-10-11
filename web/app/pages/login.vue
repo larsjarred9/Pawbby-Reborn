@@ -33,6 +33,12 @@
           {{ isLoading ? 'Authenticating...' : 'Sign In' }}
         </button>
       </form>
+
+      <div class="mt-6 text-center">
+        <NuxtLink to="/register" class="text-xs text-pawbby-muted hover:text-white transition-colors">
+          Need to set up your admin account? <span class="text-[#3D7A41] font-semibold underline">Create Account</span>
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
@@ -44,6 +50,17 @@ const form = ref({
 })
 const isLoading = ref(false)
 const errorMsg = ref('')
+
+onMounted(async () => {
+  try {
+    const { hasUser, hasPassword } = await $fetch('/api/auth/status')
+    if (!hasUser) {
+      window.location.href = '/register'
+    } else if (hasUser && !hasPassword) {
+      window.location.href = '/set-password'
+    }
+  } catch (e) {}
+})
 
 async function handleLogin() {
   isLoading.value = true
