@@ -74,6 +74,7 @@ jobs:
 
       - name: Build and push image
         if: steps.check.outputs.exists == 'false'
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -143,4 +144,82 @@ jobs:
           fi
 
           git commit -m "chore: release v${VERSION} and update changelog"
+          git push
+
+      - name: Bump version in Umbrel app repo
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.ADDON_REPO_TOKEN }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DIGEST}" ]; then
+            echo "ERROR: Docker image digest is empty."
+            exit 1
+          fi
+
+          gh auth setup-git
+          gh repo clone larsjarred9/Pawbby-Reborn-Umbrel umbrel-repo
+
+          cd umbrel-repo
+
+          # Get release notes if available
+          NOTES="$(gh release view "v${VERSION}" \
+            --repo "${{ github.repository }}" \
+            --json body \
+            --jq '.body' 2>/dev/null || echo "")"
+          export NOTES
+
+          # Update version in umbrel-app.yml and docker-compose.yml
+          node -e '
+            const fs = require("fs");
+
+            // 1. Update umbrel-app.yml
+            const appYmlPath = "pawbby-reborn/umbrel-app.yml";
+            if (!fs.existsSync(appYmlPath)) {
+              console.error("ERROR: File not found:", appYmlPath);
+              process.exit(1);
+            }
+            let appYml = fs.readFileSync(appYmlPath, "utf8");
+            appYml = appYml.replace(/^version:.*$/m, `version: "${process.env.VERSION}"`);
+            const notes = (process.env.NOTES || "").trim();
+            if (notes) {
+              const indented = notes.split("\n").map(l => "  " + l).join("\n");
+              appYml = appYml.replace(/^releaseNotes:.*$/m, "releaseNotes: >-\n" + indented);
+            }
+            fs.writeFileSync(appYmlPath, appYml, "utf8");
+
+            // 2. Update docker-compose.yml
+            const composePath = "pawbby-reborn/docker-compose.yml";
+            if (!fs.existsSync(composePath)) {
+              console.error("ERROR: File not found:", composePath);
+              process.exit(1);
+            }
+            let compose = fs.readFileSync(composePath, "utf8");
+            const imagePattern = /image:\s*ghcr\.io\/larsjarred9\/pawbby-reborn:.*/;
+            if (!imagePattern.test(compose)) {
+              console.error("ERROR: image pattern not found in", composePath);
+              process.exit(1);
+            }
+            compose = compose.replace(
+              imagePattern,
+              `image: ghcr.io/larsjarred9/pawbby-reborn:${process.env.VERSION}@${process.env.DIGEST}`
+            );
+            fs.writeFileSync(composePath, compose, "utf8");
+          '
+
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add pawbby-reborn/umbrel-app.yml pawbby-reborn/docker-compose.yml
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit in Umbrel repo."
+            exit 0
+          fi
+
+          git commit -m "chore: release v${VERSION} (${DIGEST})"
           git push
