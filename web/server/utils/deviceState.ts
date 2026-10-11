@@ -159,28 +159,7 @@ export async function computeDeviceState(device: {
     if (fullTime > replacedTime && fullTime > normalTime) isBinFullState = true
   }
 
-  // Check for persistent Drum Removed state
-  const latestDrumRemoved = await prisma.litterEvent.findFirst({
-    where: {
-      deviceId,
-      OR: [
-        { type: 'drum-removed' },
-        { type: 'tuya-raw-data', rawData: { contains: '"roller_uninstall_ok"' } },
-      ],
-    },
-    orderBy: { timestamp: 'desc' },
-  })
-  const latestDrumInstalled = await prisma.litterEvent.findFirst({
-    where: { deviceId, type: 'drum-installed' },
-    orderBy: { timestamp: 'desc' },
-  })
-  let isDrumRemovedState = false
-  if (latestDrumRemoved) {
-    const removedTime = latestDrumRemoved.timestamp.getTime()
-    const installedTime = latestDrumInstalled ? latestDrumInstalled.timestamp.getTime() : 0
-    if (removedTime > installedTime) isDrumRemovedState = true
-  }
-  let drumRemoved = isDrumRemovedState
+  let drumRemoved = false
 
   // Check DP 116 for status
   const latestDP116Event = await prisma.litterEvent.findFirst({
