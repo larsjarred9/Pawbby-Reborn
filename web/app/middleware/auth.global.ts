@@ -1,21 +1,36 @@
 const PUBLIC_ROUTES = ['/login', '/register', '/set-password']
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { data, error } = await useFetch('/api/auth/status')
-  
-  if (error.value || !data.value) {
+  const fetch = useRequestFetch()
+  let authStatus: {
+    isAuthenticated: boolean
+    isAdmin: boolean
+    hasUser: boolean
+    hasPassword: boolean
+  } | null = null
+
+  try {
+    authStatus = await fetch('/api/auth/status')
+  } catch (err) {
     // Fail closed: if we can't verify auth status, do not allow access to protected routes
     if (!PUBLIC_ROUTES.includes(to.path)) {
       return navigateTo('/login')
     }
     return
   }
+
+  if (!authStatus) {
+    if (!PUBLIC_ROUTES.includes(to.path)) {
+      return navigateTo('/login')
+    }
+    return
+  }
   
-  const { isAuthenticated, hasUser, hasPassword } = data.value
+  const { isAuthenticated, hasUser, hasPassword, isAdmin: userIsAdmin } = authStatus
   
   // Hydrate global auth state for Vue components
   const { isAdmin } = useAuthState()
-  isAdmin.value = !!data.value.isAdmin
+  isAdmin.value = !!userIsAdmin
   
   const isPublicRoute = PUBLIC_ROUTES.includes(to.path)
 

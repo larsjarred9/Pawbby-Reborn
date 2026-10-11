@@ -35,15 +35,22 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  let userRole = session.data.role
-  if (!userRole) {
-    const prisma = (await import('../utils/prisma')).default
-    const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
-    userRole = dbUser?.role ?? 'USER'
+  const prisma = (await import('../utils/prisma')).default
+  const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
+  if (!dbUser) {
+    await session.clear()
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Session expired or user no longer exists.'
+    })
+  }
+
+  let userRole = session.data.role || dbUser.role || 'USER'
+  if (!session.data.role) {
     await session.update({ userId: session.data.userId, role: userRole })
   }
 
   // Attach user ID and role to the context so we can use it in API routes if needed
-  event.context.userId = session.data.userId
+  event.context.userId = dbUser.id
   event.context.userRole = userRole
 })

@@ -6,21 +6,21 @@ export default defineEventHandler(async (event) => {
     password: process.env.SESSION_PASSWORD || 'pawbby-reborn-local-secret-32-chars!',
   }
   const session = await useSession(event, sessionConfig)
-  const isAuthenticated = !!session.data.userId
+
+  // Verify that the session user actually exists in the DB
+  let sessionUser = null
+  if (session.data.userId) {
+    sessionUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
+    if (!sessionUser) {
+      await session.clear()
+    }
+  }
 
   // Check if any user exists in the DB
   const firstUser = await prisma.user.findFirst()
-  
-  let isAdmin = false
-  if (isAuthenticated) {
-    if (session.data.role) {
-      isAdmin = session.data.role === 'ADMIN'
-    } else {
-      // Legacy session without role, check DB
-      const dbUser = await prisma.user.findUnique({ where: { id: session.data.userId } })
-      isAdmin = dbUser?.role === 'ADMIN'
-    }
-  }
+
+  const isAuthenticated = !!sessionUser
+  const isAdmin = sessionUser?.role === 'ADMIN'
 
   return {
     isAuthenticated,
