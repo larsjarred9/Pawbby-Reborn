@@ -196,6 +196,9 @@ export default defineNitroPlugin((nitroApp) => {
       // Disconnect all existing devices
       for (const [id, device] of activeDevices.entries()) {
         try {
+          if (device.client && typeof device.client.destroy === "function") {
+            device.client.destroy();
+          }
           device.disconnect();
         } catch (e) {}
       }
@@ -300,24 +303,33 @@ export default defineNitroPlugin((nitroApp) => {
           });
         }
 
-        currentDevice.on("disconnected", () => {
-          console.log(`[Tuya] Disconnected from device ${config.name}.`);
+        const scheduleRetry = (delayMs = 10000, reason = "") => {
           if (pingIntervals.has(config.id)) {
             clearInterval(pingIntervals.get(config.id));
             pingIntervals.delete(config.id);
           }
           if (!retryTimeouts.has(config.id)) {
+            console.log(
+              `[Tuya] Reconnection scheduled for ${config.name} in ${delayMs / 1000}s${reason ? ` (${reason})` : ""}...`,
+            );
             const timeout = setTimeout(() => {
               retryTimeouts.delete(config.id);
-              // Restart all connections
               startTuyaListener();
-            }, 5000);
+            }, delayMs);
             retryTimeouts.set(config.id, timeout);
           }
+        };
+
+        currentDevice.on("disconnected", () => {
+          console.log(`[Tuya] Disconnected from device ${config.name}.`);
+          scheduleRetry(5000, "disconnected");
         });
 
         currentDevice.on("error", (error: any) => {
           console.error(`[Tuya] Error for ${config.name}!`, error);
+          if (!currentDevice.isConnected()) {
+            scheduleRetry(10000, "socket error while offline");
+          }
         });
 
         let lastPayloadStr = "";
@@ -810,6 +822,11 @@ export default defineNitroPlugin((nitroApp) => {
         currentDevice.on("connected", () => {
           console.log(`[Tuya] Connected to device ${config.name}!`);
 
+          if (retryTimeouts.has(config.id)) {
+            clearTimeout(retryTimeouts.get(config.id));
+            retryTimeouts.delete(config.id);
+          }
+
           // Immediately request state refresh to synchronize latest DPs
           try {
             currentDevice.get({ schema: true }).catch(() => {});
@@ -847,6 +864,7 @@ export default defineNitroPlugin((nitroApp) => {
                 `[Tuya] Daemon failed to connect ${config.name}:`,
                 e,
               );
+              scheduleRetry(10000, "connect failed");
             });
           })
           .catch((e: any) => {
@@ -854,13 +872,7 @@ export default defineNitroPlugin((nitroApp) => {
               `[Tuya] Daemon failed to find device ${config.name}:`,
               e,
             );
-            if (!retryTimeouts.has(config.id)) {
-              const timeout = setTimeout(() => {
-                retryTimeouts.delete(config.id);
-                startTuyaListener();
-              }, 10000);
-              retryTimeouts.set(config.id, timeout);
-            }
+            scheduleRetry(10000, "find failed");
           });
       }
     } catch (error) {
