@@ -393,7 +393,7 @@
             </div>
 
             <!-- 2x2 Visual Grid of Real Pictures -->
-            <div class="grid grid-cols-2 gap-3.5 max-h-[52vh] overflow-y-auto pr-1">
+            <div class="grid grid-cols-2 gap-3.5 max-h-[46vh] overflow-y-auto pr-1">
               <button
                 v-for="litter in LITTER_CARDS"
                 :key="litter.id"
@@ -429,6 +429,45 @@
                   <span v-if="setupLitterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Selected</span>
                 </div>
                 <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+                <div class="mt-1.5 pt-1.5 border-t border-white/5 flex flex-col gap-0.5">
+                  <span class="text-[10px] text-white/50 font-medium">Density: {{ litter.density }}</span>
+                  <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ litter.tip }}</p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Sensor Tare & Calibration Card -->
+            <div class="p-3.5 bg-white/5 border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-2.5">
+                <svg class="w-5 h-5 text-pawbby-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                </svg>
+                <div class="text-xs">
+                  <span class="text-white font-semibold block">Drum Empty? Zero the scale now</span>
+                  <span class="text-pawbby-muted leading-relaxed block text-[11px] mt-0.5">
+                    Calibrating (taring) on a flat floor with an empty drum ensures accurate cat weighing and prevents false low-litter warnings.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                @click="wizardTareScale"
+                :disabled="isTaring || tareDone"
+                class="shrink-0 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
+                :class="[
+                  tareDone
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-white/10 hover:bg-white/20 text-white border-white/10'
+                ]"
+              >
+                <svg v-if="isTaring" class="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg v-else-if="tareDone" class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span>{{ isTaring ? 'Zeroing...' : tareDone ? 'Scale Zeroed' : 'Zero Scale' }}</span>
               </button>
             </div>
 
@@ -601,6 +640,8 @@ const createdDeviceId = ref<string | null>(null)
 const setupLitterType = ref<number>(0)
 const setupDelay = ref<number>(10)
 const isSavingSetting = ref(false)
+const isTaring = ref(false)
+const tareDone = ref(false)
 
 const DELAY_PRESETS = [
   {
@@ -675,6 +716,8 @@ const closeModal = () => {
   createdDeviceId.value = null
   setupLitterType.value = 0
   setupDelay.value = 10
+  tareDone.value = false
+  isTaring.value = false
 }
 
 const handleAddDevice = async () => {
@@ -707,6 +750,19 @@ const handleAddDevice = async () => {
     alert("Failed to add device")
   } finally {
     isSaving.value = false
+  }
+}
+
+const wizardTareScale = async () => {
+  if (!createdDeviceId.value || isTaring.value) return
+  isTaring.value = true
+  try {
+    await api.triggerTare(createdDeviceId.value)
+    tareDone.value = true
+  } catch (e) {
+    console.warn('Could not zero scale immediately:', e)
+  } finally {
+    isTaring.value = false
   }
 }
 
