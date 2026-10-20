@@ -56,6 +56,8 @@ export interface LitterCard {
   badge: string
   badgeClass: string
   image: string
+  density: string
+  tip: string
 }
 
 export const LITTER_CARDS: LitterCard[] = [
@@ -66,6 +68,8 @@ export const LITTER_CARDS: LitterCard[] = [
     badge: 'Recommended',
     badgeClass: 'bg-emerald-500/80 text-white',
     image: '/litter_natural.jpg',
+    density: 'Lightweight (~2.5–3.0 kg)',
+    tip: 'Lowest weight threshold. Recommended default if using lightweight or flushable litter to avoid false low-litter warnings.',
   },
   {
     id: 1,
@@ -74,6 +78,8 @@ export const LITTER_CARDS: LitterCard[] = [
     badge: 'Tofu Pellets',
     badgeClass: 'bg-amber-500/80 text-white',
     image: '/litter_tofu.jpg',
+    density: 'Low-to-medium density (~2.8–3.2 kg)',
+    tip: 'Standard cylindrical pea/tofu rods. Ensures proper sifting speed and weight tracking.',
   },
   {
     id: 2,
@@ -82,6 +88,8 @@ export const LITTER_CARDS: LitterCard[] = [
     badge: 'Clay Sand',
     badgeClass: 'bg-sky-500/80 text-white',
     image: '/litter_bentonite.jpg',
+    density: 'Heavy density (~3.8–4.5 kg)',
+    tip: 'Requires a denser fill (~3.8–4.5 kg). If your box triggers a low litter alert with light clay, switch to Pawbby Natural or tare the scale.',
   },
   {
     id: 3,
@@ -90,6 +98,8 @@ export const LITTER_CARDS: LitterCard[] = [
     badge: 'Composite Mix',
     badgeClass: 'bg-purple-500/80 text-white',
     image: '/litter_mixed.jpg',
+    density: 'Medium density (~3.2–3.8 kg)',
+    tip: 'Composite blend of tofu pellets and bentonite granules. Balanced weight profile.',
   },
 ]
 

@@ -964,11 +964,25 @@
               <span v-if="effectiveSettings?.litterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Active</span>
             </div>
             <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+            <div class="mt-1.5 pt-1.5 border-t border-white/5 flex flex-col gap-0.5">
+              <span class="text-[10px] text-white/50 font-medium">Density: {{ litter.density }}</span>
+              <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ litter.tip }}</p>
+            </div>
           </button>
         </div>
 
+        <!-- Tare / Calibration Hint -->
+        <div class="mt-4 p-3 bg-white/5 border border-white/10 rounded-xl flex items-start gap-2.5">
+          <svg class="w-4 h-4 text-pawbby-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="text-[11px] text-pawbby-muted leading-normal">
+            <span class="text-white font-semibold">Sensor calibration note:</span> The physical box uses weight to estimate fill level. If you see an unexpected low-litter warning after filling, ensure the box is on a hard flat floor and tap <strong class="text-white">Zero / Tare Scale</strong> on an empty drum, or use the lighter <strong class="text-white">Pawbby Natural</strong> profile.
+          </div>
+        </div>
+
         <!-- Footer -->
-        <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
           <span class="text-xs text-pawbby-mutedDark">Updates box level sensor calibration</span>
           <button @click="showLitterModal = false" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-colors">
             Done
@@ -1018,7 +1032,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useApi, LITTER_TYPES, type Device, type Pet, type DeviceLog, type User, type DeviceSettings } from '~/composables/useApi'
+import { useApi, LITTER_TYPES, LITTER_CARDS, type Device, type Pet, type DeviceLog, type User, type DeviceSettings } from '~/composables/useApi'
 import { Bar, Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js'
 
@@ -1410,41 +1424,6 @@ const settingToggles: { key: ToggleKey; field: keyof DeviceSettings; title: stri
     key: 'child_lock', field: 'childLock', title: 'Screen lock', color: 'bg-pawbby-brown',
     hint: 'Lock the buttons on the box to prevent accidental presses',
     icon: svgIcon('M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'),
-  },
-]
-
-const LITTER_CARDS = [
-  {
-    id: 0,
-    name: 'Pawbby Natural',
-    simpleLabel: 'Plant-based starch pellets',
-    badge: 'Recommended',
-    badgeClass: 'bg-emerald-500/80 text-white',
-    image: '/litter_natural.jpg',
-  },
-  {
-    id: 1,
-    name: 'Tofu Litter',
-    simpleLabel: 'Flushable cylindrical rods',
-    badge: 'Tofu Pellets',
-    badgeClass: 'bg-amber-500/80 text-white',
-    image: '/litter_tofu.jpg',
-  },
-  {
-    id: 2,
-    name: 'Bentonite Clay',
-    simpleLabel: 'Classic clumping sand',
-    badge: 'Clay Sand',
-    badgeClass: 'bg-sky-500/80 text-white',
-    image: '/litter_bentonite.jpg',
-  },
-  {
-    id: 3,
-    name: 'Mixed Blend',
-    simpleLabel: 'Tofu rods + clay granules',
-    badge: 'Composite Mix',
-    badgeClass: 'bg-purple-500/80 text-white',
-    image: '/litter_mixed.jpg',
   },
 ]
 

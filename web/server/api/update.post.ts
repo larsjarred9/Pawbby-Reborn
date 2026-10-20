@@ -36,10 +36,21 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Upgrade script not found at repository root' })
   }
   
+  const logPath = path.join(rootPath, 'upgrade.log')
+  const outLog = fs.openSync(logPath, 'a')
+
+  // Append timestamp header to upgrade.log
+  fs.writeSync(outLog, `\n=== Pawbby Upgrade Started at ${new Date().toISOString()} ===\n`)
+
   const child = spawn('bash', ['./upgrade.sh'], {
     cwd: rootPath,
     detached: true,
-    stdio: 'ignore'
+    stdio: ['ignore', outLog, outLog],
+    env: {
+      ...process.env,
+      // Ensure local user bin and global npm/pm2 locations are reachable
+      PATH: `${process.env.PATH || ''}:/usr/local/bin:/usr/bin:/bin:/home/${process.env.USER || 'pi'}/.npm-global/bin`
+    }
   })
   
   child.unref() // Let the Node.js event loop not wait for this child
