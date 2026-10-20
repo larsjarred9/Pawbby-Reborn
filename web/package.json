@@ -16,6 +16,7 @@
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
     "@libsql/client": "^0.17.4",
+    "@nuxtjs/i18n": "^10.6.0",
     "@prisma/adapter-libsql": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "chart.js": "^4.5.1",

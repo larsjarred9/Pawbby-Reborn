@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "back": "Terug",
+    "continue": "Doorgaan",
+    "done": "Klaar",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "dismiss": "Sluiten",
+    "connecting": "Verbinden..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Activiteit",
+    "settings": "Instellingen",
+    "users": "Gebruikersbeheer",
+    "about": "Over Pawbby",
+    "logout": "Uitloggen"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Configureer je voorkeuren, notificaties en integraties.",
+    "general": "Algemeen",
+    "language": "Taal",
+    "languageSubtitle": "Selecteer de taal van je dashboard",
+    "timezone": "Tijdzone",
+    "weightUnit": "Gewichtseenheid",
+    "account": "Account",
+    "security": "Beveiliging",
+    "notifications": "Meldingen",
+    "integrations": "Integraties",
+    "system": "Systeem",
+    "checkForUpdates": "Controleren op updates",
+    "exportDb": "Exporteer geanonimiseerde DB",
+    "clearCache": "Opgeslagen gegevens wissen"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Plantaardige zetmeelkorrels",
+        "badge": "Aanbevolen",
+        "density": "Lichtgewicht (~2.5–3.0 kg)",
+        "tip": "Laagste gewichtsdrempel. Aanbevolen standaardkeuze bij lichte korrels om valse low-litter meldingen te voorkomen."
+      },
+      "tofu": {
+        "name": "Tofu Korrels",
+        "label": "Doorspoelbare cilindrische staafjes",
+        "badge": "Tofu Pellets",
+        "density": "Laag-tot-gemiddelde dichtheid (~2.8–3.2 kg)",
+        "tip": "Standaard cilindrische tofu-staafjes. Zorgt voor juiste zeefsnelheid en gewichtsmeting."
+      },
+      "bentonite": {
+        "name": "Bentoniet Klei",
+        "label": "Klassiek klontvormend zand",
+        "badge": "Klei Zand",
+        "density": "Hoge dichtheid (~3.8–4.5 kg)",
+        "tip": "Vereist een zwaardere vulling (~3.8–4.5 kg). Geeft de box een low-litter melding bij lichte klei, kies dan Pawbby Natural of tareer de weegschaal."
+      },
+      "mixed": {
+        "name": "Mix Mengsel",
+        "label": "Tofu staafjes + kleikorrels",
+        "badge": "Composiet Mix",
+        "density": "Gemiddelde dichtheid (~3.2–3.8 kg)",
+        "tip": "Composietmix van tofu en bentoniet. Gebalanceerd gewichtsprofiel."
+      }
+    },
+    "actions": {
+      "clean": "Nu reinigen",
+      "flatten": "Grit egaliseren",
+      "empty": "Trommel legen",
+      "tare": "Nulpunt kalibreren (Tare)",
+      "cancelClean": "Cyclus stoppen"
+    },
+    "status": {
+      "idle": "Stand-by",
+      "cleaning": "Reinigen",
+      "flattening": "Egaliseren",
+      "empty": "Legen",
+      "offline": "Offline",
+      "drumRemoved": "Trommel verwijderd",
+      "sufficient": "Voldoende",
+      "low": "Grit bijna op"
+    }
+  }
+}

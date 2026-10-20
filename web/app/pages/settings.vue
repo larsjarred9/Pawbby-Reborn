@@ -39,17 +39,17 @@
       </button>
 
       <!-- Language -->
-      <button class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+      <button @click="showLanguageModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
-          <span class="font-medium text-lg">Language</span>
+          <span class="font-medium text-lg">{{ $t('settings.language') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">English</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ currentLocaleName }}</span>
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
             fill="currentColor">
@@ -391,6 +391,40 @@
       </div>
     </div>
 
+    <!-- Language Modal -->
+    <div v-if="showLanguageModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
+        <h3 class="text-xl font-bold text-white mb-2">{{ $t('settings.language') }}</h3>
+        <p class="text-xs text-pawbby-muted mb-6">{{ $t('settings.languageSubtitle') }}</p>
+        <div class="space-y-2">
+          <button
+            v-for="lang in availableLocalesList"
+            :key="lang.code"
+            type="button"
+            @click="changeLocale(lang.code)"
+            :class="[
+              locale === lang.code
+                ? 'border-pawbby-primary bg-pawbby-primary/10 text-white'
+                : 'border-white/10 bg-black/30 hover:bg-black/50 text-white/80'
+            ]"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl border transition-colors text-left"
+          >
+            <span class="font-medium text-sm">{{ lang.name }}</span>
+            <svg v-if="locale === lang.code" class="w-5 h-5 text-pawbby-primary" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <div class="mt-6">
+          <button @click="showLanguageModal = false"
+            class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            {{ $t('common.done') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Timezone Modal -->
     <div v-if="showTimezoneModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div
@@ -533,17 +567,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi, type User } from '~/composables/useApi'
+import { useI18n } from '#imports'
 
 definePageMeta({
   layout: 'detail'
 })
 
+const { locale, locales, setLocale } = useI18n()
 const api = useApi()
 const router = useRouter()
 const user = ref<User | null>(null)
+
+const showLanguageModal = ref(false)
+const availableLocalesList = computed(() => {
+  return (locales.value as Array<{ code: string; name: string }>).map(l => ({
+    code: l.code,
+    name: l.name || l.code
+  }))
+})
+
+const currentLocaleName = computed(() => {
+  const current = availableLocalesList.value.find(l => l.code === locale.value)
+  return current ? current.name : 'English'
+})
+
+const changeLocale = async (code: string) => {
+  await setLocale(code)
+}
 
 const checking = ref(false)
 const hasChecked = ref(false)

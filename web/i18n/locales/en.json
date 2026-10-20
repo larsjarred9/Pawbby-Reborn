@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "continue": "Continue",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "dismiss": "Dismiss",
+    "connecting": "Connecting..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Activity",
+    "settings": "Settings",
+    "users": "User Management",
+    "about": "About Pawbby",
+    "logout": "Logout"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your application preferences, notifications, and integrations.",
+    "general": "General",
+    "language": "Language",
+    "languageSubtitle": "Select your dashboard language",
+    "timezone": "Timezone",
+    "weightUnit": "Weight Unit",
+    "account": "Account",
+    "security": "Security",
+    "notifications": "Notifications",
+    "integrations": "Integrations",
+    "system": "System",
+    "checkForUpdates": "Check for Updates",
+    "exportDb": "Export Anonymized DB",
+    "clearCache": "Remove stored information"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Plant-based starch pellets",
+        "badge": "Recommended",
+        "density": "Lightweight (~2.5–3.0 kg)",
+        "tip": "Lowest weight threshold. Recommended default if using lightweight or flushable litter to avoid false low-litter warnings."
+      },
+      "tofu": {
+        "name": "Tofu Litter",
+        "label": "Flushable cylindrical rods",
+        "badge": "Tofu Pellets",
+        "density": "Low-to-medium density (~2.8–3.2 kg)",
+        "tip": "Standard cylindrical pea/tofu rods. Ensures proper sifting speed and weight tracking."
+      },
+      "bentonite": {
+        "name": "Bentonite Clay",
+        "label": "Classic clumping sand",
+        "badge": "Clay Sand",
+        "density": "Heavy density (~3.8–4.5 kg)",
+        "tip": "Requires a denser fill (~3.8–4.5 kg). If your box triggers a low litter alert with light clay, switch to Pawbby Natural or tare the scale."
+      },
+      "mixed": {
+        "name": "Mixed Blend",
+        "label": "Tofu rods + clay granules",
+        "badge": "Composite Mix",
+        "density": "Medium density (~3.2–3.8 kg)",
+        "tip": "Composite blend of tofu pellets and bentonite granules. Balanced weight profile."
+      }
+    },
+    "actions": {
+      "clean": "Clean Now",
+      "flatten": "Level Litter",
+      "empty": "Empty Drum",
+      "tare": "Zero / Tare Scale",
+      "cancelClean": "Stop Cycle"
+    },
+    "status": {
+      "idle": "Standby",
+      "cleaning": "Cleaning",
+      "flattening": "Leveling",
+      "empty": "Emptying",
+      "offline": "Offline",
+      "drumRemoved": "Drum Removed",
+      "sufficient": "Sufficient",
+      "low": "Low Litter"
+    }
+  }
+}
