@@ -1,0 +1,91 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "back": "Indietro",
+    "continue": "Continua",
+    "done": "Fatto",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Operazione riuscita",
+    "dismiss": "Chiudi",
+    "connecting": "Connessione in corso..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Attività",
+    "settings": "Impostazioni",
+    "users": "Gestione utenti",
+    "about": "Info su Pawbby",
+    "logout": "Disconnetti"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "subtitle": "Configura le preferenze dell'applicazione, le notifiche e le integrazioni.",
+    "general": "Generale",
+    "language": "Lingua",
+    "languageSubtitle": "Seleziona la lingua della tua dashboard",
+    "timezone": "Fuso orario",
+    "weightUnit": "Unità di peso",
+    "account": "Account",
+    "security": "Sicurezza",
+    "notifications": "Notifiche",
+    "integrations": "Integrazioni",
+    "system": "Sistema",
+    "checkForUpdates": "Controlla aggiornamenti",
+    "exportDb": "Esporta database anonimizzato",
+    "clearCache": "Cancella dati memorizzati"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Pellet di amido vegetale",
+        "badge": "Consigliato",
+        "density": "Leggera (~2,5–3,0 kg)",
+        "tip": "Soglia di peso più bassa. Predefinito consigliato se si usa lettiera leggera o biodegradabile per evitare falsi allarmi di lettiera insufficiente."
+      },
+      "tofu": {
+        "name": "Lettiera in tofu",
+        "label": "Cilindretti biodegradabili",
+        "badge": "Pellet di tofu",
+        "density": "Densità medio-bassa (~2,8–3,2 kg)",
+        "tip": "Cilindretti standard di piselli/tofu. Garantisce una velocità di setacciatura ottimale e un tracciamento accurato del peso."
+      },
+      "bentonite": {
+        "name": "Argilla bentonite",
+        "label": "Classica sabbia agglomerante",
+        "badge": "Sabbia d'argilla",
+        "density": "Alta densità (~3,8–4,5 kg)",
+        "tip": "Richiede un riempimento più denso (~3,8–4,5 kg). Se la lettiera attiva l'allarme con argilla leggera, passa a Pawbby Natural o azzera la bilancia."
+      },
+      "mixed": {
+        "name": "Miscela combinata",
+        "label": "Cilindretti di tofu + granuli d'argilla",
+        "badge": "Miscela composita",
+        "density": "Densità media (~3,2–3,8 kg)",
+        "tip": "Miscela composita di pellet di tofu e granuli di bentonite. Profilo di peso equilibrato."
+      }
+    },
+    "actions": {
+      "clean": "Pulisci ora",
+      "flatten": "Livella lettiera",
+      "empty": "Svuota tamburo",
+      "tare": "Azzera bilancia (Tara)",
+      "cancelClean": "Arresta ciclo"
+    },
+    "status": {
+      "idle": "In attesa",
+      "cleaning": "Pulizia in corso",
+      "flattening": "Livellamento in corso",
+      "empty": "Svuotamento",
+      "offline": "Non in linea",
+      "drumRemoved": "Tamburo rimosso",
+      "sufficient": "Sufficiente",
+      "low": "Lettiera insufficiente"
+    }
+  }
+}
+

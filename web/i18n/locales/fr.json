@@ -1,0 +1,91 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "continue": "Continuer",
+    "done": "Terminé",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "dismiss": "Fermer",
+    "connecting": "Connexion en cours..."
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "activity": "Activité",
+    "settings": "Paramètres",
+    "users": "Gestion des utilisateurs",
+    "about": "À propos de Pawbby",
+    "logout": "Déconnexion"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Configurez les préférences de votre application, les notifications et les intégrations.",
+    "general": "Général",
+    "language": "Langue",
+    "languageSubtitle": "Sélectionnez la langue de votre tableau de bord",
+    "timezone": "Fuseau horaire",
+    "weightUnit": "Unité de poids",
+    "account": "Compte",
+    "security": "Sécurité",
+    "notifications": "Notifications",
+    "integrations": "Intégrations",
+    "system": "Système",
+    "checkForUpdates": "Vérifier les mises à jour",
+    "exportDb": "Exporter la base de données anonymisée",
+    "clearCache": "Effacer les données stockées"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Granulés d'amidon végétal",
+        "badge": "Recommandé",
+        "density": "Légère (~2,5–3,0 kg)",
+        "tip": "Seuil de poids le plus bas. Choix recommandé par défaut pour les litières légères ou jetables dans les toilettes afin d'éviter les fausses alertes de niveau bas."
+      },
+      "tofu": {
+        "name": "Litière de tofu",
+        "label": "Bâtonnets cylindriques jetables",
+        "badge": "Granulés de tofu",
+        "density": "Densité faible à moyenne (~2,8–3,2 kg)",
+        "tip": "Bâtonnets standard de pois/tofu. Assure une vitesse de tamisage optimale et un suivi précis du poids."
+      },
+      "bentonite": {
+        "name": "Argile bentonite",
+        "label": "Sable agglomérant classique",
+        "badge": "Sable d'argile",
+        "density": "Haute densité (~3,8–4,5 kg)",
+        "tip": "Nécessite un remplissage plus dense (~3,8–4,5 kg). Si votre bac signale un manque de litière avec de l'argile légère, passez à Pawbby Natural ou tarez la balance."
+      },
+      "mixed": {
+        "name": "Mélange combiné",
+        "label": "Bâtonnets de tofu + granulés d'argile",
+        "badge": "Mélange composite",
+        "density": "Densité moyenne (~3,2–3,8 kg)",
+        "tip": "Mélange composite de granulés de tofu et d'argile bentonite. Profil de poids équilibré."
+      }
+    },
+    "actions": {
+      "clean": "Nettoyer maintenant",
+      "flatten": "Niveler la litière",
+      "empty": "Vider le tambour",
+      "tare": "Mettre à zéro (Tarer)",
+      "cancelClean": "Arrêter le cycle"
+    },
+    "status": {
+      "idle": "En veille",
+      "cleaning": "Nettoyage",
+      "flattening": "Nivellement",
+      "empty": "Vidange",
+      "offline": "Hors ligne",
+      "drumRemoved": "Tambour retiré",
+      "sufficient": "Suffisant",
+      "low": "Litière faible"
+    }
+  }
+}
+

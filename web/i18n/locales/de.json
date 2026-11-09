@@ -1,0 +1,91 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "done": "Fertig",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "dismiss": "Schließen",
+    "connecting": "Verbindung wird hergestellt..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Aktivität",
+    "settings": "Einstellungen",
+    "users": "Benutzerverwaltung",
+    "about": "Über Pawbby",
+    "logout": "Abmelden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Konfigurieren Sie Anwendungseinstellungen, Benachrichtigungen und Integrationen.",
+    "general": "Allgemein",
+    "language": "Sprache",
+    "languageSubtitle": "Wählen Sie die Sprache für Ihr Dashboard",
+    "timezone": "Zeitzone",
+    "weightUnit": "Gewichtseinheit",
+    "account": "Konto",
+    "security": "Sicherheit",
+    "notifications": "Benachrichtigungen",
+    "integrations": "Integrationen",
+    "system": "System",
+    "checkForUpdates": "Nach Updates suchen",
+    "exportDb": "Anonymisierte DB exportieren",
+    "clearCache": "Gespeicherte Daten löschen"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Pflanzliche Stärkepellets",
+        "badge": "Empfohlen",
+        "density": "Geringes Gewicht (~2,5–3,0 kg)",
+        "tip": "Niedrigste Gewichtsschwelle. Empfohlene Standardeinstellung bei Verwendung leichter oder spülbarer Streu, um Fehlalarme bei niedrigem Streustand zu vermeiden."
+      },
+      "tofu": {
+        "name": "Tofu-Streu",
+        "label": "Spülbare zylindrische Stäbchen",
+        "badge": "Tofu-Pellets",
+        "density": "Geringe bis mittlere Dichte (~2,8–3,2 kg)",
+        "tip": "Klassische zylindrische Erbsen-/Tofustäbchen. Gewährleistet optimale Siebgeschwindigkeit und Gewichtserfassung."
+      },
+      "bentonite": {
+        "name": "Bentonit-Ton",
+        "label": "Klassischer Klumpstreu-Sand",
+        "badge": "Tonsand",
+        "density": "Hohe Dichte (~3,8–4,5 kg)",
+        "tip": "Erfordert eine dichtere Füllung (~3,8–4,5 kg). Wenn Ihre Box bei leichtem Ton Streumangel meldet, wechseln Sie zu Pawbby Natural oder tarieren Sie die Waage."
+      },
+      "mixed": {
+        "name": "Mischstreu",
+        "label": "Tofustäbchen + Tongranulat",
+        "badge": "Verbundmischung",
+        "density": "Mittlere Dichte (~3,2–3,8 kg)",
+        "tip": "Verbundmischung aus Tofu-Pellets und Bentonit-Granulat. Ausgewogenes Gewichtsprofil."
+      }
+    },
+    "actions": {
+      "clean": "Jetzt reinigen",
+      "flatten": "Streu glätten",
+      "empty": "Trommel leeren",
+      "tare": "Waage nullen (Tara)",
+      "cancelClean": "Zyklus stoppen"
+    },
+    "status": {
+      "idle": "Bereit",
+      "cleaning": "Reinigung",
+      "flattening": "Glätten",
+      "empty": "Leeren",
+      "offline": "Offline",
+      "drumRemoved": "Trommel entfernt",
+      "sufficient": "Ausreichend",
+      "low": "Streu fast leer"
+    }
+  }
+}
+

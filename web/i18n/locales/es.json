@@ -1,0 +1,91 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "done": "Hecho",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "dismiss": "Cerrar",
+    "connecting": "Conectando..."
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "activity": "Actividad",
+    "settings": "Ajustes",
+    "users": "Gestión de usuarios",
+    "about": "Acerca de Pawbby",
+    "logout": "Cerrar sesión"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "subtitle": "Configura las preferencias de la aplicación, notificaciones e integraciones.",
+    "general": "General",
+    "language": "Idioma",
+    "languageSubtitle": "Selecciona el idioma de tu panel",
+    "timezone": "Zona horaria",
+    "weightUnit": "Unidad de peso",
+    "account": "Cuenta",
+    "security": "Seguridad",
+    "notifications": "Notificaciones",
+    "integrations": "Integraciones",
+    "system": "Sistema",
+    "checkForUpdates": "Buscar actualizaciones",
+    "exportDb": "Exportar base de datos anonimizada",
+    "clearCache": "Borrar datos almacenados"
+  },
+  "litter": {
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Pellets de almidón vegetal",
+        "badge": "Recomendado",
+        "density": "Ligera (~2,5–3,0 kg)",
+        "tip": "Umbral de peso más bajo. Opción predeterminada recomendada para arena ligera o biodegradable para evitar falsas alertas de arena baja."
+      },
+      "tofu": {
+        "name": "Arena de tofu",
+        "label": "Barras cilíndricas biodegradables",
+        "badge": "Pellets de tofu",
+        "density": "Densidad baja a media (~2,8–3,2 kg)",
+        "tip": "Barras estándar de guisante/tofu. Garantiza una velocidad de tamizado adecuada y un seguimiento preciso del peso."
+      },
+      "bentonite": {
+        "name": "Arcilla bentonita",
+        "label": "Arena aglomerante clásica",
+        "badge": "Arena de arcilla",
+        "density": "Alta densidad (~3,8–4,5 kg)",
+        "tip": "Requiere un llenado más denso (~3,8–4,5 kg). Si tu arenero activa alerta de poca arena con arcilla ligera, cambia a Pawbby Natural o tara la báscula."
+      },
+      "mixed": {
+        "name": "Mezcla combinada",
+        "label": "Barras de tofu + gránulos de arcilla",
+        "badge": "Mezcla compuesta",
+        "density": "Densidad media (~3,2–3,8 kg)",
+        "tip": "Mezcla compuesta de pellets de tofu y gránulos de bentonita. Perfil de peso equilibrado."
+      }
+    },
+    "actions": {
+      "clean": "Limpiar ahora",
+      "flatten": "Nivelar arena",
+      "empty": "Vaciar tambor",
+      "tare": "Calibrar / Poner a cero (Tara)",
+      "cancelClean": "Detener ciclo"
+    },
+    "status": {
+      "idle": "En espera",
+      "cleaning": "Limpieza",
+      "flattening": "Nivelación",
+      "empty": "Vaciando",
+      "offline": "Desconectado",
+      "drumRemoved": "Tambor retirado",
+      "sufficient": "Suficiente",
+      "low": "Poca arena"
+    }
+  }
+}
+
