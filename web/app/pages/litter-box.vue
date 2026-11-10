@@ -1079,32 +1079,61 @@ const editDevice = ref({
 })
 
 let initialDateSet = false
+let isLoadingData = false
 
-const loadData = async () => {
-  const devices = await api.getDevices()
-  device.value = devices.find((d: any) => d.id === deviceId) || null
-  pets.value = await api.getPets()
-  user.value = await api.getUser()
-  
-  if (!initialDateSet && user.value) {
-    selectedDateFilter.value = getLocalYMD(new Date(), user.value.timezone)
-    initialDateSet = true
-  }
+const loadData = async (forceStatic = false) => {
+  if (isLoadingData) return
+  isLoadingData = true
 
-  const rawLogs = await api.getLogs(deviceId)
-  const timeZone = user.value?.timezone || 'UTC'
-
-  logs.value = rawLogs.map((log: any) => {
-    let timestampStr = log.timestamp
-    let localDateStr = log.localDate
-    
-    if (log.rawTimestamp) {
-      timestampStr = formatLogTime(log.rawTimestamp, timeZone)
-      localDateStr = formatLocalDate(log.rawTimestamp, timeZone)
+  try {
+    const promises: Promise<any>[] = [
+      api.getDevices(),
+      api.getLogs(deviceId)
+    ]
+    if (forceStatic || pets.value.length === 0) {
+      promises.push(api.getPets())
     }
+    if (forceStatic || !user.value) {
+      promises.push(api.getUser())
+    }
+
+    const results = await Promise.all(promises)
+    const devices = results[0]
+    const rawLogs = results[1]
+
+    if (results.length > 2) {
+      let idx = 2
+      if (forceStatic || pets.value.length === 0) {
+        pets.value = results[idx++]
+      }
+      if (forceStatic || !user.value) {
+        user.value = results[idx++]
+      }
+    }
+
+    device.value = devices.find((d: any) => d.id === deviceId) || null
     
-    return { ...log, timestamp: timestampStr, localDate: localDateStr }
-  })
+    if (!initialDateSet && user.value) {
+      selectedDateFilter.value = getLocalYMD(new Date(), user.value.timezone)
+      initialDateSet = true
+    }
+
+    const timeZone = user.value?.timezone || 'UTC'
+
+    logs.value = rawLogs.map((log: any) => {
+      let timestampStr = log.timestamp
+      let localDateStr = log.localDate
+      
+      if (log.rawTimestamp) {
+        timestampStr = formatLogTime(log.rawTimestamp, timeZone)
+        localDateStr = formatLocalDate(log.rawTimestamp, timeZone)
+      }
+      
+      return { ...log, timestamp: timestampStr, localDate: localDateStr }
+    })
+  } finally {
+    isLoadingData = false
+  }
 }
 
 const loadHistory = async () => {
@@ -1170,14 +1199,28 @@ const openAssignPetModal = (log: DeviceLog) => {
 const assignPet = async (petId: string) => {
   if (!eventToAssign.value) return
   
+  const targetId = eventToAssign.value.id
+
+  // Instantly close modal and reset state for 0ms UI delay
+  showAssignPetModal.value = false
+  eventToAssign.value = null
+
+  // Optimistic UI update on the local log entry
+  const logItem = logs.value.find((l: any) => l.id === targetId)
+  if (logItem) {
+    logItem.petId = petId
+    const pet = pets.value.find(p => p.id === petId)
+    const petName = pet ? pet.name : 'A cat'
+    if (logItem.type === 'toileted' || logItem.type === 'quick-visit') {
+      logItem.description = logItem.description.replace(/^[^ ]+/, petName)
+    }
+  }
+
   try {
-    await api.assignPetToEvent(eventToAssign.value.id, petId)
-    await loadData() // reload logs to show the new assignment
+    await api.assignPetToEvent(targetId, petId)
   } catch (e) {
     alert("Failed to assign pet")
-  } finally {
-    showAssignPetModal.value = false
-    eventToAssign.value = null
+    await loadData()
   }
 }
 
