@@ -8,7 +8,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </NuxtLink>
-      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">About PAWBBY Reborn</h1>
+      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">{{ $t('profile.about') }}</h1>
     </header>
 
     <!-- Logo -->

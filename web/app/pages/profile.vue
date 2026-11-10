@@ -40,7 +40,7 @@
     <div class="space-y-4">
       <div class="flex items-center justify-between text-white/90">
         <div class="flex items-center">
-          <h3 class="text-lg font-semibold">My Pets</h3>
+          <h3 class="text-lg font-semibold">{{ $t('profile.myPets') }}</h3>
           <span class="mx-2 text-pawbby-mutedDark">&middot;</span>
           <span class="font-semibold">{{ pets.length }}</span>
         </div>
@@ -52,7 +52,7 @@
           @click="openEditPet(pet)">
           <div class="w-16 h-16 rounded-2xl overflow-hidden border border-white/5 bg-white/5">
             <img v-if="pet.imageBase64" :src="pet.imageBase64" class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full flex items-center justify-center text-pawbby-muted text-xs">No img</div>
+            <div v-else class="w-full h-full flex items-center justify-center text-pawbby-muted text-xs">{{ $t('profile.noImg') }}</div>
           </div>
           <span class="text-xs text-pawbby-muted">{{ pet.name }}</span>
         </div>
@@ -80,7 +80,7 @@
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span class="font-medium text-lg">Settings</span>
+          <span class="font-medium text-lg">{{ $t('nav.settings') }}</span>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
@@ -96,7 +96,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <span class="font-medium text-lg">User Management</span>
+          <span class="font-medium text-lg">{{ $t('nav.users') }}</span>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
@@ -114,7 +114,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="font-medium text-lg">About PAWBBY Reborn</span>
+          <span class="font-medium text-lg">{{ $t('profile.about') }}</span>
         </div>
         <div class="flex items-center space-x-2">
           <span class="text-sm text-pawbby-mutedDark">V{{ version }}</span>
@@ -141,7 +141,7 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-white/90">View on GitHub</h3>
+            <h3 class="text-lg font-semibold text-white/90">{{ $t('profile.viewOnGithub') }}</h3>
             <p class="text-xs text-pawbby-muted mt-0.5">Pawbby-Reborn Repository</p>
           </div>
         </div>
@@ -160,7 +160,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
-        Logout
+        {{ $t('profile.logout') }}
       </button>
     </div>
 
@@ -168,48 +168,48 @@
     <div v-if="isEditProfileOpen"
       class="absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
-        <h3 class="text-xl font-bold text-white mb-4">Edit Profile</h3>
+        <h3 class="text-xl font-bold text-white mb-4">{{ $t('profile.editProfile') }}</h3>
         <div class="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pb-2">
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Name</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.name') }}</label>
             <input v-model="profileForm.name" type="text"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Email (Gravatar)</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.email') }}</label>
             <input v-model="profileForm.email" type="email"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
           
           <div class="border-t border-white/10 pt-4 mt-2">
             <button @click="showPasswordFields = !showPasswordFields" class="flex items-center justify-between w-full text-left group">
-              <h4 class="text-sm font-bold text-white group-hover:text-pawbby-primary transition-colors">Change Password</h4>
+              <h4 class="text-sm font-bold text-white group-hover:text-pawbby-primary transition-colors">{{ $t('profile.changePassword') }}</h4>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted transition-transform duration-300" :class="{ 'rotate-180': showPasswordFields }" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
             </button>
             <div v-show="showPasswordFields" class="space-y-3 mt-3 animate-fade-in-up">
-              <input v-model="profileForm.currentPassword" type="password" placeholder="Current Password"
+              <input v-model="profileForm.currentPassword" type="password" :placeholder="$t('profile.currentPassword')"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
-              <input v-model="profileForm.newPassword" type="password" placeholder="New Password"
+              <input v-model="profileForm.newPassword" type="password" :placeholder="$t('profile.newPassword')"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
-              <input v-model="profileForm.confirmPassword" type="password" placeholder="Confirm New Password"
+              <input v-model="profileForm.confirmPassword" type="password" :placeholder="$t('profile.confirmPassword')"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-pawbby-primary" />
               <p v-if="passwordError" class="text-[#D84C4C] text-xs">{{ passwordError }}</p>
-              <p v-if="passwordSuccess" class="text-[#3D7A41] text-xs">Password updated successfully!</p>
+              <p v-if="passwordSuccess" class="text-[#3D7A41] text-xs">{{ $t('profile.passwordUpdated') }}</p>
             </div>
           </div>
         </div>
         <div class="flex space-x-3 mt-4">
           <button @click="closeEditProfile"
-            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
+            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">{{ $t('common.cancel') }}</button>
           <button @click="saveProfile" :disabled="isSavingProfile"
             class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors disabled:opacity-50 flex justify-center items-center">
             <svg v-if="isSavingProfile" class="animate-spin -ml-1 mr-2 h-4 w-4 text-pawbby-bg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Save
+            {{ $t('common.save') }}
           </button>
         </div>
       </div>
@@ -220,13 +220,13 @@
       class="absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-white">{{ isEditingPetId ? 'Edit Pet' : 'Add Pet' }}</h3>
+          <h3 class="text-xl font-bold text-white">{{ isEditingPetId ? $t('profile.editPet') : $t('profile.addPet') }}</h3>
           <div v-if="isEditingPetId" class="flex items-center space-x-3">
             <button @click="openExportModal"
-              class="text-[#3D7A41] hover:text-[#3D7A41]/80 transition-colors text-sm font-medium">Export CSV</button>
+              class="text-[#3D7A41] hover:text-[#3D7A41]/80 transition-colors text-sm font-medium">{{ $t('profile.exportCsv') }}</button>
             <span class="text-white/20">|</span>
             <button @click="deletePet"
-              class="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">Delete</button>
+              class="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">{{ $t('common.delete') }}</button>
           </div>
         </div>
 
@@ -245,25 +245,25 @@
               </div>
               <div
                 class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
-                Upload
+                {{ $t('profile.upload') }}
               </div>
             </div>
             <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
           </div>
 
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Name</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.name') }}</label>
             <input v-model="petForm.name" type="text"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
           <div class="flex space-x-3">
             <div class="flex-1">
-              <label class="block text-sm text-pawbby-muted mb-1">Birthday</label>
+              <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.birthday') }}</label>
               <input v-model="petForm.birthDate" type="date"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary appearance-none [&::-webkit-calendar-picker-indicator]:invert-[0.6]" />
             </div>
             <div class="flex-1">
-              <label class="block text-sm text-pawbby-muted mb-1 truncate">Weight ({{ user?.weightUnit || 'kg'
+              <label class="block text-sm text-pawbby-muted mb-1 truncate">{{ $t('profile.weight') }} ({{ user?.weightUnit || 'kg'
               }})</label>
               <input v-model.number="petForm.weight" type="number" step="0.1"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
@@ -272,9 +272,9 @@
         </div>
         <div class="flex space-x-3 mt-6">
           <button @click="isEditPetOpen = false"
-            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
+            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">{{ $t('common.cancel') }}</button>
           <button @click="savePet"
-            class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors">Save</button>
+            class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors">{{ $t('common.save') }}</button>
         </div>
       </div>
     </div>
@@ -283,20 +283,20 @@
     <div v-if="isExportModalOpen"
       class="absolute inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
-        <h3 class="text-xl font-bold text-white mb-4">Export History (CSV)</h3>
+        <h3 class="text-xl font-bold text-white mb-4">{{ $t('profile.exportHistory') }}</h3>
         
         <div v-if="!exportHasData" class="text-pawbby-muted text-sm mb-6 text-center">
-          Fetching available dates...
+          {{ $t('profile.fetchingDates') }}
         </div>
         <div v-else class="space-y-4">
           <div class="flex space-x-3">
             <div class="flex-1">
-              <label class="block text-sm text-pawbby-muted mb-1">Start Date</label>
+              <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.startDate') }}</label>
               <input v-model="exportStartDate" type="date" :min="exportMinDate" :max="exportEndDate"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary appearance-none [&::-webkit-calendar-picker-indicator]:invert-[0.6]" />
             </div>
             <div class="flex-1">
-              <label class="block text-sm text-pawbby-muted mb-1">End Date</label>
+              <label class="block text-sm text-pawbby-muted mb-1">{{ $t('profile.endDate') }}</label>
               <input v-model="exportEndDate" type="date" :min="exportStartDate" :max="exportMaxDate"
                 class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary appearance-none [&::-webkit-calendar-picker-indicator]:invert-[0.6]" />
             </div>
@@ -305,9 +305,9 @@
 
         <div class="flex space-x-3 mt-6">
           <button @click="isExportModalOpen = false"
-            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
+            class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">{{ $t('common.cancel') }}</button>
           <a v-if="exportHasData" :href="getExportUrl()" download @click="isExportModalOpen = false"
-            class="flex-1 px-4 py-2 rounded-xl bg-[#3D7A41] text-white font-semibold hover:bg-[#3D7A41]/80 transition-colors text-center block">Download</a>
+            class="flex-1 px-4 py-2 rounded-xl bg-[#3D7A41] text-white font-semibold hover:bg-[#3D7A41]/80 transition-colors text-center block">{{ $t('common.download') }}</a>
         </div>
       </div>
     </div>

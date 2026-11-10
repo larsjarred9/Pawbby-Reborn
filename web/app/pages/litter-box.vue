@@ -12,7 +12,7 @@
         <h1 class="text-lg font-bold text-white/90">{{ device?.name || 'PAWBBY Litter Box' }}</h1>
         <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border"
           :class="isOnline ? 'bg-[#3D7A41]/20 text-[#3D7A41] border-[#3D7A41]/50' : 'bg-white/10 text-pawbby-muted border-white/5'">
-          {{ isOnline ? 'Online' : 'Offline' }}
+          {{ isOnline ? $t('dashboard.online') : $t('dashboard.offline') }}
         </span>
       </div>
       <button v-if="user?.role === 'ADMIN'" @click="openSettings" class="text-white p-2 hover:text-white/80 transition-colors">
@@ -37,7 +37,7 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            <span>Bin Removed</span>
+            <span>{{ $t('litter.status.binRemoved') }}</span>
           </div>
           <div v-else-if="device?.status === 'Drum Removed'"
             class="bg-amber-600/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
@@ -47,7 +47,7 @@
                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span>Drum Removed</span>
+            <span>{{ $t('litter.status.drumRemoved') }}</span>
           </div>
           <div v-else-if="device?.lidOpen"
             class="bg-orange-500/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
@@ -56,7 +56,7 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span>Lid Removed</span>
+            <span>{{ $t('litter.status.lidRemoved') }}</span>
           </div>
           <div v-else-if="device?.status === 'Bin Full'"
             class="bg-[#D84C4C]/90 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center space-x-2 animate-pulse">
@@ -65,14 +65,14 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            <span>Bin Full</span>
+            <span>{{ $t('litter.status.binFull') }}</span>
           </div>
           <template v-else>
             <div class="flex items-baseline text-pawbby-secondary">
               <span class="text-5xl font-bold tracking-tighter">{{ device?.todayToileted || 0 }}</span>
-              <span class="text-sm font-semibold ml-1">times</span>
+              <span class="text-sm font-semibold ml-1">{{ $t('dashboard.times') }}</span>
             </div>
-            <p class="text-pawbby-mutedDark text-xs mt-1">Today Toileted</p>
+            <p class="text-pawbby-mutedDark text-xs mt-1">{{ $t('dashboard.todayToileted') }}</p>
           </template>
         </div>
       </div>
@@ -87,7 +87,7 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
         </svg>
-        <span class="text-sm font-semibold text-white/90 text-center">{{ device?.litterLevel || '-' }}</span>
+        <span class="text-sm font-semibold text-white/90 text-center">{{ formatLitterLevel(device?.litterLevel) }}</span>
       </div>
       <div
         class="bg-pawbby-card rounded-xl p-3 flex flex-col items-center justify-center space-y-2 border border-white/5">
@@ -96,7 +96,7 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
-        <span class="text-sm font-semibold text-white/90 text-center">{{ device?.wasteBin || '-' }}</span>
+        <span class="text-sm font-semibold text-white/90 text-center">{{ formatWasteBin(device?.wasteBin) }}</span>
       </div>
       <div @click="user?.role === 'ADMIN' && (showDeodorizerModal = true)"
         :class="['bg-pawbby-card rounded-xl p-3 flex flex-col items-center justify-center space-y-2 border border-white/5', user?.role === 'ADMIN' ? 'cursor-pointer hover:bg-white/5 transition-colors' : '']">
@@ -105,7 +105,7 @@
           <rect x="7" y="10" width="10" height="10" rx="3" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 7c0-1 1.5-1.5 1.5-3m3 3c0-1 1.5-1.5 1.5-3" />
         </svg>
-        <span class="text-sm font-semibold text-white/90 text-center">{{ deodorizerDaysLeft }} Days</span>
+        <span class="text-sm font-semibold text-white/90 text-center">{{ deodorizerDaysLeft }} {{ $t('litter.status.days') }}</span>
       </div>
     </div>
 
@@ -115,24 +115,24 @@
       <div class="flex justify-around mb-6 border-b border-white/10 pb-2">
         <div @click="activeTab = 'record'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
-            :class="[activeTab === 'record' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Record</span>
+            :class="[activeTab === 'record' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">{{ $t('litter.tabs.record') }}</span>
           <div :class="[activeTab === 'record' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']"></div>
         </div>
         <div @click="activeTab = 'history'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
-            :class="[activeTab === 'history' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">History</span>
+            :class="[activeTab === 'history' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">{{ $t('litter.tabs.history') }}</span>
           <div :class="[activeTab === 'history' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
         <div @click="activeTab = 'control'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
-            :class="[activeTab === 'control' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Control</span>
+            :class="[activeTab === 'control' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">{{ $t('litter.tabs.control') }}</span>
           <div :class="[activeTab === 'control' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
         <div @click="activeTab = 'settings'" class="flex flex-col items-center space-y-1 cursor-pointer">
           <span
-            :class="[activeTab === 'settings' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">Settings</span>
+            :class="[activeTab === 'settings' ? 'text-white font-bold' : 'text-pawbby-muted hover:text-white/80', 'text-lg transition-colors']">{{ $t('litter.tabs.settings') }}</span>
           <div :class="[activeTab === 'settings' ? 'bg-pawbby-primary' : 'bg-transparent', 'w-4 h-1 rounded-full']">
           </div>
         </div>
@@ -141,7 +141,7 @@
       <!-- Record Content -->
       <div v-if="activeTab === 'record'" class="space-y-4 animate-fade-in">
         <div class="flex justify-between items-center relative">
-          <h3 class="text-white/90 font-semibold text-lg">Detailed Record</h3>
+          <h3 class="text-white/90 font-semibold text-lg">{{ $t('litter.record.title') }}</h3>
 
           <!-- Date Picker -->
           <div class="relative">
@@ -151,15 +151,14 @@
         </div>
 
         <p class="text-pawbby-muted text-sm leading-relaxed">
-          PawID matches cats based on their weight, so please update it promptly if there are any changes in your cat's
-          weight.
+          {{ $t('litter.record.pawIdHint') }}
         </p>
 
         <!-- Pet Chips -->
         <div class="flex space-x-2 overflow-x-auto scrollbar-hide py-2">
           <button @click="selectedPetFilter = 'all'"
             :class="[selectedPetFilter === 'all' ? 'bg-pawbby-primary/20 border-pawbby-primary text-pawbby-secondary' : 'bg-white/5 border-white/10 text-pawbby-muted hover:text-white', 'relative flex items-center border rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors']">
-            <span>All</span>
+            <span>{{ $t('common.all') }}</span>
             <div v-if="getAllLogCount > 0"
               class="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-pawbby-secondary text-[10px] font-bold text-pawbby-bg shadow-sm">
               {{ getAllLogCount }}
@@ -377,16 +376,16 @@
       </div>
       <!-- History Content -->
       <div v-if="activeTab === 'history'" class="space-y-6 animate-fade-in py-4">
-        <h3 class="text-white/90 font-semibold text-lg text-center mb-4">Historical Data</h3>
+        <h3 class="text-white/90 font-semibold text-lg text-center mb-4">{{ $t('litter.history.title') }}</h3>
 
         <!-- Chart Selector -->
         <div class="relative w-full mb-6">
           <select v-model="selectedChart"
             class="w-full bg-pawbby-card border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pawbby-primary appearance-none font-medium">
-            <option value="visits">Daily Visit Count</option>
-            <option value="weight">Average Weight ({{ user?.weightUnit === 'lb' ? 'lbs' : 'kg' }})</option>
-            <option value="duration">Average Duration (seconds)</option>
-            <option value="waste">Estimated Waste Output (g)</option>
+            <option value="visits">{{ $t('litter.history.dailyVisits') }}</option>
+            <option value="weight">{{ $t('litter.history.avgWeight', { unit: user?.weightUnit === 'lb' ? 'lbs' : 'kg' }) }}</option>
+            <option value="duration">{{ $t('litter.history.avgDuration') }}</option>
+            <option value="waste">{{ $t('litter.history.estWaste') }}</option>
           </select>
           <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -429,8 +428,8 @@
                 </svg>
               </div>
               <div class="text-left">
-                <h4 class="text-white font-semibold text-lg">Clean Litter</h4>
-                <p class="text-pawbby-muted text-sm mt-1">Start a cleaning cycle</p>
+                <h4 class="text-white font-semibold text-lg">{{ $t('litter.actions.clean') }}</h4>
+                <p class="text-pawbby-muted text-sm mt-1">{{ $t('litter.actions.cleanDesc') }}</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -451,8 +450,8 @@
                 </svg>
               </div>
               <div class="text-left">
-                <h4 class="text-white font-semibold text-lg">Flatten Litter</h4>
-                <p class="text-pawbby-muted text-sm mt-1">Level the litter surface</p>
+                <h4 class="text-white font-semibold text-lg">{{ $t('litter.actions.flatten') }}</h4>
+                <p class="text-pawbby-muted text-sm mt-1">{{ $t('litter.actions.flattenDesc') }}</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -474,8 +473,8 @@
                 </svg>
               </div>
               <div class="text-left">
-                <h4 class="text-white font-semibold text-lg">Empty Litter Box</h4>
-                <p class="text-pawbby-muted text-sm mt-1">Dump all litter into waste bin</p>
+                <h4 class="text-white font-semibold text-lg">{{ $t('litter.actions.empty') }}</h4>
+                <p class="text-pawbby-muted text-sm mt-1">{{ $t('litter.actions.emptyDesc') }}</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -497,8 +496,8 @@
                 </svg>
               </div>
               <div class="text-left">
-                <h4 class="text-white font-semibold text-lg">Zero / Tare Scale</h4>
-                <p class="text-pawbby-muted text-sm mt-1">Calibrate empty scale to 0g</p>
+                <h4 class="text-white font-semibold text-lg">{{ $t('litter.actions.tare') }}</h4>
+                <p class="text-pawbby-muted text-sm mt-1">{{ $t('litter.actions.tareDesc') }}</p>
               </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-muted" viewBox="0 0 20 20"
@@ -514,7 +513,7 @@
       <!-- Settings Content -->
       <div v-if="activeTab === 'settings'" class="space-y-6 animate-fade-in py-4">
         <!-- Hardware Settings (DP 105 / DP 103) -->
-        <h3 class="text-white/90 font-semibold text-lg text-center mb-2">Litter Box Settings</h3>
+        <h3 class="text-white/90 font-semibold text-lg text-center mb-2">{{ $t('litter.settings.title') }}</h3>
 
         <div v-if="!effectiveSettings"
           class="bg-pawbby-card border border-white/10 p-5 rounded-2xl text-center text-pawbby-muted text-sm">
@@ -533,8 +532,8 @@
             <div class="flex items-center space-x-4 min-w-0">
               <div :class="[row.color, 'p-3 rounded-xl text-white shrink-0']" v-html="row.icon"></div>
               <div class="text-left min-w-0">
-                <h4 class="text-white font-semibold">{{ row.title }}</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">{{ row.hint }}</p>
+                <h4 class="text-white font-semibold">{{ $te(getToggleI18nKey(row.key).title) ? $t(getToggleI18nKey(row.key).title) : row.title }}</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">{{ $te(getToggleI18nKey(row.key).desc) ? $t(getToggleI18nKey(row.key).desc) : row.hint }}</p>
               </div>
             </div>
             <button type="button" role="switch" :aria-checked="effectiveSettings[row.field] ? 'true' : 'false'"
@@ -553,8 +552,8 @@
                 </svg>
               </div>
               <div class="text-left">
-                <h4 class="text-white font-semibold">Auto-clean delay</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">How long to wait after your cat leaves before cleaning</p>
+                <h4 class="text-white font-semibold">{{ $t('litter.settings.autoCleanDelay') }}</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">{{ $t('litter.settings.autoCleanDelayDesc') }}</p>
               </div>
             </div>
             <select :value="effectiveSettings.autoCleanDelayMin" :disabled="settingBusy.auto_clean_delay"
@@ -574,10 +573,10 @@
                   </svg>
                 </div>
                 <div class="text-left min-w-0">
-                  <h4 class="text-white font-semibold">Quiet period</h4>
+                  <h4 class="text-white font-semibold">{{ $t('litter.settings.quietPeriod') }}</h4>
                   <p class="text-pawbby-muted text-xs mt-0.5">
-                    <span v-if="effectiveSettings.sleepEnabled">Auto-clean pauses from {{ effectiveSettings.sleepStart }} to {{ effectiveSettings.sleepStop }}</span>
-                    <span v-else>Pause auto-clean during the night or set hours</span>
+                    <span v-if="effectiveSettings.sleepEnabled">{{ $t('litter.settings.quietPeriodActive', { start: effectiveSettings.sleepStart, stop: effectiveSettings.sleepStop }) }}</span>
+                    <span v-else>{{ $t('litter.settings.quietPeriodDesc') }}</span>
                   </p>
                 </div>
               </div>
@@ -622,8 +621,8 @@
                 </svg>
               </div>
               <div class="text-left min-w-0">
-                <h4 class="text-white font-semibold">Litter type</h4>
-                <p class="text-pawbby-muted text-xs mt-0.5">Calibrates the drum scale for your litter density</p>
+                <h4 class="text-white font-semibold">{{ $t('litter.settings.litterType') }}</h4>
+                <p class="text-pawbby-muted text-xs mt-0.5">{{ $t('litter.settings.litterTypeDesc') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0 ml-4">
@@ -667,7 +666,7 @@
               </svg>
               Waiting for the device…
             </span>
-            <span v-else>Reported by the device {{ settingsAge }}</span>
+            <span v-else>{{ $t('litter.settings.reportedBy', { age: settingsAge }) }}</span>
             <span v-if="settingError" class="text-[#D84C4C]">{{ settingError }}</span>
           </div>
         </div>
@@ -680,7 +679,7 @@
       <div
         class="bg-pawbby-card rounded-3xl p-6 w-full max-w-md border border-white/10 relative overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-white">Device Settings</h2>
+          <h2 class="text-xl font-bold text-white">{{ $t('litter.deviceSettings.title') }}</h2>
           <button @click="showSettingsModal = false" class="text-white/50 hover:text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
@@ -691,7 +690,7 @@
 
         <div class="space-y-4">
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Device Name</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('litter.deviceSettings.deviceName') }}</label>
             <input v-model="editDevice.name" type="text"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
@@ -699,7 +698,7 @@
           <details class="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
             <summary
               class="px-4 py-3 text-white/80 font-medium cursor-pointer hover:bg-white/5 transition-colors select-none focus:outline-none flex justify-between items-center">
-              <span>Connection Information</span>
+              <span>{{ $t('litter.deviceSettings.connectionInfo') }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -707,17 +706,17 @@
             </summary>
             <div class="p-4 pt-0 space-y-4 mt-2">
               <div>
-                <label class="block text-sm text-pawbby-muted mb-1">Tuya Device ID</label>
+                <label class="block text-sm text-pawbby-muted mb-1">{{ $t('litter.deviceSettings.tuyaId') }}</label>
                 <input v-model="editDevice.deviceId" type="text"
                   class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
               </div>
               <div>
-                <label class="block text-sm text-pawbby-muted mb-1">IP Address</label>
+                <label class="block text-sm text-pawbby-muted mb-1">{{ $t('litter.deviceSettings.ipAddress') }}</label>
                 <input v-model="editDevice.ipAddress" type="text"
                   class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
               </div>
               <div>
-                <label class="block text-sm text-pawbby-muted mb-1">Local Key</label>
+                <label class="block text-sm text-pawbby-muted mb-1">{{ $t('litter.deviceSettings.localKey') }}</label>
                 <input v-model="editDevice.localKey" type="text"
                   class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
               </div>
@@ -726,13 +725,13 @@
 
           <button @click="handleUpdateDevice" :disabled="isSaving"
             class="w-full py-4 bg-pawbby-primary text-black font-bold rounded-2xl hover:bg-pawbby-secondary transition-colors mt-6">
-            <span v-if="isSaving">Saving...</span>
-            <span v-else>Save Changes</span>
+            <span v-if="isSaving">{{ $t('common.loading') }}</span>
+            <span v-else>{{ $t('litter.deviceSettings.saveChanges') }}</span>
           </button>
 
           <button @click="handleDeleteDevice"
             class="w-full py-3 text-[#D84C4C] font-semibold rounded-2xl hover:bg-white/5 transition-colors">
-            Delete Device
+            {{ $t('litter.deviceSettings.deleteDevice') }}
           </button>
         </div>
       </div>
@@ -909,9 +908,9 @@
         <!-- Header -->
         <div class="flex items-start justify-between mb-4 pb-3 border-b border-white/10">
           <div>
-            <h3 class="text-xl font-bold text-white">Select Litter Type</h3>
+            <h3 class="text-xl font-bold text-white">{{ $t('litter.modal.selectType') }}</h3>
             <p class="text-pawbby-muted text-xs mt-1">
-              Current value: <span class="text-pawbby-primary font-semibold">{{ currentLitterName }}</span>
+              {{ $t('litter.modal.currentValue') }}: <span class="text-pawbby-primary font-semibold">{{ currentLitterName }}</span>
             </p>
           </div>
           <button @click="showLitterModal = false" class="text-white/50 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-white/10">
@@ -922,7 +921,7 @@
         </div>
 
         <p class="text-xs text-white/70 mb-4">
-          Tap the picture matching the cat litter you pour into your box:
+          {{ $t('litter.modal.tapPicture') }}
         </p>
 
         <!-- 2x2 Visual Grid of Real Pictures -->
@@ -943,7 +942,7 @@
           >
             <!-- Litter Photo with Badge & Active Check -->
             <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/40 border border-white/10">
-              <img :src="litter.image" :alt="litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <img :src="litter.image" :alt="$te('litter.types.' + litter.key + '.name') ? $t('litter.types.' + litter.key + '.name') : litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               
               <!-- Active Checkmark Overlay -->
               <div v-if="effectiveSettings?.litterType === litter.id" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pawbby-primary flex items-center justify-center text-black shadow-lg">
@@ -954,19 +953,19 @@
 
               <!-- Badge -->
               <span v-if="litter.badge" :class="[litter.badgeClass, 'absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md shadow']">
-                {{ litter.badge }}
+                {{ $te('litter.types.' + litter.key + '.badge') ? $t('litter.types.' + litter.key + '.badge') : litter.badge }}
               </span>
             </div>
 
             <!-- Name & Simple Label -->
             <div class="flex items-center justify-between">
-              <span class="text-white font-bold text-sm leading-tight">{{ litter.name }}</span>
-              <span v-if="effectiveSettings?.litterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Active</span>
+              <span class="text-white font-bold text-sm leading-tight">{{ $te('litter.types.' + litter.key + '.name') ? $t('litter.types.' + litter.key + '.name') : litter.name }}</span>
+              <span v-if="effectiveSettings?.litterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">{{ $t('litter.modal.active') }}</span>
             </div>
-            <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+            <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ $te('litter.types.' + litter.key + '.label') ? $t('litter.types.' + litter.key + '.label') : litter.simpleLabel }}</span>
             <div class="mt-1.5 pt-1.5 border-t border-white/5 flex flex-col gap-0.5">
-              <span class="text-[10px] text-white/50 font-medium">Density: {{ litter.density }}</span>
-              <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ litter.tip }}</p>
+              <span class="text-[10px] text-white/50 font-medium">{{ $te('litter.types.' + litter.key + '.density') ? $t('litter.types.' + litter.key + '.density') : litter.density }}</span>
+              <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ $te('litter.types.' + litter.key + '.tip') ? $t('litter.types.' + litter.key + '.tip') : litter.tip }}</p>
             </div>
           </button>
         </div>
@@ -977,15 +976,15 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div class="text-[11px] text-pawbby-muted leading-normal">
-            <span class="text-white font-semibold">Sensor calibration note:</span> The physical box uses weight to estimate fill level. If you see an unexpected low-litter warning after filling, ensure the box is on a hard flat floor and tap <strong class="text-white">Zero / Tare Scale</strong> on an empty drum, or use the lighter <strong class="text-white">Pawbby Natural</strong> profile.
+            <span class="text-white font-semibold">{{ $t('litter.modal.calibrationNoteTitle') }}:</span> {{ $t('litter.modal.calibrationNote') }}
           </div>
         </div>
 
         <!-- Footer -->
         <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-          <span class="text-xs text-pawbby-mutedDark">Updates box level sensor calibration</span>
+          <span class="text-xs text-pawbby-mutedDark">{{ $t('litter.modal.updatesSensor') }}</span>
           <button @click="showLitterModal = false" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm transition-colors">
-            Done
+            {{ $t('common.done') }}
           </button>
         </div>
       </div>
@@ -999,30 +998,30 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        <h2 class="text-xl font-bold text-white mb-2">Screen Lock Warning</h2>
+        <h2 class="text-xl font-bold text-white mb-2">{{ $t('litter.lockModal.title') }}</h2>
         <div class="text-pawbby-muted text-sm mb-6 leading-relaxed text-left bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
           <p class="text-white/90 font-medium">
-            ⚠️ <strong>Potentially dangerous action:</strong>
+            ⚠️ <strong>{{ $t('litter.lockModal.danger') }}</strong>
           </p>
           <p class="text-xs text-white/80">
-            Locking the screen disables all physical button presses on the box to prevent accidental presses by children or pets.
+            {{ $t('litter.lockModal.desc1') }}
           </p>
           <p class="text-xs text-white/80">
-            If Pawbby Reborn loses connection, your Wi-Fi changes, or the daemon goes offline while locked, you may be completely locked out from controlling or unlocking the machine from its physical controls.
+            {{ $t('litter.lockModal.desc2') }}
           </p>
           <p class="text-[#D84C4C] text-[11px] font-semibold pt-1 border-t border-white/10">
-            Pawbby Reborn and its developers take NO liability in case this locks out or bricks your machine. Proceed at your own risk.
+            {{ $t('litter.lockModal.desc3') }}
           </p>
         </div>
 
         <div class="space-y-3">
           <button @click="confirmScreenLock"
             class="w-full py-3 bg-[#D84C4C] text-white font-bold rounded-2xl hover:bg-[#D84C4C]/80 transition-colors shadow-lg shadow-[#D84C4C]/20">
-            I Understand the Risk, Lock Buttons
+            {{ $t('litter.lockModal.confirm') }}
           </button>
           <button @click="showScreenLockModal = false"
             class="w-full py-2.5 text-pawbby-muted text-sm hover:text-white transition-colors">
-            Cancel
+            {{ $t('common.cancel') }}
           </button>
         </div>
       </div>
@@ -1041,6 +1040,32 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 definePageMeta({
   layout: 'detail'
 })
+
+const { t, te } = useI18n()
+
+const formatLitterLevel = (level?: string) => {
+  if (!level || level === '-') return '-'
+  if (level === 'Sufficient') return t('litter.status.sufficient')
+  if (level === 'Low') return t('litter.status.low')
+  return level
+}
+
+const formatWasteBin = (status?: string) => {
+  if (!status || status === '-') return '-'
+  if (status === 'Normal') return t('litter.status.normal')
+  if (status === 'Full') return t('litter.status.binFull')
+  return status
+}
+
+const getToggleI18nKey = (key: string) => {
+  switch (key) {
+    case 'auto_clean': return { title: 'litter.settings.autoClean', desc: 'litter.settings.autoCleanDesc' }
+    case 'soft_clumps': return { title: 'litter.settings.softClumps', desc: 'litter.settings.softClumpsDesc' }
+    case 'auto_off_screen': return { title: 'litter.settings.autoOffScreen', desc: 'litter.settings.autoOffScreenDesc' }
+    case 'child_lock': return { title: 'litter.settings.childLock', desc: 'litter.settings.childLockDesc' }
+    default: return { title: '', desc: '' }
+  }
+}
 
 const api = useApi()
 const route = useRoute()
@@ -1497,9 +1522,11 @@ const selectedLitter = computed(() => {
 const currentLitterName = computed(() => {
   const id = effectiveSettings.value?.litterType
   const found = LITTER_CARDS.find(c => c.id === id)
-  if (found) return found.name
+  if (found) {
+    return te(`litter.types.${found.key}.name`) ? t(`litter.types.${found.key}.name`) : found.name
+  }
   if (id !== undefined) return `Type ${id}`
-  return 'Select litter'
+  return t('litter.settings.litterType')
 })
 
 const selectLitter = (id: number) => {
@@ -1508,11 +1535,11 @@ const selectLitter = (id: number) => {
 
 const settingsAge = computed(() => {
   const at = device.value?.settingsUpdatedAt
-  if (!at) return 'never'
+  if (!at) return '-'
   const secs = Math.max(0, Math.round((Date.now() - new Date(at).getTime()) / 1000))
-  if (secs < 60) return `${secs}s ago`
-  if (secs < 3600) return `${Math.round(secs / 60)} min ago`
-  return `${Math.round(secs / 3600)} h ago`
+  if (secs < 60) return `${secs}s`
+  if (secs < 3600) return `${Math.round(secs / 60)} min`
+  return `${Math.round(secs / 3600)} h`
 })
 
 const sleepForm = ref({ start: '22:00', stop: '08:30' })

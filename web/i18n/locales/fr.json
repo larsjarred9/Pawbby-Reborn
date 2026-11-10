@@ -11,7 +11,11 @@
     "error": "Erreur",
     "success": "Succès",
     "dismiss": "Fermer",
-    "connecting": "Connexion en cours..."
+    "connecting": "Connexion en cours...",
+    "close": "Fermer",
+    "download": "Télécharger",
+    "all": "Tous",
+    "saveChanges": "Enregistrer les modifications"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -21,71 +25,222 @@
     "about": "À propos de Pawbby",
     "logout": "Déconnexion"
   },
+  "dashboard": {
+    "noDevices": "Aucun appareil trouvé. Appuyez sur + pour ajouter votre litière connectée.",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "todayToileted": "Visites aujourd'hui",
+    "times": "fois",
+    "updateAvailable": "Mise à jour disponible",
+    "updateDesc": "Une nouvelle version est prête à être installée.",
+    "view": "Afficher"
+  },
+  "profile": {
+    "myPets": "Mes animaux",
+    "editProfile": "Modifier le profil",
+    "addPet": "Ajouter un animal",
+    "editPet": "Modifier l'animal",
+    "noImg": "Pas d'image",
+    "about": "À propos de PAWBBY Reborn",
+    "logout": "Déconnexion",
+    "name": "Nom",
+    "email": "E-mail (Gravatar)",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour avec succès !",
+    "exportCsv": "Exporter en CSV",
+    "upload": "Télécharger",
+    "birthday": "Date de naissance",
+    "weight": "Poids",
+    "exportHistory": "Exporter l'historique (CSV)",
+    "fetchingDates": "Récupération des dates disponibles...",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "viewOnGithub": "Voir sur GitHub",
+    "githubRepo": "Dépôt Pawbby-Reborn"
+  },
   "settings": {
     "title": "Paramètres",
-    "subtitle": "Configurez les préférences de votre application, les notifications et les intégrations.",
+    "subtitle": "Configurez vos préférences d'application, notifications et intégrations.",
     "general": "Général",
     "language": "Langue",
     "languageSubtitle": "Sélectionnez la langue de votre tableau de bord",
     "timezone": "Fuseau horaire",
+    "timezoneSubtitle": "Sélectionnez votre fuseau horaire local.",
     "weightUnit": "Unité de poids",
+    "notificationControls": "Gestion des notifications",
+    "pushNotifications": "Notifications push",
+    "externalApi": "API externe",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Sauvegardes quotidiennes",
+    "checkForUpdates": "Vérifier les mises à jour",
+    "exportDb": "Exporter la base de données anonymisée",
+    "exportDbSubtitle": "Télécharge une copie anonymisée et sécurisée de votre base de données.",
+    "clearCache": "Supprimer les informations enregistrées",
     "account": "Compte",
     "security": "Sécurité",
     "notifications": "Notifications",
     "integrations": "Intégrations",
     "system": "Système",
-    "checkForUpdates": "Vérifier les mises à jour",
-    "exportDb": "Exporter la base de données anonymisée",
-    "clearCache": "Effacer les données stockées"
+    "configured": "Configuré",
+    "setup": "Configurer",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "checking": "Vérification...",
+    "updateAvailable": "Mise à jour disponible !",
+    "upToDate": "À jour",
+    "exportDatabase": "Exporter la base de données",
+    "exportDatabaseText": "Télécharge une copie sécurisée et anonymisée de votre base de données."
+  },
+  "users": {
+    "title": "Gestion des utilisateurs",
+    "localAccounts": "Comptes locaux",
+    "addUser": "+ Ajouter un utilisateur",
+    "addSubUser": "Ajouter un sous-utilisateur",
+    "addSubUserDesc": "Créez un compte en lecture seule pour votre foyer.",
+    "displayName": "Nom affiché",
+    "displayNamePlaceholder": "ex. Jean Dupont",
+    "emailAddress": "Adresse e-mail",
+    "password": "Mot de passe",
+    "adding": "Ajout..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "Bonjour 👋",
+      "step2": "Obtenir l'application 📱",
+      "step3": "Mode appairage 🔄",
+      "step4": "Ajouter au réseau 🌐",
+      "step5": "Lier votre litière 🤝",
+      "step6": "Choisir la litière 🐱",
+      "step7": "Délai de nettoyage ⏱️",
+      "step8": "Terminé ! 🎉"
+    },
+    "step1Desc": "Connectons votre litière intelligente ! D'abord, quel nom voulez-vous lui donner ?",
+    "namePlaceholder": "ex. Litière Salon"
   },
   "litter": {
+    "tabs": {
+      "record": "Rapport",
+      "history": "Historique",
+      "control": "Contrôle",
+      "settings": "Paramètres"
+    },
+    "record": {
+      "title": "Rapport détaillé",
+      "pawIdHint": "PawID identifie les chats selon leur poids. Mettez-le à jour dès que le poids de votre chat change."
+    },
+    "history": {
+      "title": "Données historiques",
+      "dailyVisits": "Visites quotidiennes",
+      "avgWeight": "Poids moyen ({unit})",
+      "avgDuration": "Durée moyenne (secondes)",
+      "estWaste": "Déchets estimés (g)"
+    },
+    "settings": {
+      "title": "Paramètres de la litière",
+      "autoClean": "Nettoyage automatique",
+      "autoCleanDesc": "Nettoyer automatiquement après chaque passage",
+      "softClumps": "Mode selles molles",
+      "softClumpsDesc": "Secoue le tambour 2 à 4 fois avant le nettoyage pour recouvrir les selles",
+      "autoOffScreen": "Extinction automatique de l'écran",
+      "autoOffScreenDesc": "Éteint l'écran après 5 minutes d'inactivité",
+      "childLock": "Verrouillage de l'écran",
+      "childLockDesc": "Verrouille les touches physiques sur la machine pour éviter les appuis involontaires",
+      "autoCleanDelay": "Délai de nettoyage automatique",
+      "autoCleanDelayDesc": "Temps d'attente après la sortie du chat avant de lancer le cycle",
+      "quietPeriod": "Période silencieuse",
+      "quietPeriodDesc": "Suspend le nettoyage automatique la nuit ou pendant des plages définies",
+      "quietPeriodActive": "Nettoyage en pause de {start} à {stop}",
+      "litterType": "Type de litière",
+      "litterTypeDesc": "Calibre la balance du tambour selon la densité de votre litière",
+      "reportedBy": "Signalé par l'appareil il y a {age}"
+    },
+    "deviceSettings": {
+      "title": "Paramètres de l'appareil",
+      "deviceName": "Nom de l'appareil",
+      "connectionInfo": "Informations de connexion",
+      "tuyaId": "Identifiant Tuya (Device ID)",
+      "ipAddress": "Adresse IP",
+      "localKey": "Clé locale (Local Key)",
+      "saveChanges": "Enregistrer les modifications",
+      "deleteDevice": "Supprimer l'appareil"
+    },
+    "modal": {
+      "selectType": "Sélectionner le type de litière",
+      "currentValue": "Valeur actuelle",
+      "tapPicture": "Touchez l'image correspondant à la litière que vous utilisez :",
+      "active": "Actif",
+      "calibrationNoteTitle": "Remarque sur l'étalonnage du capteur",
+      "calibrationNote": "La machine utilise le poids pour estimer le niveau de remplissage. En cas d'alerte inattendue de litière basse après remplissage, assurez-vous que la machine repose sur un sol plat et effectuez un tarage tambour vide, ou choisissez le profil plus léger Pawbby Natural.",
+      "updatesSensor": "Met à jour l'étalonnage du capteur de niveau"
+    },
+    "lockModal": {
+      "title": "Avertissement de verrouillage de l'écran",
+      "danger": "Action potentiellement dangereuse :",
+      "desc1": "Le verrouillage désactive tous les boutons physiques pour éviter tout appui accidentel par des enfants ou des animaux.",
+      "desc2": "Si la connexion est perdue, si le Wi-Fi change ou si le système est hors ligne, vous risquez de ne plus pouvoir déverrouiller la machine physiquement.",
+      "desc3": "Pawbby Reborn et ses développeurs déclinent toute responsabilité. Continuez à vos risques et périls.",
+      "confirm": "Je comprends le risque, verrouiller"
+    },
     "types": {
       "natural": {
         "name": "Pawbby Natural",
         "label": "Granulés d'amidon végétal",
         "badge": "Recommandé",
-        "density": "Légère (~2,5–3,0 kg)",
-        "tip": "Seuil de poids le plus bas. Choix recommandé par défaut pour les litières légères ou jetables dans les toilettes afin d'éviter les fausses alertes de niveau bas."
+        "density": "Poids léger (~2,5–3,0 kg)",
+        "tip": "Seuil de poids le plus bas. Recommandé par défaut pour éviter les fausses alertes de niveau bas."
       },
       "tofu": {
-        "name": "Litière de tofu",
-        "label": "Bâtonnets cylindriques jetables",
-        "badge": "Granulés de tofu",
+        "name": "Litière de Tofu",
+        "label": "Bâtonnets cylindriques jetables aux toilettes",
+        "badge": "Pellets de Tofu",
         "density": "Densité faible à moyenne (~2,8–3,2 kg)",
-        "tip": "Bâtonnets standard de pois/tofu. Assure une vitesse de tamisage optimale et un suivi précis du poids."
+        "tip": "Bâtonnets cylindriques de pois/tofu. Assure une vitesse de tamisage optimale."
       },
       "bentonite": {
-        "name": "Argile bentonite",
+        "name": "Argile Bentonite",
         "label": "Sable agglomérant classique",
         "badge": "Sable d'argile",
         "density": "Haute densité (~3,8–4,5 kg)",
-        "tip": "Nécessite un remplissage plus dense (~3,8–4,5 kg). Si votre bac signale un manque de litière avec de l'argile légère, passez à Pawbby Natural ou tarez la balance."
+        "tip": "Nécessite un remplissage plus dense (~3,8–4,5 kg)."
       },
       "mixed": {
-        "name": "Mélange combiné",
-        "label": "Bâtonnets de tofu + granulés d'argile",
-        "badge": "Mélange composite",
+        "name": "Mélange Composite",
+        "label": "Bâtonnets de tofu + granules d'argile",
+        "badge": "Mélange Composite",
         "density": "Densité moyenne (~3,2–3,8 kg)",
-        "tip": "Mélange composite de granulés de tofu et d'argile bentonite. Profil de poids équilibré."
+        "tip": "Mélange composite de tofu et de bentonite. Profil de poids équilibré."
       }
     },
     "actions": {
       "clean": "Nettoyer maintenant",
-      "flatten": "Niveler la litière",
+      "cleanDesc": "Démarrer un cycle de nettoyage",
+      "flatten": "Aplanir la litière",
+      "flattenDesc": "Niveler la surface de la litière",
       "empty": "Vider le tambour",
-      "tare": "Mettre à zéro (Tarer)",
+      "emptyDesc": "Vider toute la litière dans le bac",
+      "tare": "Tarer la balance",
+      "tareDesc": "Calibrer la balance vide à 0g",
       "cancelClean": "Arrêter le cycle"
     },
     "status": {
       "idle": "En veille",
       "cleaning": "Nettoyage",
-      "flattening": "Nivellement",
-      "empty": "Vidange",
+      "flattening": "Aplanissement",
+      "empty": "Vidage",
       "offline": "Hors ligne",
       "drumRemoved": "Tambour retiré",
+      "binRemoved": "Bac à déchets retiré",
+      "lidRemoved": "Couvercle retiré",
+      "binFull": "Bac plein",
+      "normal": "Normal",
+      "days": "Jours",
+      "catInside": "Chat à l'intérieur",
+      "catNear": "Chat à proximité",
       "sufficient": "Suffisant",
-      "low": "Litière faible"
+      "low": "Litière basse"
     }
   }
 }
-

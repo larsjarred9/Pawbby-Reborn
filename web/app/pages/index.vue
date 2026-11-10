@@ -25,21 +25,21 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-[#3D7A41] font-semibold text-sm">Update Available</h3>
-            <p class="text-xs text-[#3D7A41]/80 mt-0.5">A new version is ready to install.</p>
+            <h3 class="text-[#3D7A41] font-semibold text-sm">{{ $t('dashboard.updateAvailable') }}</h3>
+            <p class="text-xs text-[#3D7A41]/80 mt-0.5">{{ $t('dashboard.updateDesc') }}</p>
           </div>
         </div>
         <div class="flex items-center space-x-3">
-          <button @click="dismissUpdateBanner" class="text-xs text-[#3D7A41]/60 hover:text-[#3D7A41]">Dismiss</button>
+          <button @click="dismissUpdateBanner" class="text-xs text-[#3D7A41]/60 hover:text-[#3D7A41]">{{ $t('common.dismiss') }}</button>
           <NuxtLink to="/settings" class="text-xs font-bold bg-[#3D7A41]/80 text-white px-3 py-1.5 rounded-lg hover:bg-[#3D7A41] transition-colors">
-            View
+            {{ $t('dashboard.view') }}
           </NuxtLink>
         </div>
       </div>
 
       <!-- Empty State -->
       <div v-if="devices.length === 0" class="text-center py-10 bg-pawbby-card/30 rounded-2xl border border-white/5">
-        <p class="text-pawbby-muted">No devices found. Tap the + to add your smart litter box.</p>
+        <p class="text-pawbby-muted">{{ $t('dashboard.noDevices') }}</p>
       </div>
 
       <!-- Device Cards -->
@@ -53,16 +53,16 @@
             </h2>
             <div class="inline-block px-3 py-1 mt-2 rounded-full text-xs font-semibold border"
               :class="isDeviceOnline(device) ? 'bg-[#3D7A41]/20 text-[#3D7A41] border-[#3D7A41]/50' : 'bg-white/10 text-pawbby-muted border-white/5'">
-              {{ isDeviceOnline(device) ? 'Online' : 'Offline' }}
+              {{ isDeviceOnline(device) ? $t('dashboard.online') : $t('dashboard.offline') }}
             </div>
           </div>
 
           <div class="mt-8">
             <div class="flex items-baseline text-pawbby-secondary">
               <span class="text-4xl font-bold tracking-tighter">{{ device.todayToileted || 0 }}</span>
-              <span class="text-sm font-semibold ml-1">times</span>
+              <span class="text-sm font-semibold ml-1">{{ $t('dashboard.times') }}</span>
             </div>
-            <p class="text-pawbby-mutedDark text-xs mt-1">Today Toileted</p>
+            <p class="text-pawbby-mutedDark text-xs mt-1">{{ $t('dashboard.todayToileted') }}</p>
           </div>
         </div>
 
@@ -85,14 +85,14 @@
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1 mt-1">
           <div class="flex justify-between items-center mb-8">
             <h2 class="text-2xl font-bold text-white tracking-tight">
-              <span v-if="currentStep === 1">Say Hello 👋</span>
-              <span v-if="currentStep === 2">Get the App 📱</span>
-              <span v-if="currentStep === 3">Pairing Mode 🔄</span>
-              <span v-if="currentStep === 4">Add to Network 🌐</span>
-              <span v-if="currentStep === 5">Link Your Box 🤝</span>
-              <span v-if="currentStep === 6">Select Litter 🐱</span>
-              <span v-if="currentStep === 7">Cycle Delay ⏱️</span>
-              <span v-if="currentStep === 8">All Done! 🎉</span>
+              <span v-if="currentStep === 1">{{ $t('setup.steps.step1') }}</span>
+              <span v-if="currentStep === 2">{{ $t('setup.steps.step2') }}</span>
+              <span v-if="currentStep === 3">{{ $t('setup.steps.step3') }}</span>
+              <span v-if="currentStep === 4">{{ $t('setup.steps.step4') }}</span>
+              <span v-if="currentStep === 5">{{ $t('setup.steps.step5') }}</span>
+              <span v-if="currentStep === 6">{{ $t('setup.steps.step6') }}</span>
+              <span v-if="currentStep === 7">{{ $t('setup.steps.step7') }}</span>
+              <span v-if="currentStep === 8">{{ $t('setup.steps.step8') }}</span>
             </h2>
             <button @click="closeModal" class="text-white/40 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -104,16 +104,16 @@
           <!-- STEP 1: Name -->
           <div v-if="currentStep === 1" class="space-y-6">
             <p class="text-pawbby-muted text-sm leading-relaxed">
-              Let's get your smart litter box connected! First, what should we call it?
+              {{ $t('setup.step1Desc') }}
             </p>
             <div>
-              <input v-model="newDevice.name" type="text" placeholder="e.g. Living Room Box"
+              <input v-model="newDevice.name" type="text" :placeholder="$t('setup.namePlaceholder')"
                 class="w-full bg-black/30 border border-white/10 rounded-2xl px-5 py-4 text-lg text-white focus:outline-none focus:border-pawbby-primary transition-colors placeholder:text-white/20" />
             </div>
             
             <button @click="nextStep" :disabled="!newDevice.name"
               class="w-full py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-30 mt-4">
-              Continue
+              {{ $t('common.continue') }}
             </button>
           </div>
 
@@ -134,7 +134,7 @@
 
             <div class="flex gap-3 pt-4">
               <button @click="currentStep--" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-                Back
+                {{ $t('common.back') }}
               </button>
               <button @click="nextStep"
                 class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors">
@@ -159,7 +159,7 @@
 
             <div class="flex gap-3 pt-4">
               <button @click="currentStep--" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-                Back
+                {{ $t('common.back') }}
               </button>
               <button @click="nextStep"
                 class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors">
@@ -200,11 +200,11 @@
 
             <div class="flex gap-3 pt-4">
               <button @click="currentStep--" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-                Back
+                {{ $t('common.back') }}
               </button>
               <button @click="nextStep" :disabled="!hasSmartLife"
                 class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-30">
-                Continue
+                {{ $t('common.continue') }}
               </button>
             </div>
           </div>
@@ -510,7 +510,7 @@
               >
                 <!-- Litter Photo with Badge & Active Check -->
                 <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/40 border border-white/10">
-                  <img :src="litter.image" :alt="litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img :src="litter.image" :alt="$te('litter.types.' + litter.key + '.name') ? $t('litter.types.' + litter.key + '.name') : litter.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   
                   <!-- Active Checkmark Overlay -->
                   <div v-if="setupLitterType === litter.id" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pawbby-primary flex items-center justify-center text-black shadow-lg">
@@ -521,19 +521,19 @@
 
                   <!-- Badge -->
                   <span v-if="litter.badge" :class="[litter.badgeClass, 'absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md shadow']">
-                    {{ litter.badge }}
+                    {{ $te('litter.types.' + litter.key + '.badge') ? $t('litter.types.' + litter.key + '.badge') : litter.badge }}
                   </span>
                 </div>
 
                 <!-- Name & Simple Label -->
                 <div class="flex items-center justify-between">
-                  <span class="text-white font-bold text-sm leading-tight">{{ litter.name }}</span>
-                  <span v-if="setupLitterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">Selected</span>
+                  <span class="text-white font-bold text-sm leading-tight">{{ $te('litter.types.' + litter.key + '.name') ? $t('litter.types.' + litter.key + '.name') : litter.name }}</span>
+                  <span v-if="setupLitterType === litter.id" class="text-pawbby-primary text-[11px] font-semibold">{{ $t('settings.configured') }}</span>
                 </div>
-                <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ litter.simpleLabel }}</span>
+                <span class="text-pawbby-muted text-[11px] block mt-0.5">{{ $te('litter.types.' + litter.key + '.label') ? $t('litter.types.' + litter.key + '.label') : litter.simpleLabel }}</span>
                 <div class="mt-1.5 pt-1.5 border-t border-white/5 flex flex-col gap-0.5">
-                  <span class="text-[10px] text-white/50 font-medium">Density: {{ litter.density }}</span>
-                  <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ litter.tip }}</p>
+                  <span class="text-[10px] text-white/50 font-medium">{{ $te('litter.types.' + litter.key + '.density') ? $t('litter.types.' + litter.key + '.density') : litter.density }}</span>
+                  <p class="text-[10px] text-pawbby-muted leading-tight mt-0.5">{{ $te('litter.types.' + litter.key + '.tip') ? $t('litter.types.' + litter.key + '.tip') : litter.tip }}</p>
                 </div>
               </button>
             </div>

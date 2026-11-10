@@ -11,7 +11,11 @@
     "error": "Fehler",
     "success": "Erfolg",
     "dismiss": "Schließen",
-    "connecting": "Verbindung wird hergestellt..."
+    "connecting": "Verbindung wird hergestellt...",
+    "close": "Schließen",
+    "download": "Herunterladen",
+    "all": "Alle",
+    "saveChanges": "Änderungen speichern"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -21,6 +25,42 @@
     "about": "Über Pawbby",
     "logout": "Abmelden"
   },
+  "dashboard": {
+    "noDevices": "Keine Geräte gefunden. Tippen Sie auf +, um Ihre smarte Katzentoilette hinzuzufügen.",
+    "online": "Online",
+    "offline": "Offline",
+    "todayToileted": "Heute benutzt",
+    "times": "Mal",
+    "updateAvailable": "Update verfügbar",
+    "updateDesc": "Eine neue Version ist zur Installation bereit.",
+    "view": "Anzeigen"
+  },
+  "profile": {
+    "myPets": "Meine Haustiere",
+    "editProfile": "Profil bearbeiten",
+    "addPet": "Haustier hinzufügen",
+    "editPet": "Haustier bearbeiten",
+    "noImg": "Kein Bild",
+    "about": "Über PAWBBY Reborn",
+    "logout": "Abmelden",
+    "name": "Name",
+    "email": "E-Mail (Gravatar)",
+    "changePassword": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "passwordUpdated": "Passwort erfolgreich aktualisiert!",
+    "exportCsv": "CSV exportieren",
+    "upload": "Hochladen",
+    "birthday": "Geburtstag",
+    "weight": "Gewicht",
+    "exportHistory": "Verlauf exportieren (CSV)",
+    "fetchingDates": "Verfügbare Daten abrufen...",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "viewOnGithub": "Auf GitHub ansehen",
+    "githubRepo": "Pawbby-Reborn Repository"
+  },
   "settings": {
     "title": "Einstellungen",
     "subtitle": "Konfigurieren Sie Anwendungseinstellungen, Benachrichtigungen und Integrationen.",
@@ -28,17 +68,122 @@
     "language": "Sprache",
     "languageSubtitle": "Wählen Sie die Sprache für Ihr Dashboard",
     "timezone": "Zeitzone",
+    "timezoneSubtitle": "Wählen Sie Ihre lokale Zeitzone.",
     "weightUnit": "Gewichtseinheit",
+    "notificationControls": "Benachrichtigungsverwaltung",
+    "pushNotifications": "Push-Benachrichtigungen",
+    "externalApi": "Externe API",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Tägliche Backups",
+    "checkForUpdates": "Nach Updates suchen",
+    "exportDb": "Anonymisierte DB exportieren",
+    "exportDbSubtitle": "Lädt eine sichere, anonymisierte Kopie Ihrer Datenbank herunter.",
+    "clearCache": "Gespeicherte Daten löschen",
     "account": "Konto",
     "security": "Sicherheit",
     "notifications": "Benachrichtigungen",
     "integrations": "Integrationen",
     "system": "System",
-    "checkForUpdates": "Nach Updates suchen",
-    "exportDb": "Anonymisierte DB exportieren",
-    "clearCache": "Gespeicherte Daten löschen"
+    "configured": "Konfiguriert",
+    "setup": "Einrichten",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "checking": "Wird geprüft...",
+    "updateAvailable": "Update verfügbar!",
+    "upToDate": "Auf dem neuesten Stand",
+    "exportDatabase": "Datenbank exportieren",
+    "exportDatabaseText": "Dadurch wird eine anonymisierte Kopie Ihrer Datenbank sicher heruntergeladen."
+  },
+  "users": {
+    "title": "Benutzerverwaltung",
+    "localAccounts": "Lokale Konten",
+    "addUser": "+ Benutzer hinzufügen",
+    "addSubUser": "Unterbenutzer hinzufügen",
+    "addSubUserDesc": "Erstelle ein zusätzliches Lese-Konto für deinen Haushalt.",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "z.B. Max Mustermann",
+    "emailAddress": "E-Mail-Adresse",
+    "password": "Passwort",
+    "adding": "Wird hinzugefügt..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "Sag Hallo 👋",
+      "step2": "App holen 📱",
+      "step3": "Kopplungsmodus 🔄",
+      "step4": "Zum Netzwerk hinzufügen 🌐",
+      "step5": "Box verbinden 🤝",
+      "step6": "Streu wählen 🐱",
+      "step7": "Reinigungsverzögerung ⏱️",
+      "step8": "Alles fertig! 🎉"
+    },
+    "step1Desc": "Lass uns deine smarte Katzentoilette verbinden! Wie soll sie heißen?",
+    "namePlaceholder": "z.B. Wohnzimmer Toilette"
   },
   "litter": {
+    "tabs": {
+      "record": "Protokoll",
+      "history": "Verlauf",
+      "control": "Steuerung",
+      "settings": "Einstellungen"
+    },
+    "record": {
+      "title": "Detailliertes Protokoll",
+      "pawIdHint": "PawID erkennt Katzen anhand ihres Gewichts. Bitte aktualisiere es umgehend, wenn sich das Gewicht deiner Katze ändert."
+    },
+    "history": {
+      "title": "Verlaufsdaten",
+      "dailyVisits": "Tägliche Besuche",
+      "avgWeight": "Durchschnittsgewicht ({unit})",
+      "avgDuration": "Durchschnittsdauer (Sekunden)",
+      "estWaste": "Geschätzte Abfallmenge (g)"
+    },
+    "settings": {
+      "title": "Katzentoiletten-Einstellungen",
+      "autoClean": "Automatische Reinigung",
+      "autoCleanDesc": "Nach jedem Besuch automatisch reinigen",
+      "softClumps": "Modus für weichen Kot",
+      "softClumpsDesc": "Trommel vor der Reinigung 2–4 Mal schütteln, um weichen Kot zu bedecken",
+      "autoOffScreen": "Bildschirm automatisch ausschalten",
+      "autoOffScreenDesc": "Schaltet das Display nach 5 Minuten Inaktivität aus",
+      "childLock": "Tastensperre",
+      "childLockDesc": "Sperrt die Tasten an der Box gegen versehentliche Betätigung",
+      "autoCleanDelay": "Reinigungsverzögerung",
+      "autoCleanDelayDesc": "Wartezeit nach dem Verlassen der Katze vor der Reinigung",
+      "quietPeriod": "Ruhezeit",
+      "quietPeriodDesc": "Automatische Reinigung nachts oder zu festen Zeiten pausieren",
+      "quietPeriodActive": "Reinigung pausiert von {start} bis {stop}",
+      "litterType": "Streutyp",
+      "litterTypeDesc": "Kalibriert die Trommelwaage für die Dichte deiner Streu",
+      "reportedBy": "Vom Gerät gemeldet vor {age}"
+    },
+    "deviceSettings": {
+      "title": "Geräteeinstellungen",
+      "deviceName": "Gerätename",
+      "connectionInfo": "Verbindungsinformationen",
+      "tuyaId": "Tuya Geräte-ID",
+      "ipAddress": "IP-Adresse",
+      "localKey": "Lokaler Schlüssel (Local Key)",
+      "saveChanges": "Änderungen speichern",
+      "deleteDevice": "Gerät löschen"
+    },
+    "modal": {
+      "selectType": "Streutyp auswählen",
+      "currentValue": "Aktueller Wert",
+      "tapPicture": "Tippe auf das Bild deiner Streu:",
+      "active": "Aktiv",
+      "calibrationNoteTitle": "Hinweis zur Sensorkalibrierung",
+      "calibrationNote": "Die Box schätzt den Füllstand anhand des Gewichts. Wenn du nach dem Einfüllen eine unerwartete Warnung wegen niedrigem Füllstand siehst, stelle sicher, dass die Box auf einem ebenen Boden steht und tippe bei leerer Trommel auf Waage tarieren, oder wähle das leichtere Pawbby Natural-Profil.",
+      "updatesSensor": "Aktualisiert die Füllstandssensorkalibrierung"
+    },
+    "lockModal": {
+      "title": "Warnung vor Tastensperre",
+      "danger": "Potenziell riskante Aktion:",
+      "desc1": "Das Sperren des Bildschirms deaktiviert alle Tasten an der Box, um unbeabsichtigte Betätigungen durch Kinder oder Haustiere zu verhindern.",
+      "desc2": "Falls die Verbindung abbricht, dein WLAN wechselt oder das System offline geht, kannst du ausgesperrt werden und das Gerät nicht mehr manuell bedienen.",
+      "desc3": "Pawbby Reborn und die Entwickler übernehmen KEINE Haftung. Fortfahren auf eigene Gefahr.",
+      "confirm": "Ich verstehe das Risiko, Tasten sperren"
+    },
     "types": {
       "natural": {
         "name": "Pawbby Natural",
@@ -51,41 +196,51 @@
         "name": "Tofu-Streu",
         "label": "Spülbare zylindrische Stäbchen",
         "badge": "Tofu-Pellets",
-        "density": "Geringe bis mittlere Dichte (~2,8–3,2 kg)",
-        "tip": "Klassische zylindrische Erbsen-/Tofustäbchen. Gewährleistet optimale Siebgeschwindigkeit und Gewichtserfassung."
+        "density": "Niedrige bis mittlere Dichte (~2,8–3,2 kg)",
+        "tip": "Standardmäßige zylindrische Erbsen-/Tofustäbchen. Gewährleistet die richtige Siebgeschwindigkeit und Gewichtsmessung."
       },
       "bentonite": {
         "name": "Bentonit-Ton",
-        "label": "Klassischer Klumpstreu-Sand",
-        "badge": "Tonsand",
+        "label": "Klassischer Klumpensand",
+        "badge": "Ton-Sand",
         "density": "Hohe Dichte (~3,8–4,5 kg)",
-        "tip": "Erfordert eine dichtere Füllung (~3,8–4,5 kg). Wenn Ihre Box bei leichtem Ton Streumangel meldet, wechseln Sie zu Pawbby Natural oder tarieren Sie die Waage."
+        "tip": "Erfordert eine dichtere Füllung (~3,8–4,5 kg). Wenn Ihre Box bei leichtem Ton einen Alarm für niedrigen Streustand auslöst, wechseln Sie zu Pawbby Natural oder tarieren Sie die Waage."
       },
       "mixed": {
-        "name": "Mischstreu",
+        "name": "Mischung",
         "label": "Tofustäbchen + Tongranulat",
         "badge": "Verbundmischung",
         "density": "Mittlere Dichte (~3,2–3,8 kg)",
-        "tip": "Verbundmischung aus Tofu-Pellets und Bentonit-Granulat. Ausgewogenes Gewichtsprofil."
+        "tip": "Verbundmischung aus Tofupellets und Bentonitgranulat. Ausgewogenes Gewichtsprofil."
       }
     },
     "actions": {
       "clean": "Jetzt reinigen",
+      "cleanDesc": "Reinigungszyklus starten",
       "flatten": "Streu glätten",
+      "flattenDesc": "Streuoberfläche einebnen",
       "empty": "Trommel leeren",
-      "tare": "Waage nullen (Tara)",
+      "emptyDesc": "Gesamte Streu in Behälter entleeren",
+      "tare": "Waage tarieren",
+      "tareDesc": "Leere Waage auf 0g kalibrieren",
       "cancelClean": "Zyklus stoppen"
     },
     "status": {
       "idle": "Bereit",
       "cleaning": "Reinigung",
-      "flattening": "Glätten",
-      "empty": "Leeren",
+      "flattening": "Glättung",
+      "empty": "Entleerung",
       "offline": "Offline",
       "drumRemoved": "Trommel entfernt",
+      "binRemoved": "Auffangbehälter entfernt",
+      "lidRemoved": "Deckel entfernt",
+      "binFull": "Behälter voll",
+      "normal": "Normal",
+      "days": "Tage",
+      "catInside": "Katze in der Box",
+      "catNear": "Katze in der Nähe",
       "sufficient": "Ausreichend",
-      "low": "Streu fast leer"
+      "low": "Wenig Streu"
     }
   }
 }
-
