@@ -290,6 +290,9 @@
                 <p class="text-xs text-white/70 max-w-sm mx-auto leading-relaxed">
                   Open <strong>Smart Life</strong>, tap the <strong>+</strong> in the top-right corner, select <strong>Scan</strong>, scan this QR code, and tap <strong>Confirm Login</strong>.
                 </p>
+                <p class="text-[11px] text-white/40 max-w-sm mx-auto leading-normal">
+                  <span class="text-[#3D7A41] font-semibold">Note:</span> The app will prompt to authorize <em>"Home Assistant"</em>. This is expected—it uses Tuya's official public device-sharing gateway to extract your local key without needing a paid developer account.
+                </p>
               </div>
 
               <!-- Error Alert -->
