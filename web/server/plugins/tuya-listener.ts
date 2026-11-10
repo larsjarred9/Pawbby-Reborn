@@ -1,10 +1,6 @@
 import TuyaDevice from "tuyapi";
 import prisma from "../utils/prisma";
-import {
-  decodeDeviceStatus,
-  buildSettingCommand,
-  utcOffsetHoursFor,
-} from "../utils/deviceSettings";
+import { decodeDeviceStatus, buildSettingCommand, utcOffsetHoursFor } from "../utils/deviceSettings";
 import type { SettingCommand } from "../utils/deviceSettings";
 
 export default defineNitroPlugin((nitroApp) => {
@@ -71,11 +67,7 @@ export default defineNitroPlugin((nitroApp) => {
     console.log(
       `[Tuya Setting] ${command.description} → DP 105 = ${command.payload} (${deviceId})`,
     );
-    await device.set({
-      dps: 105,
-      set: command.payload,
-      shouldWaitForResponse: false,
-    });
+    await device.set({ dps: 105, set: command.payload, shouldWaitForResponse: false });
     if (command.logEvent !== false) {
       await prisma.litterEvent.create({
         data: {
@@ -107,10 +99,7 @@ export default defineNitroPlugin((nitroApp) => {
    */
   const syncAccountSettings = async (
     deviceId: string,
-    opts: { timezone?: boolean; weightUnit?: boolean } = {
-      timezone: true,
-      weightUnit: true,
-    },
+    opts: { timezone?: boolean; weightUnit?: boolean } = { timezone: true, weightUnit: true },
   ) => {
     if (!activeDevices.has(deviceId)) return;
     const user = await prisma.user.findFirst();
@@ -131,77 +120,51 @@ export default defineNitroPlugin((nitroApp) => {
         if (st) st.lastWeightUnitSyncAt = Date.now();
       }
     } catch (e: any) {
-      console.error(
-        `[Tuya Setting] Account sync failed for ${deviceId}:`,
-        e?.message || e,
-      );
+      console.error(`[Tuya Setting] Account sync failed for ${deviceId}:`, e?.message || e);
     }
   };
 
-  const dispatchWebhook = async (
-    user: any,
-    message: string,
-    eventType: string,
-  ) => {
+  const dispatchWebhook = async (user: any, message: string, eventType: string) => {
     if (!user?.webhookUrl) return;
-
+    
     // Check user preferences
-    if (eventType === "visit" && !user.notifyPushVisit) return;
-    if (eventType === "auto-clean" && !user.notifyPushAutoClean) return;
-    if (eventType === "manual-clean" && !user.notifyPushManualClean) return;
-    if (eventType === "empty" && !user.notifyPushEmpty) return;
-    if (eventType === "flatten" && !user.notifyPushFlatten) return;
-    if (eventType === "error" && !user.notifyPushError) return;
+    if (eventType === 'visit' && !user.notifyPushVisit) return;
+    if (eventType === 'auto-clean' && !user.notifyPushAutoClean) return;
+    if (eventType === 'manual-clean' && !user.notifyPushManualClean) return;
+    if (eventType === 'empty' && !user.notifyPushEmpty) return;
+    if (eventType === 'flatten' && !user.notifyPushFlatten) return;
+    if (eventType === 'error' && !user.notifyPushError) return;
 
     try {
       const url = new URL(user.webhookUrl);
-      if (process.env.WEBHOOK_STRICT_MODE === "true") {
-        const allowedHosts = [
-          "hooks.slack.com",
-          "discord.com",
-          "discordapp.com",
-          "canary.discord.com",
-          "ptb.discord.com",
-          "api.telegram.org",
-          "api.pushover.net",
-        ];
-        if (url.protocol !== "https:" || !allowedHosts.includes(url.host)) {
-          throw new Error(
-            "Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.",
-          );
+      if (process.env.WEBHOOK_STRICT_MODE === 'true') {
+        const allowedHosts = ['hooks.slack.com', 'discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com', 'api.telegram.org', 'api.pushover.net'];
+        if (url.protocol !== 'https:' || !allowedHosts.includes(url.host)) {
+          throw new Error('Strict mode enabled: Webhook URL must be a valid, known secure webhook (Discord, Slack, Telegram, Pushover) over HTTPS.');
         }
       } else {
-        if (url.protocol !== "https:" && url.protocol !== "http:") {
-          throw new Error("Invalid webhook protocol. Must be http or https.");
+        if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+          throw new Error('Invalid webhook protocol. Must be http or https.');
         }
-        const blockedHosts = new Set([
-          "localhost",
-          "127.0.0.1",
-          "0.0.0.0",
-          "::1",
-          "169.254.169.254",
-        ]);
+        const blockedHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254']);
         if (blockedHosts.has(url.hostname)) {
-          throw new Error(
-            "Loopback and metadata webhook addresses are not allowed for security reasons.",
-          );
+          throw new Error('Loopback and metadata webhook addresses are not allowed for security reasons.');
         }
       }
 
       const payload = { content: message, text: message };
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
-
+      
       fetch(user.webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: controller.signal,
-      })
-        .catch((e) => console.error("[Webhook Error]", e.message))
+        signal: controller.signal
+      }).catch(e => console.error('[Webhook Error]', e.message))
         .finally(() => clearTimeout(timeout));
     } catch (err: any) {
-      console.error("[Webhook Configuration Error]", err.message);
+      console.error('[Webhook Configuration Error]', err.message);
     }
   };
 
@@ -277,10 +240,7 @@ export default defineNitroPlugin((nitroApp) => {
               deviceId: config.id,
               OR: [
                 { type: "bin-full" },
-                {
-                  type: "tuya-raw-data",
-                  rawData: { contains: '"collect_full"' },
-                },
+                { type: "tuya-raw-data", rawData: { contains: '"collect_full"' } },
               ],
             },
             orderBy: { timestamp: "desc" },
@@ -294,19 +254,12 @@ export default defineNitroPlugin((nitroApp) => {
                 OR: [
                   { type: "bin-normal" },
                   { type: "bin-replaced" },
-                  {
-                    type: "tuya-raw-data",
-                    rawData: { contains: '"collect_normal"' },
-                  },
+                  { type: "tuya-raw-data", rawData: { contains: '"collect_normal"' } },
                 ],
               },
               orderBy: { timestamp: "desc" },
             });
-            if (
-              !latestClear ||
-              latestCollectFull.timestamp.getTime() >
-                latestClear.timestamp.getTime()
-            ) {
+            if (!latestClear || latestCollectFull.timestamp.getTime() > latestClear.timestamp.getTime()) {
               initialBinFull = true;
             }
           }
@@ -412,29 +365,16 @@ export default defineNitroPlugin((nitroApp) => {
 
           // 0. Clean Cycle Completed (DP 102 - clean cycle result reporter)
           if (dps["102"]) {
-            if (
-              !state.lastCleanCompletedAt ||
-              now - state.lastCleanCompletedAt > 30000
-            ) {
+            if (!state.lastCleanCompletedAt || now - state.lastCleanCompletedAt > 30000) {
               state.lastCleanCompletedAt = now;
-              console.log(
-                `[Tuya] Cleaning cycle completed on ${config.name} (DP 102 broadcast)`,
-              );
+              console.log(`[Tuya] Cleaning cycle completed on ${config.name} (DP 102 broadcast)`);
               await recordEvent({
                 type: "clean-completed",
                 deviceId: config.id,
-                rawData:
-                  typeof dps["102"] === "string"
-                    ? dps["102"]
-                    : JSON.stringify(dps["102"]),
+                rawData: typeof dps["102"] === "string" ? dps["102"] : JSON.stringify(dps["102"]),
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "✨ Cleaning cycle completed successfully.",
-                  "auto-clean",
-                );
+              if (user) await dispatchWebhook(user, "✨ Cleaning cycle completed successfully.", "auto-clean");
               stateChanged = true;
             }
           }
@@ -504,24 +444,21 @@ export default defineNitroPlugin((nitroApp) => {
             try {
               const user = await prisma.user.findFirst();
               if (user) {
-                const petName = matchedPetId
-                  ? pets.find((p) => p.id === matchedPetId)?.name
-                  : "An unknown cat";
+                const petName = matchedPetId ? pets.find(p => p.id === matchedPetId)?.name : 'An unknown cat';
                 const min = Math.floor(durationSecs / 60);
                 const sec = durationSecs % 60;
                 const durStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
-
+                
                 const msg = `🐈 **${petName}** just used the litter box!\n- **Weight**: ${weightInKg.toFixed(2)}kg\n- **Duration**: ${durStr}`;
-                await dispatchWebhook(user, msg, "visit");
+                await dispatchWebhook(user, msg, 'visit');
               }
             } catch (e) {
-              console.error("[Webhook Error]", e);
+              console.error('[Webhook Error]', e);
             }
 
             // Reset visit state
             state.lastVisitEndedAt = Date.now();
-            state.lastVisitEndWeight =
-              weightInKg > 0 ? Math.round(weightInKg * 1000) : state.peakWeight;
+            state.lastVisitEndWeight = weightInKg > 0 ? Math.round(weightInKg * 1000) : state.peakWeight;
             state.catEnteredAt = null;
             state.peakWeight = 0;
             state.lidOpenedDuringVisit = false;
@@ -551,16 +488,10 @@ export default defineNitroPlugin((nitroApp) => {
                       `[Tuya Setting] Device reports ${decoded.weightUnit}, account uses ${wanted} — syncing.`,
                     );
                     state.lastWeightUnitSyncAt = Date.now();
-                    await sendSetting(
-                      config.id,
-                      buildSettingCommand("weight_unit", wanted),
-                    );
+                    await sendSetting(config.id, buildSettingCommand("weight_unit", wanted));
                   }
                 } catch (e: any) {
-                  console.error(
-                    "[Tuya Setting] Weight unit sync failed:",
-                    e?.message || e,
-                  );
+                  console.error("[Tuya Setting] Weight unit sync failed:", e?.message || e);
                 }
               }
             }
@@ -587,12 +518,7 @@ export default defineNitroPlugin((nitroApp) => {
                 });
                 state.lastCleanTime = now;
                 const user = await prisma.user.findFirst();
-                if (user)
-                  await dispatchWebhook(
-                    user,
-                    "🧹 Auto-cleaning cycle started.",
-                    "auto-clean",
-                  );
+                if (user) await dispatchWebhook(user, "🧹 Auto-cleaning cycle started.", "auto-clean");
               }
             }
             if (
@@ -607,39 +533,23 @@ export default defineNitroPlugin((nitroApp) => {
                 });
                 state.lastCleanTime = now;
                 const user = await prisma.user.findFirst();
-                if (user)
-                  await dispatchWebhook(
-                    user,
-                    "🧹 Manual cleaning cycle started.",
-                    "manual-clean",
-                  );
+                if (user) await dispatchWebhook(user, "🧹 Manual cleaning cycle started.", "manual-clean");
               }
             }
 
             if (
-              (state.currentStatus === "work_aclean" ||
-                state.currentStatus === "work_mclean") &&
+              (state.currentStatus === "work_aclean" || state.currentStatus === "work_mclean") &&
               (newStatus === "work_idle" || newStatus === "collect_normal")
             ) {
-              if (
-                !state.lastCleanCompletedAt ||
-                now - state.lastCleanCompletedAt > 30000
-              ) {
+              if (!state.lastCleanCompletedAt || now - state.lastCleanCompletedAt > 30000) {
                 state.lastCleanCompletedAt = now;
-                console.log(
-                  `[Tuya] Cleaning cycle finished on ${config.name} (DP 116 return to idle)`,
-                );
+                console.log(`[Tuya] Cleaning cycle finished on ${config.name} (DP 116 return to idle)`);
                 await recordEvent({
                   type: "clean-completed",
                   deviceId: config.id,
                 });
                 const user = await prisma.user.findFirst();
-                if (user)
-                  await dispatchWebhook(
-                    user,
-                    "✨ Cleaning cycle completed successfully.",
-                    "auto-clean",
-                  );
+                if (user) await dispatchWebhook(user, "✨ Cleaning cycle completed successfully.", "auto-clean");
               }
             }
 
@@ -654,8 +564,7 @@ export default defineNitroPlugin((nitroApp) => {
               if (now - state.lastFlattenTime > 60000) {
                 let flattenType = "flatten";
                 if (isApp) flattenType = "flatten-app";
-                else if (now - state.lastCatLeaveTime < 5 * 60 * 1000)
-                  flattenType = "auto-flatten";
+                else if (now - state.lastCatLeaveTime < 5 * 60 * 1000) flattenType = "auto-flatten";
 
                 await recordEvent({
                   type: flattenType,
@@ -663,12 +572,7 @@ export default defineNitroPlugin((nitroApp) => {
                 });
                 state.lastFlattenTime = now;
                 const user = await prisma.user.findFirst();
-                if (user)
-                  await dispatchWebhook(
-                    user,
-                    "🔄 Smoothing/Flattening litter.",
-                    "flatten",
-                  );
+                if (user) await dispatchWebhook(user, "🔄 Smoothing/Flattening litter.", "flatten");
               }
             }
             if (
@@ -683,12 +587,7 @@ export default defineNitroPlugin((nitroApp) => {
                 });
                 state.lastEmptyTime = now;
                 const user = await prisma.user.findFirst();
-                if (user)
-                  await dispatchWebhook(
-                    user,
-                    "🗑️ Emptying litter box.",
-                    "empty",
-                  );
+                if (user) await dispatchWebhook(user, "🗑️ Emptying litter box.", "empty");
               }
             }
             if (
@@ -703,12 +602,7 @@ export default defineNitroPlugin((nitroApp) => {
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "⚠️ Top cover/lid removed from the litter box!",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "⚠️ Top cover/lid removed from the litter box!", "error");
             }
             if (
               state.currentStatus === "lid_open" &&
@@ -730,12 +624,7 @@ export default defineNitroPlugin((nitroApp) => {
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "⚠️ Waste bin removed from the litter box!",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "⚠️ Waste bin removed from the litter box!", "error");
             }
             if (
               state.currentStatus === "collect_install" &&
@@ -747,33 +636,29 @@ export default defineNitroPlugin((nitroApp) => {
               });
             }
 
-            if (newStatus === "collect_full" && !state.isBinFull) {
+            if (
+              newStatus === "collect_full" &&
+              !state.isBinFull
+            ) {
               state.isBinFull = true;
               await recordEvent({
                 type: "bin-full",
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "🗑️ Waste bin is full and needs to be emptied.",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "🗑️ Waste bin is full and needs to be emptied.", "error");
             }
-            if (newStatus === "collect_normal" && state.isBinFull) {
+            if (
+              newStatus === "collect_normal" &&
+              state.isBinFull
+            ) {
               state.isBinFull = false;
               await recordEvent({
                 type: "bin-normal",
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "✅ Waste bin is no longer full.",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "✅ Waste bin is no longer full.", "error");
             }
 
             if (newStatus === "cat_litter_little" && !state.isLitterLow) {
@@ -783,30 +668,16 @@ export default defineNitroPlugin((nitroApp) => {
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "⚠️ Litter level is low. Please refill the litter box.",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "⚠️ Litter level is low. Please refill the litter box.", "error");
             }
-            if (
-              (newStatus === "cat_litter_enough" ||
-                newStatus.startsWith("cat_litter_eno")) &&
-              state.isLitterLow
-            ) {
+            if ((newStatus === "cat_litter_enough" || newStatus.startsWith("cat_litter_eno")) && state.isLitterLow) {
               state.isLitterLow = false;
               await recordEvent({
                 type: "litter-sufficient",
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "✅ Litter level is sufficient.",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "✅ Litter level is sufficient.", "error");
             }
 
             if (newStatus === "roller_uninstall_ok" && !state.isDrumRemoved) {
@@ -816,12 +687,7 @@ export default defineNitroPlugin((nitroApp) => {
                 deviceId: config.id,
               });
               const user = await prisma.user.findFirst();
-              if (user)
-                await dispatchWebhook(
-                  user,
-                  "⚠️ Drum/roller removed from the litter box!",
-                  "error",
-                );
+              if (user) await dispatchWebhook(user, "⚠️ Drum/roller removed from the litter box!", "error");
             }
             if (state.isDrumRemoved && newStatus !== "roller_uninstall_ok") {
               state.isDrumRemoved = false;
@@ -882,13 +748,12 @@ export default defineNitroPlugin((nitroApp) => {
           if (state.currentStatus === "work_idle" && dps["112"]) {
             if (state.pendingLitterCheck && state.baseWeight > 0) {
               const diff = dps["112"] - state.baseWeight;
-              if (Math.abs(diff) >= 50) {
-                // Only log if > 50g changed
+              if (Math.abs(diff) >= 50) { // Only log if > 50g changed
                 await recordEvent({
                   data: {
                     type: diff > 0 ? "litter-added" : "litter-removed",
                     deviceId: config.id,
-                    weight: Math.abs(diff) / 1000,
+                    weight: Math.abs(diff) / 1000
                   },
                 });
               }
@@ -908,9 +773,7 @@ export default defineNitroPlugin((nitroApp) => {
               now - state.lastVisitEndedAt < 15000 &&
               (state.lastVisitEndWeight || 0) > 0
             ) {
-              console.log(
-                "[PawID] Cat re-entered within 15s - merging split visit.",
-              );
+              console.log("[PawID] Cat re-entered within 15s - merging split visit.");
               state.peakWeight = state.lastVisitEndWeight || 0;
             } else {
               state.peakWeight = 0;
@@ -920,7 +783,10 @@ export default defineNitroPlugin((nitroApp) => {
             stateChanged = true;
           }
 
-          if (state.catEnteredAt && VISIT_STATUSES.has(state.currentStatus)) {
+          if (
+            state.catEnteredAt &&
+            VISIT_STATUSES.has(state.currentStatus)
+          ) {
             // Check DP 113: firmware direct live cat weight in grams
             if (
               typeof dps["113"] === "number" &&
@@ -975,14 +841,9 @@ export default defineNitroPlugin((nitroApp) => {
           setTimeout(() => {
             const st = deviceStates.get(config.id);
             const now = Date.now();
-            if (
-              !st?.lastTimezoneSyncAt ||
-              now - st.lastTimezoneSyncAt > 10 * 60 * 1000
-            ) {
+            if (!st?.lastTimezoneSyncAt || now - st.lastTimezoneSyncAt > 10 * 60 * 1000) {
               if (st) st.lastTimezoneSyncAt = now;
-              syncAccountSettings(config.id, { timezone: true }).catch(
-                () => {},
-              );
+              syncAccountSettings(config.id, { timezone: true }).catch(() => {});
             }
           }, 3000);
 
@@ -1056,7 +917,8 @@ export default defineNitroPlugin((nitroApp) => {
         }
 
         const inSettleWindow =
-          state.lastVisitEndedAt && Date.now() - state.lastVisitEndedAt < 15000;
+          state.lastVisitEndedAt &&
+          Date.now() - state.lastVisitEndedAt < 15000;
 
         if (action === "flatten") {
           if (state && BUSY_STATUSES.has(state.currentStatus)) {
@@ -1068,11 +930,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending flatten command (DP 106) to ${deviceId}...`,
           );
-          await device.set({
-            dps: 106,
-            set: "AQEAAQA=",
-            shouldWaitForResponse: false,
-          });
+          await device.set({ dps: 106, set: "AQEAAQA=", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "flatten-app", deviceId },
           });
@@ -1094,11 +952,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending clean command (DP 106) to ${deviceId}...`,
           );
-          await device.set({
-            dps: 106,
-            set: "AQAAAA==",
-            shouldWaitForResponse: false,
-          });
+          await device.set({ dps: 106, set: "AQAAAA==", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "manual-clean-app", deviceId },
           });
@@ -1121,20 +975,12 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending tare/zero command (DP 109) to ${deviceId}...`,
           );
-          await device.set({
-            dps: 109,
-            set: "AQEAAA==",
-            shouldWaitForResponse: false,
-          });
+          await device.set({ dps: 109, set: "AQEAAA==", shouldWaitForResponse: false });
         } else if (action === "cancel_clean") {
           console.log(
             `[Tuya Action] Sending cancel clean command (DP 106) to ${deviceId}...`,
           );
-          await device.set({
-            dps: 106,
-            set: "AQMAAA==",
-            shouldWaitForResponse: false,
-          });
+          await device.set({ dps: 106, set: "AQMAAA==", shouldWaitForResponse: false });
         } else if (action === "empty") {
           if (state && BUSY_STATUSES.has(state.currentStatus)) {
             console.warn(
@@ -1145,11 +991,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending empty command (DP 106) to ${deviceId}...`,
           );
-          await device.set({
-            dps: 106,
-            set: "AQIAAQA=",
-            shouldWaitForResponse: false,
-          });
+          await device.set({ dps: 106, set: "AQIAAQA=", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "empty-app", deviceId },
           });
@@ -1173,23 +1015,12 @@ export default defineNitroPlugin((nitroApp) => {
   // acknowledges by pushing a fresh DP 103 snapshot, which is what the UI reads back.
   nitroApp.hooks.hook(
     "tuya:setting" as any,
-    async ({
-      deviceId,
-      command,
-      result,
-    }: {
-      deviceId: string;
-      command: SettingCommand;
-      result?: { ok: boolean; error?: string };
-    }) => {
+    async ({ deviceId, command, result }: { deviceId: string; command: SettingCommand; result?: { ok: boolean; error?: string } }) => {
       try {
         await sendSetting(deviceId, command);
         if (result) result.ok = true;
       } catch (e: any) {
-        console.error(
-          `[Tuya Setting] Failed to send ${command.key} to ${deviceId}`,
-          e?.message || e,
-        );
+        console.error(`[Tuya Setting] Failed to send ${command.key} to ${deviceId}`, e?.message || e);
         if (result) {
           result.ok = false;
           result.error = e?.message || "Failed to send setting to device";
@@ -1208,39 +1039,27 @@ export default defineNitroPlugin((nitroApp) => {
    * all (fresh install / database reset) do we re-push the account time zone — a
    * harmless write that is confirmed to trigger a DP 103 within ~1 s.
    */
-  const waitForSnapshot = (
-    deviceId: string,
-    since: number,
-    timeoutMs: number,
-  ) =>
+  const waitForSnapshot = (deviceId: string, since: number, timeoutMs: number) =>
     new Promise<boolean>((resolve) => {
       const started = Date.now();
       const tick = () => {
         const st = deviceStates.get(deviceId);
-        if (st?.lastSettingsAt && st.lastSettingsAt > since)
-          return resolve(true);
+        if (st?.lastSettingsAt && st.lastSettingsAt > since) return resolve(true);
         if (Date.now() - started > timeoutMs) return resolve(false);
         setTimeout(tick, 150);
       };
       tick();
     });
 
-  const ensureSettingsSnapshot = async (
-    deviceId: string,
-  ): Promise<"cached" | "timezone"> => {
+  const ensureSettingsSnapshot = async (deviceId: string): Promise<"cached" | "timezone"> => {
     const device = activeDevices.get(deviceId);
     const state = deviceStates.get(deviceId);
-    if (!device || !state)
-      throw new Error(`Device ${deviceId} is not connected.`);
+    if (!device || !state) throw new Error(`Device ${deviceId} is not connected.`);
 
     if (state.lastSettingsRaw) return "cached";
 
     const cached = await prisma.litterEvent.findFirst({
-      where: {
-        deviceId,
-        type: "tuya-raw-data",
-        rawData: { contains: '"103"' },
-      },
+      where: { deviceId, type: "tuya-raw-data", rawData: { contains: '"103"' } },
       orderBy: { timestamp: "desc" },
     });
     if (cached) return "cached";
@@ -1249,8 +1068,7 @@ export default defineNitroPlugin((nitroApp) => {
     const t0 = Date.now();
     await sendSetting(deviceId, {
       ...buildSettingCommand("sync_timezone", accountUtcOffset(user)),
-      description:
-        "Requested the first settings snapshot from the device (time-zone push)",
+      description: "Requested the first settings snapshot from the device (time-zone push)",
       logEvent: false,
     });
     await waitForSnapshot(deviceId, t0, 3000);
@@ -1259,13 +1077,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   nitroApp.hooks.hook(
     "tuya:refresh-settings" as any,
-    async ({
-      deviceId,
-      result,
-    }: {
-      deviceId: string;
-      result?: { ok: boolean; error?: string; method?: string };
-    }) => {
+    async ({ deviceId, result }: { deviceId: string; result?: { ok: boolean; error?: string; method?: string } }) => {
       try {
         const method = await ensureSettingsSnapshot(deviceId);
         if (result) {
@@ -1285,10 +1097,7 @@ export default defineNitroPlugin((nitroApp) => {
   // push them to every connected box.
   nitroApp.hooks.hook(
     "tuya:sync-account" as any,
-    async ({
-      timezone,
-      weightUnit,
-    }: { timezone?: boolean; weightUnit?: boolean } = {}) => {
+    async ({ timezone, weightUnit }: { timezone?: boolean; weightUnit?: boolean } = {}) => {
       for (const deviceId of activeDevices.keys()) {
         await syncAccountSettings(deviceId, {
           timezone: timezone !== false,

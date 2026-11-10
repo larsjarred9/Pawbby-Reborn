@@ -39,6 +39,14 @@ export default defineNuxtConfig({
   devServer: {
     port: 3333
   },
+  vite: {
+    optimizeDeps: {
+      include: ['spark-md5']
+    },
+    resolve: {
+      dedupe: ['vue', 'vue-router']
+    }
+  },
   nitro: {
     externals: {
       external: ['@prisma/client']

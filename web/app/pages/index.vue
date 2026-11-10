@@ -79,7 +79,7 @@
         <!-- Progress Bar -->
         <div class="absolute top-0 left-0 w-full h-1 bg-white/5 z-10">
           <div class="h-full bg-gradient-to-r from-[#3D7A41] to-[#5BC266] transition-all duration-500"
-               :style="{ width: (currentStep / 9) * 100 + '%' }"></div>
+               :style="{ width: (currentStep / 8) * 100 + '%' }"></div>
         </div>
 
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1 mt-1">
@@ -89,11 +89,10 @@
               <span v-if="currentStep === 2">Get the App 📱</span>
               <span v-if="currentStep === 3">Pairing Mode 🔄</span>
               <span v-if="currentStep === 4">Add to Network 🌐</span>
-              <span v-if="currentStep === 5">Find the Box 🔍</span>
-              <span v-if="currentStep === 6">The Secret Handshake 🤝</span>
-              <span v-if="currentStep === 7">Select Litter 🐱</span>
-              <span v-if="currentStep === 8">Cycle Delay ⏱️</span>
-              <span v-if="currentStep === 9">All Done! 🎉</span>
+              <span v-if="currentStep === 5">Link Your Box 🤝</span>
+              <span v-if="currentStep === 6">Select Litter 🐱</span>
+              <span v-if="currentStep === 7">Cycle Delay ⏱️</span>
+              <span v-if="currentStep === 8">All Done! 🎉</span>
             </h2>
             <button @click="closeModal" class="text-white/40 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -210,166 +209,266 @@
             </div>
           </div>
 
-          <!-- STEP 5: Network Scan -->
+          <!-- STEP 5: Link Your Box -->
           <div v-if="currentStep === 5" class="space-y-6">
             <p class="text-pawbby-muted text-sm leading-relaxed">
-              Let's find the litter box on your local WiFi network.
+              Connect your litter box locally! Extract your credentials instantly using your Smart Life app, or enter them manually.
             </p>
-            
-            <div v-if="isScanning" class="py-10 flex flex-col items-center justify-center text-center space-y-4">
-              <svg class="animate-spin h-8 w-8 text-[#3D7A41]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p class="text-white font-bold animate-pulse">Snooping your network...</p>
-              <p class="text-xs text-pawbby-muted">Looking for Tuya smart devices nearby</p>
+
+            <!-- Mode Selector Tabs: Instant QR vs Manual -->
+            <div class="flex p-1 bg-black/40 border border-white/10 rounded-2xl gap-1">
+              <button
+                type="button"
+                @click="authMethod = 'qr'"
+                class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5"
+                :class="authMethod === 'qr' ? 'bg-[#3D7A41] text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'"
+              >
+                <span>⚡ Instant QR Link</span>
+                <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-medium">Recommended</span>
+              </button>
+              <button
+                type="button"
+                @click="authMethod = 'manual'; stopQrPolling(); if (!discoveredDevices.length) scanNetwork()"
+                class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5"
+                :class="authMethod === 'manual' ? 'bg-[#3D7A41] text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'"
+              >
+                <span>🛠️ Manual Developer Guide</span>
+              </button>
             </div>
 
-            <div v-else-if="!manualMode">
-              <div v-if="availableDiscoveredDevices.length > 0" class="space-y-3">
-                <div class="bg-white/5 p-3 rounded-xl border border-white/10 mb-4 flex gap-3 items-start">
-                  <div class="text-xl">💡</div>
-                  <p class="text-xs text-white/70">Not sure which one is Pawbby? Open your Smart Life app &gt; Device Settings &gt; Device Information and match the <strong>Virtual ID</strong>.</p>
+            <!-- TAB 1: INSTANT QR CODE -->
+            <div v-if="authMethod === 'qr'" class="space-y-5">
+              <!-- Step 1: Tuya User Code -->
+              <div class="bg-black/30 border border-white/10 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">1. Enter Smart Life User Code</span>
                 </div>
-                <p class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider mb-2">Select Your Device</p>
-                <button v-for="device in availableDiscoveredDevices" :key="device.id" @click="selectDevice(device)"
-                  class="w-full text-left bg-black/30 border border-white/10 rounded-2xl p-4 hover:border-[#3D7A41] hover:bg-[#3D7A41]/10 transition-colors group">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <p class="text-white font-bold text-sm">Smart Device</p>
-                      <p class="text-xs text-white/50 font-mono mt-1">{{ device.id }}</p>
+                <p class="text-xs text-white/70 leading-relaxed">
+                  Open <strong>Smart Life</strong> &rarr; tap <strong>Me</strong> (Profile) &rarr; tap <strong>⚙️ Settings</strong> &rarr; <strong>Account and Security</strong> &rarr; copy your <strong>User Code</strong>.
+                </p>
+                <div class="flex gap-2">
+                  <input
+                    v-model="tuyaUserCode"
+                    type="text"
+                    placeholder="e.g. ay159... (Tuya User Code)"
+                    @keyup.enter="generateTuyaQr"
+                    class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3D7A41] font-mono placeholder:text-white/20"
+                  />
+                  <button
+                    type="button"
+                    @click="generateTuyaQr"
+                    :disabled="isGeneratingQr || !tuyaUserCode.trim()"
+                    class="px-4 py-2.5 bg-[#3D7A41] text-white text-xs font-bold rounded-xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-40 flex items-center gap-1.5 shrink-0"
+                  >
+                    <svg v-if="isGeneratingQr" class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ tuyaQrSvg ? 'Refresh QR' : 'Generate QR Code' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 2: QR Code Scanning -->
+              <div v-if="tuyaQrSvg" class="bg-black/30 border border-white/10 rounded-2xl p-5 text-center space-y-4 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">2. Scan with Smart Life App</span>
+                  <span v-if="isWaitingQrConfirm" class="inline-flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    Waiting for scan...
+                  </span>
+                  <span v-else-if="discoveredTuyaCloudDevices.length > 0" class="text-xs text-emerald-400 font-bold">
+                    ✓ Verified!
+                  </span>
+                </div>
+
+                <!-- White container for QR Code -->
+                <div class="bg-white p-3 rounded-2xl w-48 h-48 sm:w-52 sm:h-52 mx-auto flex items-center justify-center shadow-xl">
+                  <div v-html="tuyaQrSvg" class="w-full h-full [&>svg]:w-full [&>svg]:h-full"></div>
+                </div>
+
+                <p class="text-xs text-white/70 max-w-sm mx-auto leading-relaxed">
+                  Open <strong>Smart Life</strong>, tap the <strong>+</strong> in the top-right corner, select <strong>Scan</strong>, scan this QR code, and tap <strong>Confirm Login</strong>.
+                </p>
+              </div>
+
+              <!-- Error Alert -->
+              <div v-if="qrError" class="p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300 flex items-start gap-2">
+                <span class="text-sm">⚠️</span>
+                <span class="leading-relaxed">{{ qrError }}</span>
+              </div>
+
+              <!-- Step 3: Discovered Cloud Devices -->
+              <div v-if="discoveredTuyaCloudDevices.length > 0" class="space-y-3 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">3. Discovered Devices</span>
+                  <span class="text-xs text-pawbby-muted">{{ discoveredTuyaCloudDevices.length }} found</span>
+                </div>
+
+                <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  <div
+                    v-for="dev in discoveredTuyaCloudDevices"
+                    :key="dev.id"
+                    @click="selectCloudDevice(dev)"
+                    :class="[
+                      newDevice.deviceId === dev.id
+                        ? 'border-[#3D7A41] bg-[#3D7A41]/15 ring-1 ring-[#3D7A41]'
+                        : 'border-white/10 bg-black/40 hover:border-white/30',
+                      'p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between'
+                    ]"
+                  >
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-white">{{ dev.name || 'Unnamed Device' }}</span>
+                        <span v-if="dev.isPawbby" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#3D7A41] text-white">
+                          Pawbby Box
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-3 text-xs text-white/50 font-mono">
+                        <span>ID: {{ dev.id.slice(0, 8) }}...</span>
+                        <span v-if="dev.local_key || dev.localKey">Key: {{ (dev.local_key || dev.localKey).slice(0, 4) }}••••••••</span>
+                        <span v-if="dev.ip">IP: {{ dev.ip }}</span>
+                      </div>
                     </div>
+
                     <div class="text-right">
-                      <p class="text-xs text-[#3D7A41] font-mono bg-[#3D7A41]/20 px-2 py-1 rounded-md">{{ device.ip }}</p>
+                      <span v-if="newDevice.deviceId === dev.id" class="text-xs font-bold text-[#3D7A41] flex items-center gap-1">
+                        ✓ Selected
+                      </span>
+                      <span v-else class="text-xs text-white/40 group-hover:text-white">
+                        Select
+                      </span>
                     </div>
                   </div>
-                </button>
-                <div class="flex justify-between mt-4 items-center px-2">
+                </div>
+              </div>
+
+              <!-- Selected Key Preview / Confirmation -->
+              <div v-if="newDevice.localKey" class="p-3.5 bg-black/30 border border-white/5 rounded-xl space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-white/50 uppercase font-mono">Extracted Local Key</span>
+                  <span class="text-[#3D7A41] font-bold">Ready to connect</span>
+                </div>
+                <div class="text-sm font-mono text-white/90 bg-black/50 px-3 py-2 rounded-lg border border-white/5 flex justify-between items-center">
+                  <span>{{ showKey ? newDevice.localKey : '••••••••••••••••' }}</span>
+                  <button type="button" @click="showKey = !showKey" class="text-xs text-white/40 hover:text-white">
+                    {{ showKey ? 'Hide' : 'Show' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: MANUAL DEVELOPER GUIDE -->
+            <div v-if="authMethod === 'manual'" class="space-y-6">
+              <!-- Optional Local Network Scan -->
+              <div class="bg-black/30 border border-white/10 rounded-2xl p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">Local Network Scan</span>
                   <button @click="scanNetwork" class="text-xs text-[#3D7A41] hover:text-[#5BC266] font-bold underline">Scan Again</button>
-                  <button @click="manualMode = true" class="text-xs text-white/40 hover:text-white underline">I don't see it / Enter manually</button>
+                </div>
+
+                <div v-if="isScanning" class="py-6 flex flex-col items-center justify-center text-center space-y-2">
+                  <svg class="animate-spin h-6 w-6 text-[#3D7A41]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p class="text-xs text-white/70 font-medium">Scanning WiFi for Tuya devices...</p>
+                </div>
+
+                <div v-else-if="availableDiscoveredDevices.length > 0" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  <button
+                    v-for="device in availableDiscoveredDevices"
+                    :key="device.id"
+                    type="button"
+                    @click="newDevice.deviceId = device.id; newDevice.ipAddress = device.ip"
+                    :class="[
+                      newDevice.deviceId === device.id ? 'border-[#3D7A41] bg-[#3D7A41]/20' : 'border-white/10 bg-black/40',
+                      'w-full text-left border rounded-xl p-3 hover:border-[#3D7A41] transition-all flex justify-between items-center'
+                    ]"
+                  >
+                    <div>
+                      <p class="text-white font-bold text-xs">Smart Device</p>
+                      <p class="text-[11px] text-white/50 font-mono mt-0.5">{{ device.id }}</p>
+                    </div>
+                    <span class="text-xs text-[#3D7A41] font-mono bg-[#3D7A41]/20 px-2 py-0.5 rounded">{{ device.ip }}</span>
+                  </button>
+                </div>
+                <div v-else class="text-xs text-white/50">
+                  No devices currently detected via broadcast. You can enter the Device ID manually below.
                 </div>
               </div>
-                <div v-else-if="discoveredDevices.length > 0" class="text-center py-6">
-                  <p class="text-white/60 text-sm mb-4">
-                    All discovered Tuya devices have already been added to Pawbby Reborn.
-                  </p>
-                  <button
-                    @click="scanNetwork"
-                    class="px-4 py-2 bg-[#3D7A41]/20 text-[#3D7A41] rounded-lg text-sm font-bold hover:bg-[#3D7A41]/30 transition-colors mb-2"
-                  >
-                    Scan Again
+
+              <!-- 11-step Tuya Developer Guide -->
+              <div class="bg-black/30 border border-white/10 rounded-2xl overflow-hidden relative">
+                <div class="flex justify-between items-center p-3 border-b border-white/10 bg-white/5">
+                  <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">How to link your app</span>
+                  <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
+                    <div v-for="i in 11" :key="i-1" class="w-2 h-2 rounded-full transition-colors shrink-0" :class="guideSlide === (i-1) ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
+                  </div>
+                </div>
+                <div class="relative w-full h-48 sm:h-56 bg-black/50 flex items-center justify-center">
+                  <img v-if="guideSlide === 0" src="/step_1.png" alt="Step 1 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_1.png'" @click="expandedImage = '/step_1.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 1" src="/step_2.png" alt="Step 2 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_2.png'" @click="expandedImage = '/step_2.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 2" src="/step_3.png" alt="Step 3 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_3.png'" @click="expandedImage = '/step_3.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 3" src="/step_4.png" alt="Step 4 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_4.png'" @click="expandedImage = '/step_4.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 4" src="/step_5.png" alt="Step 5 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_5.png'" @click="expandedImage = '/step_5.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 5" src="/step_6.png" alt="Step 6 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_6.png'" @click="expandedImage = '/step_6.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 7" src="/step_8.png" alt="Step 8 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_8.png'" @click="expandedImage = '/step_8.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 8" src="/step_9.png" alt="Step 9 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_9.png'" @click="expandedImage = '/step_9.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 9" src="/step_10.png" alt="Step 10 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_10.png'" @click="expandedImage = '/step_10.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <img v-if="guideSlide === 10" src="/step_11.png" alt="Step 11 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_11.png'" @click="expandedImage = '/step_11.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
+                  <div v-if="guideSlide === 6" class="text-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                  </div>
+
+                  <button v-if="guideSlide > 0" @click="guideSlide--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                   </button>
-                  <button
-                    @click="manualMode = true"
-                    class="block w-full mt-2 px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors"
-                  >
-                    Enter Details Manually
+                  <button v-if="guideSlide < 10" @click="guideSlide++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                   </button>
                 </div>
-                <div v-else class="text-center py-6">
-                  <p class="text-white/60 text-sm mb-4">
-                    We couldn't find any Tuya devices on your local network automatically.
-                  </p>
-                  <button
-                    @click="scanNetwork"
-                    class="px-4 py-2 bg-[#3D7A41]/20 text-[#3D7A41] rounded-lg text-sm font-bold hover:bg-[#3D7A41]/30 transition-colors mb-2"
-                  >
-                    Scan Again
-                  </button>
-                  <button
-                    @click="manualMode = true"
-                    class="block w-full mt-2 px-4 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition-colors"
-                  >
-                    Enter Details Manually
-                  </button>
+                <div class="p-4 text-xs text-white/80 leading-relaxed min-h-[5rem]">
+                  <p v-if="guideSlide === 0"><strong>Step 1.</strong> Go to <a href="https://iot.tuya.com/" target="_blank" class="text-[#3D7A41] underline">iot.tuya.com</a> and sign up for a free developer account.</p>
+                  <p v-if="guideSlide === 1"><strong>Step 2.</strong> After you create an account, click on <strong>Cloud</strong> on the left menu, then <strong>Project Management</strong>.</p>
+                  <p v-if="guideSlide === 2"><strong>Step 3.</strong> Click on the blue <strong>Create Cloud Project</strong> button.</p>
+                  <p v-if="guideSlide === 3"><strong>Step 4.</strong> Fill in the form: Industry &rarr; <em>Smart Home</em>, Development Method &rarr; <em>Custom</em>. <br><span class="text-[#3D7A41] font-bold">Important:</span> Select the Data Center that geographically matches where your Smart Life app is registered!</p>
+                  <p v-if="guideSlide === 4"><strong>Step 5.</strong> In the API Services section, make sure to add <strong>Smart Home Basic Service</strong>, then click Authorize.</p>
+                  <p v-if="guideSlide === 5"><strong>Step 6.</strong> Click on the <strong>Devices</strong> tab at the top, then <strong>Link Tuya App Account</strong>, and click <strong>Add App Account</strong> to show a QR code.</p>
+                  <p v-if="guideSlide === 6"><strong>Step 7.</strong> Open the Smart Life app on your phone, tap the `+` or scanner icon, and scan the QR code on your computer screen. Tap <strong>Confirm Login</strong> on your phone.</p>
+                  <p v-if="guideSlide === 7"><strong>Step 8.</strong> Back on your computer screen, an authorization box will pop up. Leave it on <em>Automatic Link</em> and click <strong>OK</strong>.</p>
+                  <p v-if="guideSlide === 8"><strong>Step 9.</strong> Tuya might show you an overview of your linked devices. You can just click away/close that overview panel to get back to the project page.</p>
+                  <p v-if="guideSlide === 9"><strong>Step 10.</strong> Click on <strong>Cloud</strong> on the left menu, then click on <strong>API Explorer</strong>.</p>
+                  <p v-if="guideSlide === 10"><strong>Step 11.</strong> Search for <em>Query Device Details</em>. Enter the <strong>Device ID</strong> located directly below this text into the input field, click Submit, and copy the <strong>local_key</strong> from the right panel!</p>
                 </div>
+              </div>
+
+              <div class="space-y-4">
+                <div v-if="newDevice.deviceId && !manualMode" class="bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white/50 font-mono flex justify-between">
+                  <span>Device ID</span>
+                  <span>{{ newDevice.deviceId }}</span>
+                </div>
+                <div v-else>
+                  <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Device ID</label>
+                  <input v-model="newDevice.deviceId" type="text" placeholder="Tuya Device ID"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Local IP Address (Optional)</label>
+                  <input v-model="newDevice.ipAddress" type="text" placeholder="e.g. 192.168.1.100 (Leave empty for auto-find)"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Local Key</label>
+                  <input v-model="newDevice.localKey" type="password" placeholder="16-character secret key"
+                    class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20" />
+                </div>
+              </div>
             </div>
 
-            <div v-if="manualMode">
-              <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Device ID</label>
-              <input v-model="newDevice.deviceId" type="text" placeholder="Found in Tuya App"
-                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20 mb-4" />
-              
-              <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Local IP Address</label>
-              <input v-model="newDevice.ipAddress" type="text" placeholder="e.g. 192.168.1.100"
-                class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20" />
-            </div>
-
+            <!-- Action Buttons -->
             <div class="flex gap-3 pt-4">
-              <button @click="currentStep--; manualMode = false" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-                Back
-              </button>
-              <button v-if="manualMode" @click="nextStep" :disabled="!newDevice.ipAddress || !newDevice.deviceId"
-                class="flex-1 py-4 bg-[#3D7A41] text-white font-bold rounded-2xl hover:bg-[#3D7A41]/80 transition-colors disabled:opacity-30">
-                Continue
-              </button>
-            </div>
-          </div>
-
-          <!-- STEP 6: Security -->
-          <div v-if="currentStep === 6" class="space-y-6">
-            <p class="text-pawbby-muted text-sm leading-relaxed">
-              Tuya fiercely locks down their devices. To securely connect locally, we need the device's secret Local Key.
-            </p>
-            
-            <div class="bg-black/30 border border-white/10 rounded-2xl overflow-hidden relative">
-              <div class="flex justify-between items-center p-3 border-b border-white/10 bg-white/5">
-                <span class="text-xs font-bold text-[#3D7A41] uppercase tracking-wider">How to link your app</span>
-                <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
-                  <div v-for="i in 11" :key="i-1" class="w-2 h-2 rounded-full transition-colors shrink-0" :class="guideSlide === (i-1) ? 'bg-[#3D7A41]' : 'bg-white/20'"></div>
-                </div>
-              </div>
-              <div class="relative w-full h-48 sm:h-56 bg-black/50 flex items-center justify-center">
-                <img v-if="guideSlide === 0" src="/step_1.png" alt="Step 1 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_1.png'" @click="expandedImage = '/step_1.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 1" src="/step_2.png" alt="Step 2 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_2.png'" @click="expandedImage = '/step_2.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 2" src="/step_3.png" alt="Step 3 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_3.png'" @click="expandedImage = '/step_3.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 3" src="/step_4.png" alt="Step 4 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_4.png'" @click="expandedImage = '/step_4.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 4" src="/step_5.png" alt="Step 5 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_5.png'" @click="expandedImage = '/step_5.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 5" src="/step_6.png" alt="Step 6 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_6.png'" @click="expandedImage = '/step_6.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 7" src="/step_8.png" alt="Step 8 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_8.png'" @click="expandedImage = '/step_8.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 8" src="/step_9.png" alt="Step 9 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_9.png'" @click="expandedImage = '/step_9.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 9" src="/step_10.png" alt="Step 10 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_10.png'" @click="expandedImage = '/step_10.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <img v-if="guideSlide === 10" src="/step_11.png" alt="Step 11 Screenshot" tabindex="0" @keydown.enter="expandedImage = '/step_11.png'" @click="expandedImage = '/step_11.png'" class="absolute inset-0 w-full h-full object-cover opacity-80 cursor-pointer hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#3D7A41] inset-ring-2 inset-ring-[#3D7A41]" />
-                <div v-if="guideSlide === 6" class="text-white/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                </div>
-                
-                <button v-if="guideSlide > 0" @click="guideSlide--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <button v-if="guideSlide < 10" @click="guideSlide++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 p-1.5 rounded-full text-white/70 hover:text-white backdrop-blur-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
-              <div class="p-4 text-xs text-white/80 leading-relaxed min-h-[5rem]">
-                <p v-if="guideSlide === 0"><strong>Step 1.</strong> Go to <a href="https://iot.tuya.com/" target="_blank" class="text-[#3D7A41] underline">iot.tuya.com</a> and sign up for a free developer account.</p>
-                <p v-if="guideSlide === 1"><strong>Step 2.</strong> After you create an account, click on <strong>Cloud</strong> on the left menu, then <strong>Project Management</strong>.</p>
-                <p v-if="guideSlide === 2"><strong>Step 3.</strong> Click on the blue <strong>Create Cloud Project</strong> button.</p>
-                <p v-if="guideSlide === 3"><strong>Step 4.</strong> Fill in the form: Industry &rarr; <em>Smart Home</em>, Development Method &rarr; <em>Custom</em>. <br><span class="text-[#3D7A41] font-bold">Important:</span> Select the Data Center that geographically matches where your Smart Life app is registered!</p>
-                <p v-if="guideSlide === 4"><strong>Step 5.</strong> In the API Services section, make sure to add <strong>Smart Home Basic Service</strong>, then click Authorize.</p>
-                <p v-if="guideSlide === 5"><strong>Step 6.</strong> Click on the <strong>Devices</strong> tab at the top, then <strong>Link Tuya App Account</strong>, and click <strong>Add App Account</strong> to show a QR code.</p>
-                <p v-if="guideSlide === 6"><strong>Step 7.</strong> Open the Smart Life app on your phone, tap the `+` or scanner icon, and scan the QR code on your computer screen. Tap <strong>Confirm Login</strong> on your phone.</p>
-                <p v-if="guideSlide === 7"><strong>Step 8.</strong> Back on your computer screen, an authorization box will pop up. Leave it on <em>Automatic Link</em> and click <strong>OK</strong>.</p>
-                <p v-if="guideSlide === 8"><strong>Step 9.</strong> Tuya might show you an overview of your linked devices. You can just click away/close that overview panel to get back to the project page.</p>
-                <p v-if="guideSlide === 9"><strong>Step 10.</strong> Click on <strong>Cloud</strong> on the left menu, then click on <strong>API Explorer</strong>.</p>
-                <p v-if="guideSlide === 10"><strong>Step 11.</strong> Search for <em>Query Device Details</em>. Enter the <strong>Device ID</strong> located directly below this text into the input field, click Submit, and copy the <strong>local_key</strong> from the right panel!</p>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div v-if="!manualMode" class="bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white/50 font-mono flex justify-between">
-                <span>Device ID</span>
-                <span>{{ newDevice.deviceId }}</span>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-pawbby-muted uppercase tracking-wider mb-2">Local Key</label>
-                <input v-model="newDevice.localKey" type="password" placeholder="16-character secret key"
-                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pawbby-primary transition-colors font-mono placeholder:text-white/20" />
-              </div>
-            </div>
-
-            <div class="flex gap-3 pt-4">
-              <button @click="currentStep--; manualMode = false" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
+              <button @click="currentStep--; manualMode = false; stopQrPolling()" class="px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
                 Back
               </button>
               <button @click="handleAddDevice" :disabled="isSaving || !newDevice.deviceId || !newDevice.localKey"
@@ -384,8 +483,8 @@
             </div>
           </div>
 
-          <!-- STEP 7: Litter Selection -->
-          <div v-if="currentStep === 7" class="space-y-6">
+          <!-- STEP 6: Litter Selection -->
+          <div v-if="currentStep === 6" class="space-y-6">
             <div>
               <p class="text-pawbby-muted text-sm leading-relaxed">
                 Select the cat litter you pour into your box. This calibrates the drum's weight sensor and algorithm for the correct density.
@@ -486,8 +585,8 @@
             </div>
           </div>
 
-          <!-- STEP 8: Auto-Clean Delay (Time to cycle) -->
-          <div v-if="currentStep === 8" class="space-y-6">
+          <!-- STEP 7: Auto-Clean Delay (Time to cycle) -->
+          <div v-if="currentStep === 7" class="space-y-6">
             <div>
               <p class="text-pawbby-muted text-sm leading-relaxed">
                 How long should the box wait after your cat leaves before cycling? Letting clumps settle for a few minutes prevents sticky residue and keeps the drum clean.
@@ -566,8 +665,8 @@
             </div>
           </div>
 
-          <!-- STEP 9: Success -->
-          <div v-if="currentStep === 9" class="space-y-6">
+          <!-- STEP 8: Success -->
+          <div v-if="currentStep === 8" class="space-y-6">
             <div class="bg-[#3D7A41]/10 border border-[#3D7A41]/20 rounded-2xl p-6 text-center">
               <div class="text-4xl mb-4">🥳</div>
               <h3 class="text-xl font-bold text-white mb-2">Connection Successful!</h3>
@@ -606,7 +705,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthState } from '~/composables/useAuthState'
 import { LITTER_CARDS } from '~/composables/useApi'
 
@@ -635,6 +734,112 @@ const discoveredDevices = ref<any[]>([])
 const manualMode = ref(false)
 const guideSlide = ref(0)
 const expandedImage = ref<string | null>(null)
+
+// Tuya QR Code Auth State
+const authMethod = ref<'qr' | 'manual'>('qr')
+const tuyaUserCode = ref('')
+const isGeneratingQr = ref(false)
+const isWaitingQrConfirm = ref(false)
+const tuyaQrSvg = ref('')
+const tuyaQrToken = ref('')
+const qrError = ref('')
+const discoveredTuyaCloudDevices = ref<any[]>([])
+const showKey = ref(false)
+let qrPollTimer: any = null
+
+const stopQrPolling = () => {
+  if (qrPollTimer) {
+    clearInterval(qrPollTimer)
+    qrPollTimer = null
+  }
+}
+
+const generateTuyaQr = async () => {
+  if (!tuyaUserCode.value.trim()) {
+    qrError.value = 'Please enter your Smart Life User Code first.'
+    return
+  }
+  stopQrPolling()
+  isGeneratingQr.value = true
+  qrError.value = ''
+  tuyaQrSvg.value = ''
+  tuyaQrToken.value = ''
+  discoveredTuyaCloudDevices.value = []
+
+  try {
+    const res: any = await $fetch('/api/setup/tuya/qr', {
+      method: 'POST',
+      body: { userCode: tuyaUserCode.value.trim() }
+    })
+    if (res.success && res.qrSvg) {
+      tuyaQrSvg.value = res.qrSvg
+      tuyaQrToken.value = res.token
+      startQrPolling()
+    } else {
+      qrError.value = res.error || 'Failed to generate QR code.'
+    }
+  } catch (err: any) {
+    qrError.value = err?.data?.statusMessage || err?.message || 'Error communicating with Tuya server.'
+  } finally {
+    isGeneratingQr.value = false
+  }
+}
+
+const selectCloudDevice = (dev: any) => {
+  newDevice.value.deviceId = dev.id
+  newDevice.value.localKey = dev.localKey || dev.local_key || ''
+  if (!newDevice.value.name) {
+    newDevice.value.name = dev.name || 'Pawbby Smart Litter Box'
+  }
+  // Try to match the actual LAN IP from a local network scan
+  const localMatch = discoveredDevices.value.find((d: any) => d.id === dev.id)
+  if (localMatch?.ip) {
+    newDevice.value.ipAddress = localMatch.ip
+  } else if (!newDevice.value.ipAddress && dev.ip && /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|127\.)/.test(dev.ip)) {
+    // Only use dev.ip if it is actually a private LAN IP (not a public WAN IP)
+    newDevice.value.ipAddress = dev.ip
+  }
+}
+
+const startQrPolling = () => {
+  stopQrPolling()
+  isWaitingQrConfirm.value = true
+
+  qrPollTimer = setInterval(async () => {
+    if (!tuyaQrToken.value || !tuyaUserCode.value) return
+    try {
+      const res: any = await $fetch(`/api/setup/tuya/status?token=${encodeURIComponent(tuyaQrToken.value)}&userCode=${encodeURIComponent(tuyaUserCode.value.trim())}`)
+      if (res.confirmed) {
+        stopQrPolling()
+        isWaitingQrConfirm.value = false
+        discoveredTuyaCloudDevices.value = res.devices || []
+
+        // Auto-select device if matching newDevice.deviceId or if only 1 pawbby device
+        const pawbbyDev = (res.devices || []).find((d: any) =>
+          (newDevice.value.deviceId && d.id === newDevice.value.deviceId) || d.isPawbby
+        ) || (res.devices && res.devices.length === 1 ? res.devices[0] : null)
+
+        if (pawbbyDev) {
+          selectCloudDevice(pawbbyDev)
+        }
+      } else if (res.error) {
+        stopQrPolling()
+        isWaitingQrConfirm.value = false
+        qrError.value = res.error
+      }
+    } catch (err: any) {
+      if (err?.statusCode && err.statusCode >= 400) {
+        stopQrPolling()
+        isWaitingQrConfirm.value = false
+        qrError.value = err?.data?.statusMessage || 'Tuya session expired. Please generate a new QR code.'
+      }
+    }
+  }, 2000)
+}
+
+onUnmounted(() => {
+  stopQrPolling()
+})
 
 const createdDeviceId = ref<string | null>(null)
 const setupLitterType = ref<number>(0)
@@ -702,12 +907,22 @@ const selectDevice = (d: any) => {
 const nextStep = () => {
   manualMode.value = false
   if (currentStep.value === 4) {
+    // Optionally pre-scan local network in background to match LAN IPs
     scanNetwork()
   }
-  if (currentStep.value < 9) currentStep.value++
+  if (currentStep.value < 8) currentStep.value++
 }
 
 const closeModal = () => {
+  stopQrPolling()
+  isWaitingQrConfirm.value = false
+  isGeneratingQr.value = false
+  tuyaQrSvg.value = ''
+  tuyaQrToken.value = ''
+  qrError.value = ''
+  discoveredTuyaCloudDevices.value = []
+  authMethod.value = 'qr'
+  showKey.value = false
   showAddModal.value = false
   currentStep.value = 1
   hasSmartLife.value = false
@@ -722,7 +937,7 @@ const closeModal = () => {
 
 const handleAddDevice = async () => {
   if (createdDeviceId.value) {
-    currentStep.value = 7
+    currentStep.value = 6
     return
   }
   if (!newDevice.value.deviceId) {
@@ -736,8 +951,8 @@ const handleAddDevice = async () => {
     // Refresh devices
     await loadDevices()
     
-    // Move to step 7 for litter selection
-    currentStep.value = 7
+    // Move to step 6 for litter selection
+    currentStep.value = 6
     // reset form (done on actual close)
     newDevice.value = {
       name: '',
@@ -777,7 +992,7 @@ const saveSetupLitter = async () => {
       isSavingSetting.value = false
     }
   }
-  currentStep.value = 8
+  currentStep.value = 7
 }
 
 const saveSetupDelay = async () => {
@@ -791,7 +1006,7 @@ const saveSetupDelay = async () => {
       isSavingSetting.value = false
     }
   }
-  currentStep.value = 9
+  currentStep.value = 8
 }
 
 const isDeviceOnline = (device: any) => {
