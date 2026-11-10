@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pawbby Reborn 🐾 | 100% Local, Cloud-Free Smart Litter Box Dashboard</title>
+  <meta name="description" content="A beautiful, 100% local, cloud-free dashboard for your Pawbby Smart Cat Litter Box. Zero cloud latency, complete privacy, multi-cat weight tracking, and 1-click QR setup.">
+  <meta name="theme-color" content="#201e1b">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pawbby Reborn 🐾 — 100% Local Smart Litter Box Dashboard">
+  <meta property="og:description" content="Rescue your Pawbby Smart Cat Litter Box from dead cloud servers. 100% local Wi-Fi control, multi-cat tracking, Home Assistant support, and zero subscriptions.">
+  <meta property="og:image" content="assets/images/device.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Ambient Light Effect -->
+  <div class="ambient-glow"></div>
+
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="nav-brand">
+        <img src="assets/images/logo.png" alt="Pawbby Reborn Logo">
+        <span>Pawbby Reborn</span>
+        <span class="brand-badge">v1.1.0</span>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#features">Features</a>
+        <a href="#qr-setup">QR Setup</a>
+        <a href="#story">The Story</a>
+        <a href="#install">Installation</a>
+        <a href="https://discord.gg/Tw43AKZkge" target="_blank" rel="noopener">Discord</a>
+        <a href="https://github.com/larsjarred9/Pawbby-Reborn" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#install" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span class="pulse-dot"></span>
+          <span>v1.1.0 Released — 1-Click QR Setup &amp; 6 Languages</span>
+        </div>
+
+        <h1 class="hero-title">
+          Rescue your smart litter box from the <span class="gradient-text">dead cloud.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          A modern, 100% local, lightning-fast dashboard for your Pawbby Smart Cat Litter Box. 
+          No cloud outages, no subscription fees, and your cat's health data never leaves your home network.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#install" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Install Pawbby Reborn
+          </a>
+          <a href="https://github.com/larsjarred9/Pawbby-Reborn" target="_blank" rel="noopener" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            Star on GitHub
+          </a>
+        </div>
+
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            100% Local Wi-Fi
+          </div>
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            AGPL-3.0 Open Source
+          </div>
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.2 6.7 5.3 8 .4.1.6-.2.6-.4v-1.5c-2.5.5-3-1.1-3-1.1-.4-1-.9-1.3-.9-1.3-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-2-.2-4.1-1-4.1-4.5 0-1 .4-1.8 1-2.5 0-.2-.4-1.1.1-2.4 0 0 .8-.2 2.6.9a8.9 8.9 0 0 1 4.7 0c1.8-1.1 2.6-.9 2.6-.9.5 1.3.1 2.2.1 2.4.6.7 1 1.5 1 2.5 0 3.5-2.1 4.3-4.1 4.5.3.3.6.8.6 1.6v2.4c0 .2.2.5.6.4A9 9 0 0 0 21 12a9 9 0 0 0-9-9z"/>
+            </svg>
+            Home Assistant Ready
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Mockup -->
+      <div class="hero-mockup-wrapper">
+        <div class="hero-mockup-glow"></div>
+        <div class="hero-mockup-card">
+          <div class="mockup-header">
+            <div class="mockup-status" id="mockupStatus">
+              <span class="mockup-status-dot"></span>
+              Ready &amp; Idle
+            </div>
+            <span style="font-size: 0.8rem; color: var(--color-text-dim);">LAN Connected</span>
+          </div>
+
+          <div class="mockup-drum">
+            <img src="assets/images/litterbox.png" alt="Pawbby Smart Litter Box">
+            <div class="mockup-weight" id="mockupWeight">4.35<span>kg</span></div>
+            <div class="mockup-weight-sub">🐱 Luna matched (PawID)</div>
+          </div>
+
+          <div class="mockup-grid">
+            <div class="mockup-stat">
+              <div class="mockup-stat-label">Waste Bin</div>
+              <div class="mockup-stat-val gold">18% (Normal)</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="mockup-stat-label">Litter Level</div>
+              <div class="mockup-stat-val">Sufficient</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="mockup-stat-label">Litter Type</div>
+              <div class="mockup-stat-val">Bentonite Clay</div>
+            </div>
+            <div class="mockup-stat">
+              <div class="mockup-stat-label">Last Visit</div>
+              <div class="mockup-stat-val">12m ago</div>
+            </div>
+          </div>
+
+          <div class="mockup-actions">
+            <button class="mockup-action-btn" data-action="clean">✨ Clean Now</button>
+            <button class="mockup-action-btn" data-action="soft">🔄 Soft Clumps</button>
+            <button class="mockup-action-btn" data-action="tare">⚖️ Tare Scale</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Numbers Banner -->
+  <section class="stats-banner">
+    <div class="container stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-desc">Local Wi-Fi Control</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">0 ms</div>
+        <div class="stat-desc">Cloud Latency or Dependency</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6</div>
+        <div class="stat-desc">Languages Supported</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">$0</div>
+        <div class="stat-desc">Subscription Fees Forever</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">Everything You Need</span>
+        <h2 class="section-title">Built for pet parents, by the open-source community.</h2>
+        <p class="section-desc">
+          When cloud services fail or abandon hardware, Pawbby Reborn keeps your litter box fully operational, private, and continuously updated.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h3 class="feature-title">
+            1-Click QR Setup
+            <span class="feature-badge">v1.1.0</span>
+          </h3>
+          <p class="feature-desc">
+            No developer accounts, cloud tokens, or packet sniffing needed. Simply scan the setup QR code directly from your Smart Life app to link your box instantly.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">100% Local &amp; Private</h3>
+          <p class="feature-desc">
+            All device communication stays on your local home network. Even if your internet connection goes down, your box cleans and reports seamlessly.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Multi-Cat PawID</h3>
+          <p class="feature-desc">
+            Automatically identifies which cat used the box based on weight. Tracks bathroom visit frequencies, duration, and long-term health trends.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Full Hardware Controls</h3>
+          <p class="feature-desc">
+            Configure every setting locally: auto-clean delays, quiet night schedules, soft clumps pre-shake, screen lock, tare scale, and deodorizer lifecycle resets.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Smart Home Alerts</h3>
+          <p class="feature-desc">
+            Push instant alerts directly to Home Assistant, Discord, Slack, Telegram, or Ntfy whenever a cat visits or when the waste bin needs attention.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">6 Languages Built-in</h3>
+          <p class="feature-desc">
+            Enjoy full internationalization support: English (default), Nederlands, Deutsch, Français, Español, and Italiano with instant language switching.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1-Click QR Setup Walkthrough -->
+  <section class="qr-walkthrough" id="qr-setup">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">Zero Cloud Hassle</span>
+        <h2 class="section-title">Connect your box in under 60 seconds.</h2>
+        <p class="section-desc">
+          Gone are the days of registering developer accounts or copying cryptic encryption keys. Pawbby Reborn v1.1.0 uses native Smart Life sharing.
+        </p>
+      </div>
+
+      <div class="qr-steps-grid">
+        <div class="qr-step-card">
+          <div class="qr-step-number">1</div>
+          <h3>Open the Setup Wizard</h3>
+          <p>
+            Launch your Pawbby Reborn web dashboard. It automatically scans your home Wi-Fi network and locates your box's IP address.
+          </p>
+        </div>
+
+        <div class="qr-step-card">
+          <div class="qr-step-number">2</div>
+          <h3>Scan the QR Code</h3>
+          <p>
+            Open the Smart Life or Tuya app on your phone, tap the Scan icon (+ top right), and point your camera at the screen.
+          </p>
+        </div>
+
+        <div class="qr-step-card">
+          <div class="qr-step-number">3</div>
+          <h3>You're All Set!</h3>
+          <p>
+            Pawbby Reborn securely performs the local handshake, saves your credentials, and starts live local control immediately.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Story Section -->
+  <section class="story-section" id="story">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill">The Story</span>
+        <h2 class="section-title">Rescuing hardware from cloud abandonment.</h2>
+        <p class="section-desc">
+          When the official Pawbby cloud was discontinued, expensive smart litter boxes were turned into high-tech paperweights overnight. Here is how the community rescued them.
+        </p>
+      </div>
+
+      <div class="story-grid">
+        <div class="story-card">
+          <div class="story-icon red">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <h3>1. The Cloud Shutdown</h3>
+          <p>
+            Without warning, the original Pawbby cloud servers went dark. The vendor mobile app stopped connecting, leaving pet parents unable to configure settings, review cat bathroom history, or control the box remotely.
+          </p>
+        </div>
+
+        <div class="story-card">
+          <div class="story-icon amber">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+              <line x1="2" y1="8" x2="22" y2="8"></line>
+            </svg>
+          </div>
+          <h3>2. The "No Tuya UI" Dilemma</h3>
+          <p>
+            Under the hood, the litter box communicates using the Tuya protocol. However, unlike standard smart home gadgets, it was manufactured without any standard Tuya control panel UI. Pairing it in the Smart Life app yielded an empty screen with zero controls.
+          </p>
+        </div>
+
+        <div class="story-card">
+          <div class="story-icon green">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <h3>3. Community Reverse Engineering</h3>
+          <p>
+            Rather than letting perfectly good machinery go to the dump, a collective of reverse engineers and cat owners joined forces on Discord. We packet-sniffed raw network communications, decoded every device command, and built our own UI.
+          </p>
+        </div>
+
+        <div class="story-card">
+          <div class="story-icon gold">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3>4. Pawbby Reborn (AGPL-3.0)</h3>
+          <p>
+            Pawbby Reborn was built to be 100% local, self-hosted, and protected under the GNU AGPL-3.0 license. This guarantees that our community's work remains free, open-source, and immune to corporate takeover or future shutdowns.
+          </p>
+        </div>
+      </div>
+
+      <div class="story-quote-banner">
+        <p>"Let's unbrick some hardware. 🐈‍⬛⚡"</p>
+        <span>— The Pawbby Reborn Community Pledge</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Guide Section -->
+  <section class="install-section" id="install">
+    <div class="container install-container">
+      <div class="section-header">
+        <span class="section-pill">Quick Start</span>
+        <h2 class="section-title">Install in minutes.</h2>
+        <p class="section-desc">
+          Choose the installation method that fits your home server or Raspberry Pi.
+        </p>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="tabs-header" role="tablist">
+        <button class="tab-btn active" data-tab="tab-docker" role="tab" aria-selected="true" aria-controls="tab-docker" id="btn-docker">
+          🐳 Docker Compose
+        </button>
+        <button class="tab-btn" data-tab="tab-ha" role="tab" aria-selected="false" aria-controls="tab-ha" id="btn-ha">
+          🏠 Home Assistant
+        </button>
+        <button class="tab-btn" data-tab="tab-pm2" role="tab" aria-selected="false" aria-controls="tab-pm2" id="btn-pm2">
+          ⚡ Raspberry Pi / PM2
+        </button>
+        <button class="tab-btn" data-tab="tab-umbrel" role="tab" aria-selected="false" aria-controls="tab-umbrel" id="btn-umbrel">
+          ☂️ Umbrel App Store
+        </button>
+      </div>
+
+      <!-- Panel: Docker Compose -->
+      <div class="tab-panel active" id="tab-docker" role="tabpanel" aria-labelledby="btn-docker">
+        <div class="panel-intro">
+          <h3>Deploy with Docker Compose</h3>
+          <p>The cleanest setup for Synology NAS, Unraid, TrueNAS, or any Docker-enabled server.</p>
+        </div>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>docker-compose.yml</span>
+            <button class="copy-btn" data-target="#code-docker">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <pre><code id="code-docker">services:
+  pawbby-reborn:
+    image: ghcr.io/larsjarred9/pawbby-reborn:latest
+    container_name: pawbby-reborn
+    ports:
+      - "3333:3333"
+    volumes:
+      - pawbby_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  pawbby_data:</code></pre>
+        </div>
+
+        <div class="code-steps">
+          <div class="code-step">
+            <div class="code-step-num">1</div>
+            <div class="code-step-content">
+              <p>Save the snippet above as <code>docker-compose.yml</code> in your preferred directory.</p>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">2</div>
+            <div class="code-step-content">
+              <p>Run the container in background mode:</p>
+              <div class="code-block-wrapper" style="margin-top: 8px;">
+                <div class="code-block-header">
+                  <span>Terminal</span>
+                  <button class="copy-btn" data-target="#code-docker-run">Copy</button>
+                </div>
+                <pre><code id="code-docker-run">docker compose up -d</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">3</div>
+            <div class="code-step-content">
+              <p>Open <strong>http://&lt;your-server-ip&gt;:3333</strong> in your web browser to start the onboarding wizard!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Tip:</strong> To update later, simply run <code>docker compose pull &amp;&amp; docker compose up -d</code>.
+        </div>
+      </div>
+
+      <!-- Panel: Home Assistant -->
+      <div class="tab-panel" id="tab-ha" role="tabpanel" aria-labelledby="btn-ha" hidden>
+        <div class="panel-intro">
+          <h3>Home Assistant Add-on</h3>
+          <p>Natively integrated into your Home Assistant sidebar with seamless ingress support.</p>
+        </div>
+
+        <div class="code-steps">
+          <div class="code-step">
+            <div class="code-step-num">1</div>
+            <div class="code-step-content">
+              <p>Navigate to <strong>Settings &rarr; Add-ons &rarr; Add-on Store</strong> in your Home Assistant instance.</p>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">2</div>
+            <div class="code-step-content">
+              <p>Click the 3 dots in the top right, select <strong>Repositories</strong>, and add our community repository:</p>
+              <div class="code-block-wrapper" style="margin-top: 8px;">
+                <div class="code-block-header">
+                  <span>Repository URL</span>
+                  <button class="copy-btn" data-target="#code-ha-repo">Copy</button>
+                </div>
+                <pre><code id="code-ha-repo">https://github.com/larsjarred9/Pawbby-Reborn</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">3</div>
+            <div class="code-step-content">
+              <p>Find <strong>Pawbby Reborn</strong> in the store, click <strong>Install</strong>, and turn on <em>Show in sidebar</em>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: PM2 / Linux -->
+      <div class="tab-panel" id="tab-pm2" role="tabpanel" aria-labelledby="btn-pm2" hidden>
+        <div class="panel-intro">
+          <h3>PM2 / Bare Metal (Raspberry Pi)</h3>
+          <p>Lightweight deployment with full support for the built-in <strong>1-Click Update</strong> UI feature.</p>
+        </div>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>Terminal</span>
+            <button class="copy-btn" data-target="#code-pm2">Copy</button>
+          </div>
+          <pre><code id="code-pm2"># 1. Clone repository
+git clone https://github.com/larsjarred9/Pawbby-Reborn.git
+cd Pawbby-Reborn
+
+# 2. Install dependencies & build
+npm install
+npm run setup
+
+# 3. Start background process with PM2
+pm2 start ecosystem.config.cjs
+pm2 save
+pm2 startup</code></pre>
+        </div>
+
+        <div class="callout">
+          <strong>1-Click Updates:</strong> When a new update is released, a notification banner appears in your dashboard. Simply click "Update Now" to run <code>upgrade.sh</code> automatically!
+        </div>
+      </div>
+
+      <!-- Panel: Umbrel -->
+      <div class="tab-panel" id="tab-umbrel" role="tabpanel" aria-labelledby="btn-umbrel" hidden>
+        <div class="panel-intro">
+          <h3>Umbrel App Store</h3>
+          <p>For users running an Umbrel Home or UmbrelOS server.</p>
+        </div>
+
+        <div class="code-steps">
+          <div class="code-step">
+            <div class="code-step-num">1</div>
+            <div class="code-step-content">
+              <p>Open your Umbrel dashboard and go to the <strong>App Store</strong>.</p>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">2</div>
+            <div class="code-step-content">
+              <p>Add our community app store repository:</p>
+              <div class="code-block-wrapper" style="margin-top: 8px;">
+                <div class="code-block-header">
+                  <span>Community App Store</span>
+                  <button class="copy-btn" data-target="#code-umbrel">Copy</button>
+                </div>
+                <pre><code id="code-umbrel">https://github.com/larsjarred9/Pawbby-Reborn-Umbrel</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="code-step">
+            <div class="code-step-num">3</div>
+            <div class="code-step-content">
+              <p>Click <strong>Install Pawbby Reborn</strong> to enjoy 1-click sandboxed deployment with automatic updates!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Community & Discord CTA -->
+  <section class="container">
+    <div class="cta-box">
+      <h2>Join the Community Effort 🐱</h2>
+      <p>
+        Pawbby Reborn is built together by passionate cat owners and reverse engineers. 
+        Have ideas, need help, or want to contribute? Join our active Discord server!
+      </p>
+      <div class="cta-actions">
+        <a href="https://discord.gg/Tw43AKZkge" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+          Join Discord Community
+        </a>
+        <a href="https://github.com/larsjarred9/Pawbby-Reborn/wiki" target="_blank" rel="noopener" class="btn btn-secondary">
+          Browse Project Wiki
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-brand">
+            <img src="assets/images/logo.png" alt="Pawbby Reborn Logo">
+            <span>Pawbby Reborn</span>
+          </div>
+          <p style="font-size: 0.85rem; max-width: 320px;">
+            A collaborative open-source effort to liberate pet hardware from cloud obsolescence.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#qr-setup">1-Click QR Setup</a></li>
+            <li><a href="#story">The Story</a></li>
+            <li><a href="#install">Install Guide</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Deployment</h4>
+          <ul>
+            <li><a href="#install">Docker Compose</a></li>
+            <li><a href="#install">Home Assistant</a></li>
+            <li><a href="#install">Raspberry Pi (PM2)</a></li>
+            <li><a href="#install">UmbrelOS</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="https://github.com/larsjarred9/Pawbby-Reborn" target="_blank" rel="noopener">GitHub Repository</a></li>
+            <li><a href="https://discord.gg/Tw43AKZkge" target="_blank" rel="noopener">Discord Community</a></li>
+            <li><a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/main/LICENSE" target="_blank" rel="noopener">AGPL-3.0 License</a></li>
+            <li><a href="https://github.com/larsjarred9/Pawbby-Reborn/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 Pawbby Reborn Community. Licensed under GNU AGPLv3.</span>
+        <span>Made with 🐾 by cat owners &amp; <a href="https://speetjens.net" target="_blank" rel="noopener" class="footer-serif-link">Speetjens.net</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
+
