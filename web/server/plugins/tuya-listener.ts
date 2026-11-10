@@ -24,6 +24,7 @@ export default defineNitroPlugin((nitroApp) => {
     lastSettingsRaw?: string;
     lastSettingsAt?: number;
     lastWeightUnitSyncAt?: number;
+    lastTimezoneSyncAt?: number;
   }
 
   const VISIT_STATUSES = new Set([
@@ -66,7 +67,7 @@ export default defineNitroPlugin((nitroApp) => {
     console.log(
       `[Tuya Setting] ${command.description} → DP 105 = ${command.payload} (${deviceId})`,
     );
-    await device.set({ dps: 105, set: command.payload });
+    await device.set({ dps: 105, set: command.payload, shouldWaitForResponse: false });
     if (command.logEvent !== false) {
       await prisma.litterEvent.create({
         data: {
@@ -109,6 +110,8 @@ export default defineNitroPlugin((nitroApp) => {
           deviceId,
           buildSettingCommand("sync_timezone", accountUtcOffset(user)),
         );
+        const st = deviceStates.get(deviceId);
+        if (st) st.lastTimezoneSyncAt = Date.now();
       }
       if (opts.weightUnit) {
         const unit = user.weightUnit === "lb" ? "lb" : "kg";
@@ -834,8 +837,14 @@ export default defineNitroPlugin((nitroApp) => {
 
           // Mirror the account time zone to the box (as the vendor app did on every
           // connect). DP 103 is push-only, so this also yields a fresh settings snapshot.
+          // Cooldown guards against rapid disconnect/reconnect loops.
           setTimeout(() => {
-            syncAccountSettings(config.id, { timezone: true }).catch(() => {});
+            const st = deviceStates.get(config.id);
+            const now = Date.now();
+            if (!st?.lastTimezoneSyncAt || now - st.lastTimezoneSyncAt > 10 * 60 * 1000) {
+              if (st) st.lastTimezoneSyncAt = now;
+              syncAccountSettings(config.id, { timezone: true }).catch(() => {});
+            }
           }, 3000);
 
           if (!pingIntervals.has(config.id)) {
@@ -921,7 +930,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending flatten command (DP 106) to ${deviceId}...`,
           );
-          await device.set({ dps: 106, set: "AQEAAQA=" });
+          await device.set({ dps: 106, set: "AQEAAQA=", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "flatten-app", deviceId },
           });
@@ -943,7 +952,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending clean command (DP 106) to ${deviceId}...`,
           );
-          await device.set({ dps: 106, set: "AQAAAA==" });
+          await device.set({ dps: 106, set: "AQAAAA==", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "manual-clean-app", deviceId },
           });
@@ -966,12 +975,12 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending tare/zero command (DP 109) to ${deviceId}...`,
           );
-          await device.set({ dps: 109, set: "AQEAAA==" });
+          await device.set({ dps: 109, set: "AQEAAA==", shouldWaitForResponse: false });
         } else if (action === "cancel_clean") {
           console.log(
             `[Tuya Action] Sending cancel clean command (DP 106) to ${deviceId}...`,
           );
-          await device.set({ dps: 106, set: "AQMAAA==" });
+          await device.set({ dps: 106, set: "AQMAAA==", shouldWaitForResponse: false });
         } else if (action === "empty") {
           if (state && BUSY_STATUSES.has(state.currentStatus)) {
             console.warn(
@@ -982,7 +991,7 @@ export default defineNitroPlugin((nitroApp) => {
           console.log(
             `[Tuya Action] Sending empty command (DP 106) to ${deviceId}...`,
           );
-          await device.set({ dps: 106, set: "AQIAAQA=" });
+          await device.set({ dps: 106, set: "AQIAAQA=", shouldWaitForResponse: false });
           await recordEvent({
             data: { type: "empty-app", deviceId },
           });

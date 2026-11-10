@@ -6,14 +6,14 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </NuxtLink>
-      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">User Management</h1>
+      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">{{ $t('nav.users') }}</h1>
     </header>
 
     <div class="space-y-4">
       <div class="flex justify-between items-center mb-2">
-        <h2 class="text-lg font-semibold text-white/90">Local Accounts</h2>
+        <h2 class="text-lg font-semibold text-white/90">{{ $t('users.localAccounts') }}</h2>
         <button @click="isAddModalOpen = true" class="bg-pawbby-primary text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-pawbby-secondary transition-colors">
-          + Add User
+          {{ $t('users.addUser') }}
         </button>
       </div>
       
@@ -45,22 +45,22 @@
     <!-- Add User Modal -->
     <div v-if="isAddModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-pawbby-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10 animate-fade-in-up">
-        <h3 class="text-xl font-bold text-white mb-4">Add Sub-User</h3>
-        <p class="text-sm text-pawbby-muted mb-4">Create an additional read-only account for your household.</p>
+        <h3 class="text-xl font-bold text-white mb-4">{{ $t('users.addSubUser') }}</h3>
+        <p class="text-sm text-pawbby-muted mb-4">{{ $t('users.addSubUserDesc') }}</p>
         
         <form @submit.prevent="handleAddUser" class="space-y-4">
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Display Name</label>
-            <input v-model="addForm.name" type="text" required placeholder="e.g. Jane Doe"
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('users.displayName') }}</label>
+            <input v-model="addForm.name" type="text" required :placeholder="$t('users.displayNamePlaceholder')"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Email Address</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('users.emailAddress') }}</label>
             <input v-model="addForm.email" type="email" required placeholder="user@local.network"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
           <div>
-            <label class="block text-sm text-pawbby-muted mb-1">Password</label>
+            <label class="block text-sm text-pawbby-muted mb-1">{{ $t('users.password') }}</label>
             <input v-model="addForm.password" type="password" required placeholder="••••••••"
               class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-pawbby-primary" />
           </div>
@@ -68,9 +68,9 @@
           <p v-if="errorMsg" class="text-[#D84C4C] text-xs">{{ errorMsg }}</p>
 
           <div class="flex space-x-3 mt-6">
-            <button type="button" @click="closeAddModal" class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">Cancel</button>
+            <button type="button" @click="closeAddModal" class="flex-1 px-4 py-2 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors">{{ $t('common.cancel') }}</button>
             <button type="submit" :disabled="isSaving" class="flex-1 px-4 py-2 rounded-xl bg-pawbby-primary text-pawbby-bg font-semibold hover:bg-pawbby-secondary transition-colors disabled:opacity-50">
-              {{ isSaving ? 'Adding...' : 'Add User' }}
+              {{ isSaving ? $t('users.adding') : $t('users.addUser') }}
             </button>
           </div>
         </form>

@@ -1,0 +1,246 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "back": "Terug",
+    "continue": "Doorgaan",
+    "done": "Klaar",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "dismiss": "Sluiten",
+    "connecting": "Verbinden...",
+    "close": "Sluiten",
+    "download": "Downloaden",
+    "all": "Alles",
+    "saveChanges": "Wijzigingen opslaan"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Activiteit",
+    "settings": "Instellingen",
+    "users": "Gebruikersbeheer",
+    "about": "Over Pawbby",
+    "logout": "Uitloggen"
+  },
+  "dashboard": {
+    "noDevices": "Geen apparaten gevonden. Tik op de + om je slimme kattenbak toe te voegen.",
+    "online": "Online",
+    "offline": "Offline",
+    "todayToileted": "Vandaag bezocht",
+    "times": "keer",
+    "updateAvailable": "Update beschikbaar",
+    "updateDesc": "Een nieuwe versie is klaar om te installeren.",
+    "view": "Bekijken"
+  },
+  "profile": {
+    "myPets": "Mijn huisdieren",
+    "editProfile": "Profiel bewerken",
+    "addPet": "Huisdier toevoegen",
+    "editPet": "Huisdier bewerken",
+    "noImg": "Geen foto",
+    "about": "Over PAWBBY Reborn",
+    "logout": "Uitloggen",
+    "name": "Naam",
+    "email": "E-mail (Gravatar)",
+    "changePassword": "Wachtwoord wijzigen",
+    "currentPassword": "Huidig wachtwoord",
+    "newPassword": "Nieuw wachtwoord",
+    "confirmPassword": "Bevestig nieuw wachtwoord",
+    "passwordUpdated": "Wachtwoord succesvol bijgewerkt!",
+    "exportCsv": "Exporteer CSV",
+    "upload": "Uploaden",
+    "birthday": "Geboortedatum",
+    "weight": "Gewicht",
+    "exportHistory": "Geschiedenis exporteren (CSV)",
+    "fetchingDates": "Beschikbare datums ophalen...",
+    "startDate": "Begindatum",
+    "endDate": "Einddatum",
+    "viewOnGithub": "Bekijk op GitHub",
+    "githubRepo": "Pawbby-Reborn Repository"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Configureer je voorkeuren, meldingen en integraties.",
+    "general": "Algemeen",
+    "language": "Taal",
+    "languageSubtitle": "Selecteer de taal van je dashboard",
+    "timezone": "Tijdzone",
+    "timezoneSubtitle": "Selecteer je lokale tijdzone.",
+    "weightUnit": "Gewichtseenheid",
+    "notificationControls": "Meldingenbeheer",
+    "pushNotifications": "Push-notificaties",
+    "externalApi": "Externe API",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Dagelijkse back-ups",
+    "checkForUpdates": "Controleren op updates",
+    "exportDb": "Exporteer geanonimiseerde DB",
+    "exportDbSubtitle": "Download een veilige, geanonimiseerde kopie van je database om te delen met ontwikkelaars.",
+    "clearCache": "Opgeslagen gegevens wissen",
+    "account": "Account",
+    "security": "Beveiliging",
+    "notifications": "Meldingen",
+    "integrations": "Integraties",
+    "system": "Systeem",
+    "configured": "Ingesteld",
+    "setup": "Instellen",
+    "enabled": "Ingeschakeld",
+    "disabled": "Uitgeschakeld",
+    "checking": "Controleren...",
+    "updateAvailable": "Update beschikbaar!",
+    "upToDate": "Up-to-date",
+    "exportDatabase": "Database exporteren",
+    "exportDatabaseText": "Dit downloadt een veilige, geanonimiseerde kopie van je database. Alle wifi-wachtwoorden, Tuya-sleutels, IP-adressen en namen zijn permanent gewist."
+  },
+  "users": {
+    "title": "Gebruikersbeheer",
+    "localAccounts": "Lokale accounts",
+    "addUser": "+ Gebruiker toevoegen",
+    "addSubUser": "Sub-gebruiker toevoegen",
+    "addSubUserDesc": "Maak een extra alleen-lezen account aan voor je huishouden.",
+    "displayName": "Weergavenaam",
+    "displayNamePlaceholder": "bijv. Jane Doe",
+    "emailAddress": "E-mailadres",
+    "password": "Wachtwoord",
+    "adding": "Toevoegen..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "Zeg hallo 👋",
+      "step2": "Download de app 📱",
+      "step3": "Koppelmodus 🔄",
+      "step4": "Aan netwerk toevoegen 🌐",
+      "step5": "Koppel je kattenbak 🤝",
+      "step6": "Kies je grit 🐱",
+      "step7": "Reinigingsvertraging ⏱️",
+      "step8": "Helemaal klaar! 🎉"
+    },
+    "step1Desc": "Laten we je slimme kattenbak verbinden! Hoe wil je hem noemen?",
+    "namePlaceholder": "bijv. Woonkamer Kattenbak"
+  },
+  "litter": {
+    "tabs": {
+      "record": "Rapport",
+      "history": "Geschiedenis",
+      "control": "Bediening",
+      "settings": "Instellingen"
+    },
+    "record": {
+      "title": "Gedetailleerd rapport",
+      "pawIdHint": "PawID herkent katten op basis van gewicht, werk dit direct bij als het gewicht van je kat verandert."
+    },
+    "history": {
+      "title": "Historische gegevens",
+      "dailyVisits": "Dagelijkse bezoeken",
+      "avgWeight": "Gemiddeld gewicht ({unit})",
+      "avgDuration": "Gemiddelde tijdsduur (seconden)",
+      "estWaste": "Geschatte hoeveelheid afval (g)"
+    },
+    "settings": {
+      "title": "Kattenbak instellingen",
+      "autoClean": "Automatisch reinigen",
+      "autoCleanDesc": "Reinig automatisch na elk toiletbezoek",
+      "softClumps": "Zachte ontlasting modus",
+      "softClumpsDesc": "Schud de trommel 2–4 keer voor het reinigen om zachte ontlasting te bedekken",
+      "autoOffScreen": "Scherm automatisch dimmen",
+      "autoOffScreenDesc": "Schakelt het scherm uit na 5 minuten inactiviteit",
+      "childLock": "Kinderslot (schermvergrendeling)",
+      "childLockDesc": "Vergrendel de fysieke knoppen op de kattenbak om ongewenste bediening te voorkomen",
+      "autoCleanDelay": "Vertraging automatisch reinigen",
+      "autoCleanDelayDesc": "Wachttijd nadat je kat de bak heeft verlaten voordat de reiniging start",
+      "quietPeriod": "Rustperiode",
+      "quietPeriodDesc": "Pauzeer automatisch reinigen 's nachts of op vaste tijden",
+      "quietPeriodActive": "Automatisch reinigen gepauzeerd van {start} tot {stop}",
+      "litterType": "Type kattenbakvulling",
+      "litterTypeDesc": "Kalibreert de weegschaal voor de dichtheid van je grit",
+      "reportedBy": "Gemeld door het apparaat {age}"
+    },
+    "deviceSettings": {
+      "title": "Apparaatinstellingen",
+      "deviceName": "Apparaatnaam",
+      "connectionInfo": "Verbindingsgegevens",
+      "tuyaId": "Tuya Device ID",
+      "ipAddress": "IP-adres",
+      "localKey": "Lokale sleutel (Local Key)",
+      "saveChanges": "Wijzigingen opslaan",
+      "deleteDevice": "Apparaat verwijderen"
+    },
+    "modal": {
+      "selectType": "Selecteer type kattenbakvulling",
+      "currentValue": "Huidige waarde",
+      "tapPicture": "Tik op de afbeelding die overeenkomt met de vulling in je kattenbak:",
+      "active": "Actief",
+      "calibrationNoteTitle": "Opmerking over sensorkalibratie",
+      "calibrationNote": "De machine gebruikt gewicht om het vulniveau te schatten. Krijg je na het vullen een onverwachte melding dat het grit bijna op is? Controleer of de bak op een vlakke, harde vloer staat en druk op Nulpunt kalibreren (Tare) met een lege trommel, of kies het lichtere Pawbby Natural profiel.",
+      "updatesSensor": "Werkt sensorkalibratie van de bak bij"
+    },
+    "lockModal": {
+      "title": "Waarschuwing schermvergrendeling",
+      "danger": "Mogelijk riskante actie:",
+      "desc1": "Het vergrendelen van het scherm schakelt alle fysieke knoppen op de machine uit om ongewenste bediening door kinderen of huisdieren te voorkomen.",
+      "desc2": "Als Pawbby Reborn de verbinding verliest, je wifi verandert of het systeem offline gaat terwijl het scherm is vergrendeld, kun je buitengesloten raken en de machine niet meer fysiek bedienen.",
+      "desc3": "Pawbby Reborn en de ontwikkelaars aanvaarden GEEN aansprakelijkheid als dit je machine blokkeert. Ga door op eigen risico.",
+      "confirm": "Ik begrijp het risico, vergrendel knoppen"
+    },
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Plantaardige zetmeelkorrels",
+        "badge": "Aanbevolen",
+        "density": "Lichtgewicht (~2.5–3.0 kg)",
+        "tip": "Laagste gewichtsdrempel. Aanbevolen standaardkeuze bij lichte korrels om valse low-litter meldingen te voorkomen."
+      },
+      "tofu": {
+        "name": "Tofu Korrels",
+        "label": "Doorspoelbare cilindrische staafjes",
+        "badge": "Tofu Pellets",
+        "density": "Laag-tot-gemiddelde dichtheid (~2.8–3.2 kg)",
+        "tip": "Standaard cilindrische tofu-staafjes. Zorgt voor juiste zeefsnelheid en gewichtsmeting."
+      },
+      "bentonite": {
+        "name": "Bentoniet Klei",
+        "label": "Klassiek klontvormend zand",
+        "badge": "Klei Zand",
+        "density": "Hoge dichtheid (~3.8–4.5 kg)",
+        "tip": "Vereist een zwaardere vulling (~3.8–4.5 kg). Geeft de box een low-litter melding bij lichte klei, kies dan Pawbby Natural of tareer de weegschaal."
+      },
+      "mixed": {
+        "name": "Mix Mengsel",
+        "label": "Tofu staafjes + kleikorrels",
+        "badge": "Composiet Mix",
+        "density": "Gemiddelde dichtheid (~3.2–3.8 kg)",
+        "tip": "Composietmix van tofu en bentoniet. Gebalanceerd gewichtsprofiel."
+      }
+    },
+    "actions": {
+      "clean": "Nu reinigen",
+      "cleanDesc": "Start een reinigingscyclus",
+      "flatten": "Grit egaliseren",
+      "flattenDesc": "Egaliseer het kattenbakgrind",
+      "empty": "Trommel legen",
+      "emptyDesc": "Gooi alle vulling in de afvalbak",
+      "tare": "Nulpunt kalibreren (Tare)",
+      "tareDesc": "Kalibreer lege weegschaal naar 0g",
+      "cancelClean": "Cyclus stoppen"
+    },
+    "status": {
+      "idle": "Stand-by",
+      "cleaning": "Reinigen",
+      "flattening": "Egaliseren",
+      "empty": "Legen",
+      "offline": "Offline",
+      "drumRemoved": "Trommel verwijderd",
+      "binRemoved": "Opvangbak verwijderd",
+      "lidRemoved": "Deksel verwijderd",
+      "binFull": "Opvangbak vol",
+      "normal": "Normaal",
+      "days": "Dagen",
+      "catInside": "Kat binnen",
+      "catNear": "Kat in de buurt",
+      "sufficient": "Voldoende",
+      "low": "Grit bijna op"
+    }
+  }
+}

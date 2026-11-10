@@ -1,0 +1,246 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "done": "Listo",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "dismiss": "Cerrar",
+    "connecting": "Conectando...",
+    "close": "Cerrar",
+    "download": "Descargar",
+    "all": "Todo",
+    "saveChanges": "Guardar cambios"
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "activity": "Actividad",
+    "settings": "Ajustes",
+    "users": "Gestión de usuarios",
+    "about": "Acerca de Pawbby",
+    "logout": "Cerrar sesión"
+  },
+  "dashboard": {
+    "noDevices": "No se encontraron dispositivos. Toca + para añadir tu arenero inteligente.",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "todayToileted": "Visitas hoy",
+    "times": "veces",
+    "updateAvailable": "Actualización disponible",
+    "updateDesc": "Una nueva versión está lista para instalar.",
+    "view": "Ver"
+  },
+  "profile": {
+    "myPets": "Mis mascotas",
+    "editProfile": "Editar perfil",
+    "addPet": "Añadir mascota",
+    "editPet": "Editar mascota",
+    "noImg": "Sin foto",
+    "about": "Acerca de PAWBBY Reborn",
+    "logout": "Cerrar sesión",
+    "name": "Nombre",
+    "email": "Correo (Gravatar)",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "passwordUpdated": "¡Contraseña actualizada con éxito!",
+    "exportCsv": "Exportar CSV",
+    "upload": "Subir",
+    "birthday": "Fecha de nacimiento",
+    "weight": "Peso",
+    "exportHistory": "Exportar historial (CSV)",
+    "fetchingDates": "Obteniendo fechas disponibles...",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "viewOnGithub": "Ver en GitHub",
+    "githubRepo": "Repositorio Pawbby-Reborn"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "subtitle": "Configura tus preferencias, notificaciones e integraciones.",
+    "general": "General",
+    "language": "Idioma",
+    "languageSubtitle": "Selecciona el idioma del panel",
+    "timezone": "Zona horaria",
+    "timezoneSubtitle": "Selecciona tu zona horaria local.",
+    "weightUnit": "Unidad de peso",
+    "notificationControls": "Control de notificaciones",
+    "pushNotifications": "Notificaciones push",
+    "externalApi": "API externa",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Copias de seguridad diarias",
+    "checkForUpdates": "Buscar actualizaciones",
+    "exportDb": "Exportar base de datos anonimizada",
+    "exportDbSubtitle": "Descarga una copia segura y anonimizada de tu base de datos.",
+    "clearCache": "Eliminar información almacenada",
+    "account": "Cuenta",
+    "security": "Seguridad",
+    "notifications": "Notificaciones",
+    "integrations": "Integraciones",
+    "system": "Sistema",
+    "configured": "Configurado",
+    "setup": "Configurar",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "checking": "Comprobando...",
+    "updateAvailable": "¡Actualización disponible!",
+    "upToDate": "Actualizado",
+    "exportDatabase": "Exportar base de datos",
+    "exportDatabaseText": "Descarga una copia de seguridad segura y anonimizada de tu base de datos."
+  },
+  "users": {
+    "title": "Gestión de usuarios",
+    "localAccounts": "Cuentas locales",
+    "addUser": "+ Añadir usuario",
+    "addSubUser": "Añadir subusuario",
+    "addSubUserDesc": "Crea una cuenta adicional de solo lectura para tu hogar.",
+    "displayName": "Nombre visible",
+    "displayNamePlaceholder": "ej. Juan Pérez",
+    "emailAddress": "Correo electrónico",
+    "password": "Contraseña",
+    "adding": "Añadiendo..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "¡Hola! 👋",
+      "step2": "Descarga la app 📱",
+      "step3": "Modo emparejamiento 🔄",
+      "step4": "Añadir a la red 🌐",
+      "step5": "Vincular tu caja 🤝",
+      "step6": "Elegir arena 🐱",
+      "step7": "Retardo de ciclo ⏱️",
+      "step8": "¡Todo listo! 🎉"
+    },
+    "step1Desc": "¡Conectemos tu arenero inteligente! Primero, ¿cómo quieres llamarlo?",
+    "namePlaceholder": "ej. Arenero Salón"
+  },
+  "litter": {
+    "tabs": {
+      "record": "Registro",
+      "history": "Historial",
+      "control": "Control",
+      "settings": "Ajustes"
+    },
+    "record": {
+      "title": "Registro detallado",
+      "pawIdHint": "PawID identifica a los gatos según su peso. Actualízalo de inmediato si el peso de tu gato cambia."
+    },
+    "history": {
+      "title": "Datos históricos",
+      "dailyVisits": "Visitas diarias",
+      "avgWeight": "Peso medio ({unit})",
+      "avgDuration": "Duración media (segundos)",
+      "estWaste": "Residuos estimados (g)"
+    },
+    "settings": {
+      "title": "Ajustes del arenero",
+      "autoClean": "Limpieza automática",
+      "autoCleanDesc": "Limpiar automáticamente después de cada visita",
+      "softClumps": "Modo heces blandas",
+      "softClumpsDesc": "Agita el tambor 2 a 4 veces antes de limpiar para cubrir las heces",
+      "autoOffScreen": "Apagado automático de pantalla",
+      "autoOffScreenDesc": "Apaga la pantalla tras 5 minutos de inactividad",
+      "childLock": "Bloqueo de pantalla",
+      "childLockDesc": "Bloquea los botones del arenero para evitar pulsaciones accidentales",
+      "autoCleanDelay": "Retardo de limpieza automática",
+      "autoCleanDelayDesc": "Tiempo de espera después de que el gato sale antes de limpiar",
+      "quietPeriod": "Periodo de silencio",
+      "quietPeriodDesc": "Pausa la limpieza automática por la noche o en horarios establecidos",
+      "quietPeriodActive": "Limpieza en pausa de {start} a {stop}",
+      "litterType": "Tipo de arena",
+      "litterTypeDesc": "Calibra la báscula del tambor para la densidad de tu arena",
+      "reportedBy": "Notificado por el dispositivo hace {age}"
+    },
+    "deviceSettings": {
+      "title": "Ajustes del dispositivo",
+      "deviceName": "Nombre del dispositivo",
+      "connectionInfo": "Información de conexión",
+      "tuyaId": "ID de dispositivo Tuya",
+      "ipAddress": "Dirección IP",
+      "localKey": "Clave local (Local Key)",
+      "saveChanges": "Guardar cambios",
+      "deleteDevice": "Eliminar dispositivo"
+    },
+    "modal": {
+      "selectType": "Seleccionar tipo de arena",
+      "currentValue": "Valor actual",
+      "tapPicture": "Toca la imagen correspondiente a la arena que utilizas:",
+      "active": "Activo",
+      "calibrationNoteTitle": "Nota sobre la calibración del sensor",
+      "calibrationNote": "El arenero usa el peso para estimar el nivel de llenado. Si aparece un aviso de nivel bajo tras rellenar, asegúrate de que esté sobre una superficie plana y tara la báscula con el tambor vacío, o utiliza el perfil más ligero Pawbby Natural.",
+      "updatesSensor": "Actualiza la calibración del sensor de nivel"
+    },
+    "lockModal": {
+      "title": "Aviso de bloqueo de pantalla",
+      "danger": "Acción potencialmente peligrosa:",
+      "desc1": "Bloquear la pantalla desactiva los botones físicos de la máquina para evitar toques accidentales de niños o mascotas.",
+      "desc2": "Si se pierde la conexión, cambia el Wi-Fi o el sistema se desconecta mientras está bloqueado, podrías perder el control físico de la máquina.",
+      "desc3": "Pawbby Reborn y sus desarrolladores NO se responsabilizan. Procede bajo tu propio riesgo.",
+      "confirm": "Entiendo el riesgo, bloquear"
+    },
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Pellets de almidón vegetal",
+        "badge": "Recomendado",
+        "density": "Ligero (~2,5–3,0 kg)",
+        "tip": "Umbral de peso más bajo. Recomendado por defecto para evitar falsas alarmas de bajo nivel de arena."
+      },
+      "tofu": {
+        "name": "Arena de Tofu",
+        "label": "Barras cilíndricas desechables",
+        "badge": "Pellets de Tofu",
+        "density": "Densidad baja-media (~2,8–3,2 kg)",
+        "tip": "Barras cilíndricas de tofu estándar. Asegura una velocidad de tamizado adecuada."
+      },
+      "bentonite": {
+        "name": "Arcilla Bentonita",
+        "label": "Arena aglomerante clásica",
+        "badge": "Arena de Arcilla",
+        "density": "Alta densidad (~3,8–4,5 kg)",
+        "tip": "Requiere un llenado más denso (~3,8–4,5 kg)."
+      },
+      "mixed": {
+        "name": "Mezcla Compuesta",
+        "label": "Barras de tofu + gránulos de arcilla",
+        "badge": "Mezcla Mixta",
+        "density": "Densidad media (~3,2–3,8 kg)",
+        "tip": "Mezcla compuesta de tofu y bentonita. Perfil de peso equilibrado."
+      }
+    },
+    "actions": {
+      "clean": "Limpiar ahora",
+      "cleanDesc": "Iniciar ciclo de limpieza",
+      "flatten": "Nivelar arena",
+      "flattenDesc": "Nivelar la superficie de arena",
+      "empty": "Vaciar tambor",
+      "emptyDesc": "Vaciar toda la arena al depósito",
+      "tare": "Tarar báscula",
+      "tareDesc": "Calibrar la báscula vacía a 0g",
+      "cancelClean": "Detener ciclo"
+    },
+    "status": {
+      "idle": "En espera",
+      "cleaning": "Limpiando",
+      "flattening": "Nivelando",
+      "empty": "Vaciando",
+      "offline": "Desconectado",
+      "drumRemoved": "Tambor retirado",
+      "binRemoved": "Cajón de residuos retirado",
+      "lidRemoved": "Tapa retirada",
+      "binFull": "Depósito lleno",
+      "normal": "Normal",
+      "days": "Días",
+      "catInside": "Gato dentro",
+      "catNear": "Gato cerca",
+      "sufficient": "Suficiente",
+      "low": "Arena baja"
+    }
+  }
+}

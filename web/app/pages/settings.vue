@@ -8,7 +8,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </NuxtLink>
-      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">Settings</h1>
+      <h1 class="text-xl font-bold text-white/90 flex-1 text-center pr-8">{{ $t('settings.title') }}</h1>
     </header>
 
     <!-- Menu Links -->
@@ -23,7 +23,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
           </svg>
-          <span class="font-medium text-lg">Unit of Weight</span>
+          <span class="font-medium text-lg">{{ $t('settings.weightUnit') }}</span>
         </div>
         <div class="flex items-center space-x-2">
           <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors uppercase">{{
@@ -39,17 +39,17 @@
       </button>
 
       <!-- Language -->
-      <button class="w-full flex items-center justify-between text-white/90 hover:text-white group">
+      <button @click="showLanguageModal = true" class="w-full flex items-center justify-between text-white/90 hover:text-white group">
         <div class="flex items-center space-x-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
-          <span class="font-medium text-lg">Language</span>
+          <span class="font-medium text-lg">{{ $t('settings.language') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">English</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ currentLocaleName }}</span>
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
             fill="currentColor">
@@ -68,7 +68,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="font-medium text-lg">Timezone</span>
+          <span class="font-medium text-lg">{{ $t('settings.timezone') }}</span>
         </div>
         <div class="flex items-center space-x-2">
           <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors max-w-[120px] truncate text-right">{{ user?.timezone || 'UTC' }}</span>
@@ -89,7 +89,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span class="font-medium text-lg">Notification Controls</span>
+          <span class="font-medium text-lg">{{ $t('settings.notificationControls') }}</span>
         </div>
         <div class="flex items-center space-x-2">
           <svg xmlns="http://www.w3.org/2000/svg"
@@ -111,11 +111,11 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-          <span class="font-medium text-lg">Push Notifications</span>
+          <span class="font-medium text-lg">{{ $t('settings.pushNotifications') }}</span>
         </div>
         <div class="flex items-center space-x-2">
           <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ webhookUrl ?
-            'Configured' : 'Setup' }}</span>
+            $t('settings.configured') : $t('settings.setup') }}</span>
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
             fill="currentColor">
@@ -132,10 +132,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span class="font-medium text-lg">External API</span>
+          <span class="font-medium text-lg">{{ $t('settings.externalApi') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.apiKey ? 'Configured' : 'Setup' }}</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.apiKey ? $t('settings.configured') : $t('settings.setup') }}</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
@@ -148,10 +148,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
           </svg>
-          <span class="font-medium text-lg">Home Assistant (MQTT)</span>
+          <span class="font-medium text-lg">{{ $t('settings.mqtt') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.mqttEnabled ? 'Enabled' : 'Setup' }}</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user?.mqttEnabled ? $t('settings.enabled') : $t('settings.setup') }}</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
@@ -164,10 +164,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pawbby-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
           </svg>
-          <span class="font-medium text-lg">Daily Backups</span>
+          <span class="font-medium text-lg">{{ $t('settings.dailyBackups') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user.enableAutomatedBackups ? 'Enabled' : 'Disabled' }}</span>
+          <span class="text-sm text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors">{{ user.enableAutomatedBackups ? $t('settings.enabled') : $t('settings.disabled') }}</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
           </svg>
@@ -183,12 +183,12 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span class="font-medium text-lg">Check for Updates</span>
+          <span class="font-medium text-lg">{{ $t('settings.checkForUpdates') }}</span>
         </div>
         <div class="flex items-center space-x-2">
-          <span v-if="checking" class="text-sm text-pawbby-mutedDark">Checking...</span>
-          <span v-else-if="updateAvailable" class="text-sm text-[#3D7A41]">Update Available!</span>
-          <span v-else-if="!updateAvailable && hasChecked" class="text-sm text-pawbby-mutedDark">Up to date</span>
+          <span v-if="checking" class="text-sm text-pawbby-mutedDark">{{ $t('settings.checking') }}</span>
+          <span v-else-if="updateAvailable" class="text-sm text-[#3D7A41]">{{ $t('settings.updateAvailable') }}</span>
+          <span v-else-if="!updateAvailable && hasChecked" class="text-sm text-pawbby-mutedDark">{{ $t('settings.upToDate') }}</span>
 
           <svg xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-pawbby-mutedDark group-hover:text-pawbby-muted transition-colors" viewBox="0 0 20 20"
@@ -212,7 +212,7 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
-          <span class="font-medium text-lg">Export Anonymized DB</span>
+          <span class="font-medium text-lg">{{ $t('settings.exportDb') }}</span>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-[#3D7A41]/50 group-hover:text-[#3D7A41] transition-colors" viewBox="0 0 20 20"
@@ -223,14 +223,14 @@
         </svg>
       </div>
       <p class="text-xs text-pawbby-mutedDark ml-9">
-        Downloads a safe, redacted copy of your database to share with developers.
+        {{ $t('settings.exportDbSubtitle') }}
       </p>
     </button>
     <!-- Account Actions -->
     <div class="mt-auto pt-8 pb-4 space-y-4">
       <button @click="doClearCache"
         class="w-full text-center py-4 text-[#D84C4C] font-semibold text-lg hover:bg-white/5 rounded-2xl transition-colors">
-        Remove stored information
+        {{ $t('settings.clearCache') }}
       </button>
     </div>
 
@@ -245,10 +245,9 @@
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
         </div>
-        <h2 class="text-xl font-bold text-white mb-2 text-center">Export Database</h2>
+        <h2 class="text-xl font-bold text-white mb-2 text-center">{{ $t('settings.exportDatabase') }}</h2>
         <p class="text-pawbby-muted text-sm mb-6 text-center leading-relaxed">
-          This will securely download an anonymized copy of your database. All Wi-Fi passwords, Tuya keys, IPs, and
-          names have been permanently erased.<br><br>
+          {{ $t('settings.exportDatabaseText') }}<br><br>
           Once downloaded, join our <a href="https://discord.gg/Tw43AKZkge" target="_blank"
             class="text-[#5865F2] font-bold hover:underline">Discord Server</a> and drag-and-drop the file into the
           <strong>#database-dump</strong> channel to help us find new features!
@@ -256,11 +255,11 @@
         <div class="flex gap-3">
           <button @click="showExportModal = false"
             class="w-full py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors">
-            Cancel
+            {{ $t('common.cancel') }}
           </button>
           <a href="/api/export-anonymized-db" download="pawbby-share.db" @click="showExportModal = false"
             class="w-full flex items-center justify-center py-4 bg-[#3D7A41]/80 text-white font-bold rounded-2xl hover:bg-[#3D7A41] transition-colors">
-            Download
+            {{ $t('common.download') }}
           </a>
         </div>
       </div>
@@ -386,6 +385,40 @@
           <button @click="showMqttModal = false"
             class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
             Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Language Modal -->
+    <div v-if="showLanguageModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-pawbby-card rounded-3xl p-6 w-full max-w-sm border border-white/10 relative overflow-hidden animate-fade-in-up">
+        <h3 class="text-xl font-bold text-white mb-2">{{ $t('settings.language') }}</h3>
+        <p class="text-xs text-pawbby-muted mb-6">{{ $t('settings.languageSubtitle') }}</p>
+        <div class="space-y-2">
+          <button
+            v-for="lang in availableLocalesList"
+            :key="lang.code"
+            type="button"
+            @click="changeLocale(lang.code)"
+            :class="[
+              locale === lang.code
+                ? 'border-pawbby-primary bg-pawbby-primary/10 text-white'
+                : 'border-white/10 bg-black/30 hover:bg-black/50 text-white/80'
+            ]"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl border transition-colors text-left"
+          >
+            <span class="font-medium text-sm">{{ lang.name }}</span>
+            <svg v-if="locale === lang.code" class="w-5 h-5 text-pawbby-primary" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <div class="mt-6">
+          <button @click="showLanguageModal = false"
+            class="w-full py-3 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            {{ $t('common.done') }}
           </button>
         </div>
       </div>
@@ -533,17 +566,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi, type User } from '~/composables/useApi'
+import { useI18n } from '#imports'
 
 definePageMeta({
   layout: 'detail'
 })
 
+const { locale, locales, setLocale } = useI18n()
 const api = useApi()
 const router = useRouter()
 const user = ref<User | null>(null)
+
+const showLanguageModal = ref(false)
+const availableLocalesList = computed(() => {
+  return (locales.value as Array<{ code: string; name: string }>).map(l => ({
+    code: l.code,
+    name: l.name || l.code
+  }))
+})
+
+const currentLocaleName = computed(() => {
+  const current = availableLocalesList.value.find(l => l.code === locale.value)
+  return current ? current.name : 'English'
+})
+
+const changeLocale = async (code: string) => {
+  await setLocale(code)
+}
 
 const checking = ref(false)
 const hasChecked = ref(false)

@@ -1,0 +1,246 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "continue": "Continue",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "dismiss": "Dismiss",
+    "connecting": "Connecting...",
+    "close": "Close",
+    "download": "Download",
+    "all": "All",
+    "saveChanges": "Save Changes"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Activity",
+    "settings": "Settings",
+    "users": "User Management",
+    "about": "About Pawbby",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "noDevices": "No devices found. Tap the + to add your smart litter box.",
+    "online": "Online",
+    "offline": "Offline",
+    "todayToileted": "Today Toileted",
+    "times": "times",
+    "updateAvailable": "Update Available",
+    "updateDesc": "A new version is ready to install.",
+    "view": "View"
+  },
+  "profile": {
+    "myPets": "My Pets",
+    "editProfile": "Edit Profile",
+    "addPet": "Add Pet",
+    "editPet": "Edit Pet",
+    "noImg": "No img",
+    "about": "About PAWBBY Reborn",
+    "logout": "Log out",
+    "name": "Name",
+    "email": "Email (Gravatar)",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "passwordUpdated": "Password updated successfully!",
+    "exportCsv": "Export CSV",
+    "upload": "Upload",
+    "birthday": "Birthday",
+    "weight": "Weight",
+    "exportHistory": "Export History (CSV)",
+    "fetchingDates": "Fetching available dates...",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "viewOnGithub": "View on GitHub",
+    "githubRepo": "Pawbby-Reborn Repository"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your application preferences, notifications, and integrations.",
+    "general": "General",
+    "language": "Language",
+    "languageSubtitle": "Select your dashboard language",
+    "timezone": "Timezone",
+    "timezoneSubtitle": "Select your local timezone.",
+    "weightUnit": "Unit of Weight",
+    "notificationControls": "Notification Controls",
+    "pushNotifications": "Push Notifications",
+    "externalApi": "External API",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Daily Backups",
+    "checkForUpdates": "Check for Updates",
+    "exportDb": "Export Anonymized DB",
+    "exportDbSubtitle": "Downloads a safe, redacted copy of your database to share with developers.",
+    "clearCache": "Remove stored information",
+    "account": "Account",
+    "security": "Security",
+    "notifications": "Notifications",
+    "integrations": "Integrations",
+    "system": "System",
+    "configured": "Configured",
+    "setup": "Setup",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "checking": "Checking...",
+    "updateAvailable": "Update Available!",
+    "upToDate": "Up to date",
+    "exportDatabase": "Export Database",
+    "exportDatabaseText": "This will securely download an anonymized copy of your database. All Wi-Fi passwords, Tuya keys, IPs, and names have been permanently erased."
+  },
+  "users": {
+    "title": "User Management",
+    "localAccounts": "Local Accounts",
+    "addUser": "+ Add User",
+    "addSubUser": "Add Sub-User",
+    "addSubUserDesc": "Create an additional read-only account for your household.",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "e.g. Jane Doe",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "adding": "Adding..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "Say Hello 👋",
+      "step2": "Get the App 📱",
+      "step3": "Pairing Mode 🔄",
+      "step4": "Add to Network 🌐",
+      "step5": "Link Your Box 🤝",
+      "step6": "Select Litter 🐱",
+      "step7": "Cycle Delay ⏱️",
+      "step8": "All Done! 🎉"
+    },
+    "step1Desc": "Let's get your smart litter box connected! First, what should we call it?",
+    "namePlaceholder": "e.g. Living Room Box"
+  },
+  "litter": {
+    "tabs": {
+      "record": "Record",
+      "history": "History",
+      "control": "Control",
+      "settings": "Settings"
+    },
+    "record": {
+      "title": "Detailed Record",
+      "pawIdHint": "PawID matches cats based on their weight, so please update it promptly if there are any changes in your cat's weight."
+    },
+    "history": {
+      "title": "Historical Data",
+      "dailyVisits": "Daily Visit Count",
+      "avgWeight": "Average Weight ({unit})",
+      "avgDuration": "Average Duration (seconds)",
+      "estWaste": "Estimated Waste Output (g)"
+    },
+    "settings": {
+      "title": "Litter Box Settings",
+      "autoClean": "Auto-clean",
+      "autoCleanDesc": "Clean automatically after each visit",
+      "softClumps": "Soft Clumps Mode",
+      "softClumpsDesc": "Shake the drum 2–4 times before cleaning to bury soft stool",
+      "autoOffScreen": "Auto screen-off",
+      "autoOffScreenDesc": "Turn the screen off after 5 minutes idle",
+      "childLock": "Screen lock",
+      "childLockDesc": "Lock the buttons on the box to prevent accidental presses",
+      "autoCleanDelay": "Auto-clean delay",
+      "autoCleanDelayDesc": "How long to wait after your cat leaves before cleaning",
+      "quietPeriod": "Quiet period",
+      "quietPeriodDesc": "Pause auto-clean during the night or set hours",
+      "quietPeriodActive": "Auto-clean pauses from {start} to {stop}",
+      "litterType": "Litter type",
+      "litterTypeDesc": "Calibrates the drum scale for your litter density",
+      "reportedBy": "Reported by the device {age}"
+    },
+    "deviceSettings": {
+      "title": "Device Settings",
+      "deviceName": "Device Name",
+      "connectionInfo": "Connection Information",
+      "tuyaId": "Tuya Device ID",
+      "ipAddress": "IP Address",
+      "localKey": "Local Key",
+      "saveChanges": "Save Changes",
+      "deleteDevice": "Delete Device"
+    },
+    "modal": {
+      "selectType": "Select Litter Type",
+      "currentValue": "Current value",
+      "tapPicture": "Tap the picture matching the cat litter you pour into your box:",
+      "active": "Active",
+      "calibrationNoteTitle": "Sensor calibration note",
+      "calibrationNote": "The physical box uses weight to estimate fill level. If you see an unexpected low-litter warning after filling, ensure the box is on a hard flat floor and tap Zero / Tare Scale on an empty drum, or use the lighter Pawbby Natural profile.",
+      "updatesSensor": "Updates box level sensor calibration"
+    },
+    "lockModal": {
+      "title": "Screen Lock Warning",
+      "danger": "Potentially dangerous action:",
+      "desc1": "Locking the screen disables all physical button presses on the box to prevent accidental presses by children or pets.",
+      "desc2": "If Pawbby Reborn loses connection, your Wi-Fi changes, or the daemon goes offline while locked, you may be completely locked out from controlling or unlocking the machine from its physical controls.",
+      "desc3": "Pawbby Reborn and its developers take NO liability in case this locks out or bricks your machine. Proceed at your own risk.",
+      "confirm": "I Understand the Risk, Lock Buttons"
+    },
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Plant-based starch pellets",
+        "badge": "Recommended",
+        "density": "Lightweight (~2.5–3.0 kg)",
+        "tip": "Lowest weight threshold. Recommended default if using lightweight or flushable litter to avoid false low-litter warnings."
+      },
+      "tofu": {
+        "name": "Tofu Litter",
+        "label": "Flushable cylindrical rods",
+        "badge": "Tofu Pellets",
+        "density": "Low-to-medium density (~2.8–3.2 kg)",
+        "tip": "Standard cylindrical pea/tofu rods. Ensures proper sifting speed and weight tracking."
+      },
+      "bentonite": {
+        "name": "Bentonite Clay",
+        "label": "Classic clumping sand",
+        "badge": "Clay Sand",
+        "density": "Heavy density (~3.8–4.5 kg)",
+        "tip": "Requires a denser fill (~3.8–4.5 kg). If your box triggers a low litter alert with light clay, switch to Pawbby Natural or tare the scale."
+      },
+      "mixed": {
+        "name": "Mixed Blend",
+        "label": "Tofu rods + clay granules",
+        "badge": "Composite Mix",
+        "density": "Medium density (~3.2–3.8 kg)",
+        "tip": "Composite blend of tofu pellets and bentonite granules. Balanced weight profile."
+      }
+    },
+    "actions": {
+      "clean": "Clean Litter",
+      "cleanDesc": "Start a cleaning cycle",
+      "flatten": "Flatten Litter",
+      "flattenDesc": "Level the litter surface",
+      "empty": "Empty Litter Box",
+      "emptyDesc": "Dump all litter into waste bin",
+      "tare": "Zero / Tare Scale",
+      "tareDesc": "Calibrate empty scale to 0g",
+      "cancelClean": "Stop Cycle"
+    },
+    "status": {
+      "idle": "Standby",
+      "cleaning": "Cleaning",
+      "flattening": "Leveling",
+      "empty": "Emptying",
+      "offline": "Offline",
+      "drumRemoved": "Drum Removed",
+      "binRemoved": "Bin Removed",
+      "lidRemoved": "Lid Removed",
+      "binFull": "Bin Full",
+      "normal": "Normal",
+      "days": "Days",
+      "catInside": "Cat Inside",
+      "catNear": "Cat Near",
+      "sufficient": "Sufficient",
+      "low": "Low Litter"
+    }
+  }
+}

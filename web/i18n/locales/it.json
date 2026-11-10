@@ -1,0 +1,246 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "back": "Indietro",
+    "continue": "Continua",
+    "done": "Fatto",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "dismiss": "Chiudi",
+    "connecting": "Connessione in corso...",
+    "close": "Chiudi",
+    "download": "Scarica",
+    "all": "Tutti",
+    "saveChanges": "Salva modifiche"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activity": "Attività",
+    "settings": "Impostazioni",
+    "users": "Gestione utenti",
+    "about": "Informazioni su Pawbby",
+    "logout": "Disconnetti"
+  },
+  "dashboard": {
+    "noDevices": "Nessun dispositivo trovato. Tocca + per aggiungere la tua lettiera intelligente.",
+    "online": "Online",
+    "offline": "Offline",
+    "todayToileted": "Visite oggi",
+    "times": "volte",
+    "updateAvailable": "Aggiornamento disponibile",
+    "updateDesc": "Una nuova versione è pronta per l'installazione.",
+    "view": "Visualizza"
+  },
+  "profile": {
+    "myPets": "I miei animali",
+    "editProfile": "Modifica profilo",
+    "addPet": "Aggiungi animale",
+    "editPet": "Modifica animale",
+    "noImg": "Nessuna foto",
+    "about": "Informazioni su PAWBBY Reborn",
+    "logout": "Disconnetti",
+    "name": "Nome",
+    "email": "Email (Gravatar)",
+    "changePassword": "Cambia password",
+    "currentPassword": "Password attuale",
+    "newPassword": "Nuova password",
+    "confirmPassword": "Conferma nuova password",
+    "passwordUpdated": "Password aggiornata con successo!",
+    "exportCsv": "Esporta CSV",
+    "upload": "Carica",
+    "birthday": "Data di nascita",
+    "weight": "Peso",
+    "exportHistory": "Esporta cronologia (CSV)",
+    "fetchingDates": "Recupero date disponibili...",
+    "startDate": "Data inizio",
+    "endDate": "Data fine",
+    "viewOnGithub": "Vedi su GitHub",
+    "githubRepo": "Repository Pawbby-Reborn"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "subtitle": "Configura le preferenze dell'applicazione, le notifiche e le integrazioni.",
+    "general": "Generale",
+    "language": "Lingua",
+    "languageSubtitle": "Seleziona la lingua della dashboard",
+    "timezone": "Fuso orario",
+    "timezoneSubtitle": "Seleziona il fuso orario locale.",
+    "weightUnit": "Unità di peso",
+    "notificationControls": "Gestione notifiche",
+    "pushNotifications": "Notifiche push",
+    "externalApi": "API esterna",
+    "mqtt": "Home Assistant (MQTT)",
+    "dailyBackups": "Backup giornalieri",
+    "checkForUpdates": "Controlla aggiornamenti",
+    "exportDb": "Esporta database anonimizzato",
+    "exportDbSubtitle": "Scarica una copia anonimizzata e sicura del tuo database.",
+    "clearCache": "Rimuovi informazioni salvate",
+    "account": "Account",
+    "security": "Sicurezza",
+    "notifications": "Notifiche",
+    "integrations": "Integrazioni",
+    "system": "Sistema",
+    "configured": "Configurato",
+    "setup": "Configura",
+    "enabled": "Abilitato",
+    "disabled": "Disabilitato",
+    "checking": "Controllo in corso...",
+    "updateAvailable": "Aggiornamento disponibile!",
+    "upToDate": "Aggiornato",
+    "exportDatabase": "Esporta database",
+    "exportDatabaseText": "Scarica una copia di backup sicura e anonimizzata del tuo database."
+  },
+  "users": {
+    "title": "Gestione utenti",
+    "localAccounts": "Account locali",
+    "addUser": "+ Aggiungi utente",
+    "addSubUser": "Aggiungi utente secondario",
+    "addSubUserDesc": "Crea un account aggiuntivo in sola lettura per la tua casa.",
+    "displayName": "Nome visualizzato",
+    "displayNamePlaceholder": "es. Mario Rossi",
+    "emailAddress": "Indirizzo email",
+    "password": "Password",
+    "adding": "Aggiunta..."
+  },
+  "setup": {
+    "steps": {
+      "step1": "Ciao! 👋",
+      "step2": "Scarica l'app 📱",
+      "step3": "Modalità associazione 🔄",
+      "step4": "Aggiungi alla rete 🌐",
+      "step5": "Collega la lettiera 🤝",
+      "step6": "Scegli lettiera 🐱",
+      "step7": "Ritardo pulizia ⏱️",
+      "step8": "Tutto pronto! 🎉"
+    },
+    "step1Desc": "Colleghiamo la tua lettiera intelligente! Come vorresti chiamarla?",
+    "namePlaceholder": "es. Lettiera Soggiorno"
+  },
+  "litter": {
+    "tabs": {
+      "record": "Registro",
+      "history": "Cronologia",
+      "control": "Controllo",
+      "settings": "Impostazioni"
+    },
+    "record": {
+      "title": "Registro dettagliato",
+      "pawIdHint": "PawID riconosce i gatti in base al loro peso. Aggiornalo tempestivamente se il peso del tuo gatto cambia."
+    },
+    "history": {
+      "title": "Dati storici",
+      "dailyVisits": "Visite giornaliere",
+      "avgWeight": "Peso medio ({unit})",
+      "avgDuration": "Durata media (secondi)",
+      "estWaste": "Rifiuti stimati (g)"
+    },
+    "settings": {
+      "title": "Impostazioni lettiera",
+      "autoClean": "Pulizia automatica",
+      "autoCleanDesc": "Pulisce automaticamente dopo ogni visita",
+      "softClumps": "Modalità feci morbide",
+      "softClumpsDesc": "Scuote il tamburo 2-4 volte prima della pulizia per coprire le feci",
+      "autoOffScreen": "Spegnimento automatico schermo",
+      "autoOffScreenDesc": "Spegne lo schermo dopo 5 minuti di inattività",
+      "childLock": "Blocco schermo",
+      "childLockDesc": "Blocca i tasti sulla macchina per evitare pressioni accidentali",
+      "autoCleanDelay": "Ritardo pulizia automatica",
+      "autoCleanDelayDesc": "Tempo di attesa dopo l'uscita del gatto prima di avviare il ciclo",
+      "quietPeriod": "Periodo silenzioso",
+      "quietPeriodDesc": "Sospende la pulizia automatica durante la notte o orari stabiliti",
+      "quietPeriodActive": "Pulizia in pausa dalle {start} alle {stop}",
+      "litterType": "Tipo di lettiera",
+      "litterTypeDesc": "Calibra la bilancia del tamburo in base alla densità della tua lettiera",
+      "reportedBy": "Segnalato dal dispositivo {age} fa"
+    },
+    "deviceSettings": {
+      "title": "Impostazioni dispositivo",
+      "deviceName": "Nome dispositivo",
+      "connectionInfo": "Informazioni di connessione",
+      "tuyaId": "ID dispositivo Tuya",
+      "ipAddress": "Indirizzo IP",
+      "localKey": "Chiave locale (Local Key)",
+      "saveChanges": "Salva modifiche",
+      "deleteDevice": "Elimina dispositivo"
+    },
+    "modal": {
+      "selectType": "Seleziona tipo di lettiera",
+      "currentValue": "Valore attuale",
+      "tapPicture": "Tocca l'immagine corrispondente alla lettiera che utilizzi:",
+      "active": "Attivo",
+      "calibrationNoteTitle": "Nota sulla calibrazione del sensore",
+      "calibrationNote": "La macchina usa il peso per stimare il livello di riempimento. Se vedi un avviso inaspettato di livello basso dopo il riempimento, assicurati che la lettiera sia su un pavimento piano e tara la bilancia con il cestello vuoto, oppure usa il profilo più leggero Pawbby Natural.",
+      "updatesSensor": "Aggiorna la calibrazione del sensore di livello"
+    },
+    "lockModal": {
+      "title": "Avviso blocco schermo",
+      "danger": "Azione potenzialmente rischiosa:",
+      "desc1": "Il blocco schermo disabilita tutti i tasti fisici sulla macchina per evitare pressioni accidentali da parte di bambini o animali.",
+      "desc2": "Se si perde la connessione, cambia il Wi-Fi o il sistema va offline, potresti non essere più in grado di controllare manualmente la macchina.",
+      "desc3": "Pawbby Reborn e i suoi sviluppatori NON si assumono alcuna responsabilità. Procedi a tuo rischio.",
+      "confirm": "Comprendo il rischio, blocca tasti"
+    },
+    "types": {
+      "natural": {
+        "name": "Pawbby Natural",
+        "label": "Pellet di amido vegetale",
+        "badge": "Consigliato",
+        "density": "Leggero (~2,5–3,0 kg)",
+        "tip": "Soglia di peso più bassa. Consigliato come impostazione predefinita per evitare falsi allarmi di livello basso."
+      },
+      "tofu": {
+        "name": "Lettiera di Tofu",
+        "label": "Bastoncini cilindrici gettabili nel WC",
+        "badge": "Pellet di Tofu",
+        "density": "Densità medio-bassa (~2,8–3,2 kg)",
+        "tip": "Bastoncini cilindrici di piselli/tofu standard. Garantisce la corretta velocità di setacciatura."
+      },
+      "bentonite": {
+        "name": "Argilla Bentonite",
+        "label": "Classica sabbia agglomerante",
+        "badge": "Sabbia di Argilla",
+        "density": "Alta densità (~3,8–4,5 kg)",
+        "tip": "Richiede un riempimento più denso (~3,8–4,5 kg)."
+      },
+      "mixed": {
+        "name": "Miscela Composita",
+        "label": "Bastoncini di tofu + granuli di argilla",
+        "badge": "Miscela Composita",
+        "density": "Densità media (~3,2–3,8 kg)",
+        "tip": "Miscela composita di tofu e bentonite. Profilo di peso bilanciato."
+      }
+    },
+    "actions": {
+      "clean": "Pulisci ora",
+      "cleanDesc": "Avvia un ciclo di pulizia",
+      "flatten": "Livella lettiera",
+      "flattenDesc": "Livella la superficie della lettiera",
+      "empty": "Svuota tamburo",
+      "emptyDesc": "Scarica tutta la lettiera nel cassetto",
+      "tare": "Tara bilancia",
+      "tareDesc": "Calibra la bilancia vuota a 0g",
+      "cancelClean": "Interrompi ciclo"
+    },
+    "status": {
+      "idle": "In attesa",
+      "cleaning": "Pulizia",
+      "flattening": "Livellamento",
+      "empty": "Svuotamento",
+      "offline": "Offline",
+      "drumRemoved": "Tamburo rimosso",
+      "binRemoved": "Cassetto rimosso",
+      "lidRemoved": "Coperchio rimosso",
+      "binFull": "Cassetto pieno",
+      "normal": "Normale",
+      "days": "Giorni",
+      "catInside": "Gatto all'interno",
+      "catNear": "Gatto nelle vicinanze",
+      "sufficient": "Sufficiente",
+      "low": "Lettiera quasi esaurita"
+    }
+  }
+}

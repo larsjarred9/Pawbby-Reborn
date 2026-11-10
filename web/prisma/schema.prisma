@@ -75,4 +75,8 @@ model LitterEvent {
   rawData   String?  // To store raw Tuya JSON payloads for debugging
   deviceId  String?  // Link back to the device that triggered it
   device    Device?  @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId, timestamp])
+  @@index([deviceId, type, timestamp])
+  @@index([type, timestamp])
 }

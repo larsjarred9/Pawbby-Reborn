@@ -51,6 +51,7 @@ export interface DeviceSettings {
 
 export interface LitterCard {
   id: number
+  key: 'natural' | 'tofu' | 'bentonite' | 'mixed'
   name: string
   simpleLabel: string
   badge: string
@@ -63,6 +64,7 @@ export interface LitterCard {
 export const LITTER_CARDS: LitterCard[] = [
   {
     id: 0,
+    key: 'natural',
     name: 'Pawbby Natural',
     simpleLabel: 'Plant-based starch pellets',
     badge: 'Recommended',
@@ -73,6 +75,7 @@ export const LITTER_CARDS: LitterCard[] = [
   },
   {
     id: 1,
+    key: 'tofu',
     name: 'Tofu Litter',
     simpleLabel: 'Flushable cylindrical rods',
     badge: 'Tofu Pellets',
@@ -83,6 +86,7 @@ export const LITTER_CARDS: LitterCard[] = [
   },
   {
     id: 2,
+    key: 'bentonite',
     name: 'Bentonite Clay',
     simpleLabel: 'Classic clumping sand',
     badge: 'Clay Sand',
@@ -93,6 +97,7 @@ export const LITTER_CARDS: LitterCard[] = [
   },
   {
     id: 3,
+    key: 'mixed',
     name: 'Mixed Blend',
     simpleLabel: 'Tofu rods + clay granules',
     badge: 'Composite Mix',

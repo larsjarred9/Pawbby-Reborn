@@ -2,6 +2,17 @@ import prisma from '../utils/prisma'
 
 export default defineNitroPlugin(async (nitroApp) => {
   try {
+    // 0. Ensure performance indexes on LitterEvent exist
+    await prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS idx_litter_event_device_timestamp ON LitterEvent(deviceId, timestamp DESC);`
+    ).catch(() => {})
+    await prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS idx_litter_event_device_type ON LitterEvent(deviceId, type, timestamp DESC);`
+    ).catch(() => {})
+    await prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS idx_litter_event_type ON LitterEvent(type, timestamp DESC);`
+    ).catch(() => {})
+
     // 1. Check if there are any users in the database
     const userCount = await prisma.user.count()
     if (userCount === 0) return // Fresh install, no migration needed
